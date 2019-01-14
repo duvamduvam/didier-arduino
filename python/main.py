@@ -1,5 +1,5 @@
 import os
-import re
+import sys
 import serial
 from omxplayer.player import OMXPlayer
 from pathlib import Path
@@ -22,7 +22,6 @@ videos = {
 
 #find the right usb
 def getUSB():
-    
     usb = ['ttyACM0','ttyACM1','ttyACM2','ttyACM3']
     list = os.listdir("/dev")
     
@@ -36,6 +35,9 @@ def cleanOutput(out):
     return out.decode("utf-8")
 
 def getVideo(number):
+    
+    
+    
     for key,val in videos.items():
         if number == key:
             print(val)
@@ -56,12 +58,15 @@ usb = getUSB()
 ser = serial.Serial(usb,9600)
 ser.flushInput()
 
-while True:
+try:
+    while True:
 
-    read_serial=ser.readline()
-    cleanSerial = cleanOutput(read_serial)
-    print(cleanSerial)
-    
-    getVideo(cleanSerial)
-    
+        read_serial=ser.readline()
+        cleanSerial = cleanOutput(read_serial)
+        print(cleanSerial)
+        
+        getVideo(cleanSerial)
+
+except KeyboardInterrupt:
+    sys.exit()
     #ser.write('3333')
