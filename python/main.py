@@ -1,10 +1,17 @@
 import os
 import re
 import serial
+from omxplayer.player import OMXPlayer
+from pathlib import Path
+from time import sleep
 
 from subprocess import Popen
 
 movieFolder = ("/home/pi/Videos/") 
+#playerParam = "'-o', 'hdmi',  '--win', '0,0,1024,768', '--no-osd'"
+playerParam = '-o hdmi --win 0,0,1024,768 --no-osd'
+player = OMXPlayer(Path(movieFolder+"smile.mp4"), args=playerParam)
+queue = ""
 
 videos = {
     "10000":"bored.mp4",
@@ -36,11 +43,15 @@ def getVideo(number):
             break
         
 def playVideo(name):
-    file = movieFolder + name
-    Popen(['omxplayer', '-o', 'hdmi',  '--win', '0,0,1024,768', '--no-osd', file])
-    #file = movieFolder +"base.mp4"
+    global player
+    if(player.is_playing != True):
+        file = movieFolder + name
+        VIDEO_PATH = Path(file)
+        player = OMXPlayer(VIDEO_PATH, args=playerParam)
     #Popen(['omxplayer', '-o', 'hdmi',  '--win', '0,0,1024,768', '--no-osd', file])
+
     
+
 usb = getUSB()
 ser = serial.Serial(usb,9600)
 ser.flushInput()
