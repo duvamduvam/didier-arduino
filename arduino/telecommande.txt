@@ -1,4 +1,0 @@
-
-1 joystick
-9 boutons
-3 leds
