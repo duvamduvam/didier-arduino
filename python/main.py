@@ -66,7 +66,7 @@ try:
         print(cleanSerial)
         
         getVideo(cleanSerial)
-
+#exit with crtl+C
 except KeyboardInterrupt:
-    sys.exit()
+    pass
     #ser.write('3333')
