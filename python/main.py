@@ -63,6 +63,7 @@ try:
 
         read_serial=ser.readline()
         cleanSerial = cleanOutput(read_serial)
+        cleanSerial = "10002"
         print(cleanSerial)
         
         getVideo(cleanSerial)
