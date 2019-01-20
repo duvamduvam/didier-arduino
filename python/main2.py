@@ -42,7 +42,7 @@ try:
         cleanSerial = cleanOutput(read_serial)
         
         fileName = datetime.datetime.now().isoformat()
-        bufferFile = open(fileName,  "a")
+        bufferFile = open("/home/pi/robot/buffer/"+fileName,  "a")
         bufferFile.write(cleanSerial)
         bufferFile.close()
         

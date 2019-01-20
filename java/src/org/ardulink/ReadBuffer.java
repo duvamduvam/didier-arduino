@@ -1,4 +1,4 @@
-package org.ardulink;
+package src.org.ardulink;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,7 +32,7 @@ public class ReadBuffer {
         WatchService watchService
           = FileSystems.getDefault().newWatchService();
  
-        Path path = Paths.get("/home/david/Nextcloud/robot/python");
+        Path path = Paths.get("/home/pi/robot/buffer/");
  
         path.register(
           watchService, 
