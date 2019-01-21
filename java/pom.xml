@@ -90,7 +90,7 @@
 				  <archive>
 					<manifest>
 						<!-- Jar file entry point -->
-						<mainClass>fr.duvam.ReadBuffer</mainClass>
+						<mainClass>fr.duvam.ReadVideo</mainClass>
 					</manifest>
 				  </archive>
 				</configuration>

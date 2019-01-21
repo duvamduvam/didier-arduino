@@ -38,6 +38,6 @@ public class ReadVideo {
 		mediaPlayerComponent = new EmbeddedMediaPlayerComponent();
 		frame.setContentPane(mediaPlayerComponent);
 		frame.setVisible(true);
-		mediaPlayerComponent.getMediaPlayer().playMedia("/home/david/Nextcloud/robot/videos/base.mp4");
+		mediaPlayerComponent.getMediaPlayer().playMedia("/home/pi/rosita/videos/base.mp4");
 	}
 }
