@@ -50,6 +50,7 @@ public class ReadVideo {
 		//mediaPlayerComponent.setStandardMediaOptions(vlcArgs);
 		frame.setContentPane(mediaPlayerComponent);
 		frame.setVisible(true);
+<<<<<<< HEAD
 		// EmbeddedMediaPlayer player = mediaPlayerComponent.getMediaPlayer();
 		// player.set
 		//.playMedia("/home/david/Nextcloud/robot/videos/base.mp4");
@@ -107,5 +108,8 @@ public class ReadVideo {
 
 		   // Cleanly dispose of the media player factory and any associated native resources
 		   mediaPlayerFactory.release();
+=======
+		mediaPlayerComponent.getMediaPlayer().playMedia("/home/pi/rosita/videos/base.mp4");
+>>>>>>> 9a9ec6f97db2bbd801bc692ab7650c874debe0d0
 	}
 }
