@@ -1,4 +1,4 @@
-package fr.duvam;
+package fr.duvam.video;
 
 import java.io.BufferedReader;
 import java.io.IOException;
