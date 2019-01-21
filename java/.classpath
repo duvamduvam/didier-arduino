@@ -1,17 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="lib/ardulink-core-base-2.1.0.jar" sourcepath="/home/david/.m2/repository/org/ardulink/ardulink-core-base/2.1.0/ardulink-core-base-2.1.0-sources.jar"/>
-	<classpathentry kind="lib" path="lib/ardulink-core-beans-2.1.0.jar"/>
-	<classpathentry kind="lib" path="lib/ardulink-core-proxy-2.1.0.jar"/>
-	<classpathentry kind="lib" path="lib/ardulink-core-serial-rxtx-2.1.0.jar"/>
-	<classpathentry kind="lib" path="lib/ardulink-core-util-2.1.0.jar"/>
-	<classpathentry kind="lib" path="lib/args4j-2.32.jar"/>
-	<classpathentry kind="lib" path="lib/example-datareceiver-2.1.0.jar"/>
-	<classpathentry kind="lib" path="lib/rxtx-2.1.7.jar"/>
-	<classpathentry kind="lib" path="lib/slf4j-api-1.7.12.jar"/>
-	<classpathentry kind="lib" path="lib/slf4j-jdk14-1.7.12.jar"/>
-	<classpathentry kind="lib" path="lib/validation-api-1.0.0.GA.jar"/>
-	<classpathentry kind="output" path="bin"/>
+	<classpathentry kind="src" output="target/classes" path="src/main/java"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5"/>
+	<classpathentry kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER"/>
+	<classpathentry kind="output" path="target/classes"/>
 </classpath>
