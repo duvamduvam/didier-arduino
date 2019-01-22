@@ -14,10 +14,10 @@ import fr.duvam.command.Command;
 /**
  * A Sample class used to show OmxplayerProcess capabilities
  */
-public class ReadVIdeo {
+public class VideoManager {
 
-	private static final Logger LOGGER = Logger.getLogger(ReadVIdeo.class);	
-	
+	private static final Logger LOGGER = Logger.getLogger(VideoManager.class);	
+	private PrintStream mplayerIn;
 	
 	public String playingVideo() {
 		Command command = new Command();
@@ -27,9 +27,11 @@ public class ReadVIdeo {
 	public void play(String path) {
 
 		try {
+			String base = "mplayer ";
 			Process mplayerProcess = Runtime.getRuntime()
-					.exec("mplayer -fs /home/david/Nextcloud/robot/videos/base.mp4");
-
+					//.exec("mplayer -fs /home/david/Nextcloud/robot/videos/base.mp4");
+					.exec(base + path);
+			
 			// create the piped streams where to redirect the standard output and error of
 			// MPlayer
 			// specify a bigger pipesize than the default of 1024
@@ -45,11 +47,28 @@ public class ReadVIdeo {
 			new LineRedirecter(mplayerProcess.getErrorStream(), writeTo).start();
 
 			// the standard input of MPlayer
-			PrintStream mplayerIn = new PrintStream(mplayerProcess.getOutputStream());
+			mplayerIn = new PrintStream(mplayerProcess.getOutputStream());
+			
+			/*mplayerIn.print("pause");
+			mplayerIn.print("\n");
+			mplayerIn.flush();            
+			try {
+			    mplayerProcess.waitFor();
+			}
+			catch (InterruptedException e) {}
+			*/
 		} catch (IOException e) {
 			LOGGER.error(e);
 		}
 
+	}
+
+	public PrintStream getMplayerIn() {
+		return mplayerIn;
+	}
+
+	public void setMplayerIn(PrintStream mplayerIn) {
+		this.mplayerIn = mplayerIn;
 	}
 
 }

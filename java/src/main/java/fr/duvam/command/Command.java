@@ -24,7 +24,7 @@ public class Command {
 	}
 	
 
-	private String execute(String cmd){
+	public String execute(String cmd){
 		// you need a shell to execute a command pipeline
 		List<String> commands = new ArrayList<String>();
 
