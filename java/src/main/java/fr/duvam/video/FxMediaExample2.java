@@ -1,21 +1,16 @@
 package fr.duvam.video;
 import java.io.File;
-import java.net.URL;
 
 import javafx.application.Application;
-import javafx.geometry.HPos;
-import javafx.geometry.Insets;
 import javafx.scene.Group;
 import javafx.scene.Scene;
-import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 public class FxMediaExample2 extends Application {
     public static void main(String[] args) {
@@ -43,8 +38,8 @@ public class FxMediaExample2 extends Application {
         MediaView mediaView = new MediaView(player);
 
         mediaView.setFitWidth(1024);
-        mediaView.setFitHeight(768);
-        mediaView.setSmooth(true);
+        mediaView.setFitHeight(576);
+        //mediaView.setSmooth(true);
         //mediaView.setLayoutX(200);
         //mediaView.setLayoutY(200);
         // Create the DropShadow effect
@@ -64,25 +59,26 @@ public class FxMediaExample2 extends Application {
         // HBox controlBox = new HBox(5, null, null);
 
         // Create the VBox
-        VBox root = new VBox(1, mediaView);
+        VBox root = new VBox(0, mediaView);
 
         GridPane gridpane = new GridPane();
-        gridpane.setPadding(new Insets(95));
-        gridpane.setHgap(1);
-        gridpane.setVgap(10);
-
+        //gridpane.setPadding(new Insets(95));
+        //gridpane.setHgap(1);
+        //gridpane.setVgap(10);
         //GridPane.setHalignment(rect4, HPos.CENTER);
 
         Group grp = new Group();
-        gridpane.add(root, 1, 1);
+        gridpane.add(root, 0, 0);
 
-        grp.getChildren().add(gridpane);
+        grp.getChildren().add(mediaView);
 
         // Create the Scene
         Scene scene = new Scene(grp);
 
         // Add the scene to the Stage
         stage.setScene(scene);
+        //remove titlebar	
+        stage.initStyle(StageStyle.UNDECORATED);
         // Set the title of the Stage
         //stage.setTitle("A simple Media Example");
         // Display the Stage

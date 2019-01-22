@@ -1,8 +1,3 @@
-To run this example double click on data receiver jar or use java -jar command.
-This example accepts arguments. Please run it with -h option to read the usage.
+run with
 
-
-For Windows 32 bit systems.
-
-This example has rxtxSerial.dll for 64 bit systems, if yours is a 32 bit system replace this dll
-with the right one that you can find in winDLLs folder.
+java -jar --module-path /home/david/softs/openjfx-11.0.2_linux-x64_bin-sdk/javafx-sdk-11.0.2/lib --add-modules=javafx.controls --add-modules=javafx.media rosita-jar-with-dependencies.jar 
