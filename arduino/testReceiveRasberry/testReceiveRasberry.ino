@@ -1,22 +1,8 @@
-const int ledPin = 12;
-
-void setup() {
-  pinMode(ledPin, OUTPUT);
+void setup(){
   Serial.begin(9600);
 }
-
-void loop() {
-  if (Serial.available()) {
-    light(Serial.read());
-  }
-  delay(500);
-}
-
-void light(int n) {
-  for (int i = 0; i < n; i++) {
-    digitalWrite(ledPin, HIGH);
-    delay(100);
-    digitalWrite(ledPin, LOW);
-    delay(100);
-  }
+ 
+void loop(){
+  Serial.println("Is there anybody out there?");
+  delay(10000);
 }

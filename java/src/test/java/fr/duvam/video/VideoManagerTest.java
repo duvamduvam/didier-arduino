@@ -1,17 +1,12 @@
 package fr.duvam.video;
 
-import java.io.PrintStream;
-import java.util.concurrent.TimeUnit;
-
-import org.junit.Test;
-
 /**
  * A Sample class used to show OmxplayerProcess capabilities
  */
 public class VideoManagerTest {
 
 	
-	@Test
+	/*@Test
 	public void playingVideo() throws InterruptedException {
 		VideoManager videoManger = new VideoManager();
 		String base = "/home/david/Nextcloud/robot/videos/base.mp4";
@@ -31,7 +26,7 @@ public class VideoManagerTest {
 		
 		TimeUnit.SECONDS.sleep(20);
 		
-	}
+	}*/
 
 
 }
