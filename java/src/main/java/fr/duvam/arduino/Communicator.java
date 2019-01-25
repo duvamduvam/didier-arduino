@@ -6,34 +6,29 @@
 package fr.duvam.arduino;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Random;
 import java.util.TooManyListenersException;
 
+import fr.duvam.video.Layout;
+import fr.duvam.video.Listener;
 import gnu.io.CommPort;
 import gnu.io.CommPortIdentifier;
 import gnu.io.PortInUseException;
 import gnu.io.SerialPort;
 import gnu.io.SerialPortEvent;
 import gnu.io.SerialPortEventListener;
-import javafx.scene.media.MediaPlayer;
 
 public class Communicator implements SerialPortEventListener
 {
-    //passed from main GUI
-	private MediaPlayer player = null;
-	
-    public MediaPlayer getPlayer() {
-		return player;
-	}
-
-	public void setPlayer(MediaPlayer player) {
-		this.player = player;
-	}
+    //passed from main GUI	
+	private Layout layout;
+	private Listener listener;
 
 	final static String selectedPort = "/dev/ttyS3";
     //for containing the ports that will be found
@@ -68,6 +63,10 @@ public class Communicator implements SerialPortEventListener
     //this string is written to the GUI
     String logText = "";
 
+    public Communicator(Listener listener) {
+		super();
+		this.listener = listener;
+	}
 
     //search for all the serial ports
     //pre: none
@@ -228,8 +227,14 @@ public class Communicator implements SerialPortEventListener
     public void serialEvent(SerialPortEvent evt) {
 		if (evt.getEventType() == SerialPortEvent.DATA_AVAILABLE) {
 			try {
+				
+				
+				
 				String inputLine=input.readLine();
-				player.stop();
+				
+				listener.addEvent(inputLine);
+
+				
 				System.out.println(inputLine);
 			} catch (Exception e) {
 				System.err.println(e.toString());
@@ -237,7 +242,17 @@ public class Communicator implements SerialPortEventListener
 		}
     }
 
-    //method that can be called to send data
+
+
+	public Layout getLayout() {
+		return layout;
+	}
+
+	public void setLayout(Layout layout) {
+		this.layout = layout;
+	}
+
+	//method that can be called to send data
     //pre: open serial port
     //post: data sent to the other device
     public void writeData(int leftThrottle, int rightThrottle)

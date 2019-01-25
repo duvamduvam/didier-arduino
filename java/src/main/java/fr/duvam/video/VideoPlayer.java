@@ -5,6 +5,7 @@ import java.io.File;
 
 import fr.duvam.arduino.Communicator;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.layout.GridPane;
@@ -17,8 +18,7 @@ import javafx.stage.StageStyle;
 
 public class VideoPlayer extends Application {
 
-	// private MediaPlayer currentPlayer = null;
-	private static Communicator communicator = null;
+	private Communicator communicator;
 
 	public static void main(String[] args) throws Exception {
 		launch(args);
@@ -27,41 +27,63 @@ public class VideoPlayer extends Application {
 	@Override
 	public void start(final Stage stage) throws Exception {
 
- 
+		Layout layout = new Layout(stage);
+		Listener listener = new Listener(layout);
+		
+		 Thread thread = new Thread(new Runnable() {
+
+	            @Override
+	            public void run() {
+	                while (true) {
+	                    try {
+	                        Thread.sleep(1000);
+	                    } catch (InterruptedException ex) {
+	                    }
+
+	                    // UI update is run on the Application thread
+	                    Platform.runLater(listener);
+	                }
+	            }
+		 });
+		 
+		 
+		//Platform.runLater(listener);
+		//listener.start();
 		// connect arduino
-		communicator = new Communicator();
+		communicator = new Communicator(listener);
 		communicator.searchForPorts();
 		communicator.connect();
-        if (communicator.getConnected() == true)
-        {
-            if (communicator.initIOStream() == true)
-            {
-                communicator.initListener();
-            }
-        }
+		if (communicator.getConnected() == true) {
+			if (communicator.initIOStream() == true) {
+				communicator.initListener();
+			}
+		}
 
-        
-		MediaPlayer player = getPlayer(stage, "/home/david/Nextcloud/robot/videos/base.mp4");
-		player.setCycleCount(MediaPlayer.INDEFINITE);
+		layout.getPlayer("/home/david/Nextcloud/robot/videos/base.mp4", true);
+
+		
+        thread.setDaemon(true);
+        thread.start();
+		
 		stage.initStyle(StageStyle.UNDECORATED);
 		stage.show();
 
-		/*player.setOnEndOfMedia(new Runnable() {
-			public void run()
-
-			{
-				getPlayer(stage, "/home/david/Nextcloud/robot/videos/smile.mp4");
-			}
-		})*/;
-
-		player.setOnStopped(new Runnable() {
-			public void run()
-
-			{
-				getPlayer(stage, "/home/david/Nextcloud/robot/videos/bored.mp4");
-
-			}
-		});
+		/*
+		 * WatchService watchService = FileSystems.getDefault().newWatchService();
+		 * 
+		 * Path path = Paths.get("/home/david/tmp/");
+		 * 
+		 * path.register(watchService, StandardWatchEventKinds.ENTRY_CREATE);
+		 * 
+		 * 
+		 * //test listener
+		 * 
+		 * WatchKey key; while ((key = watchService.take()) != null) { for
+		 * (WatchEvent<?> event : key.pollEvents()) {
+		 * System.out.println("Event new video");
+		 * layout.getPlayer("/home/david/Nextcloud/robot/videos/angry.mp4", true); }
+		 * key.reset(); }
+		 */
 
 	}
 
@@ -90,7 +112,7 @@ public class VideoPlayer extends Application {
 		player.setMute(true);
 		player.setRate(20);
 
-		communicator.setPlayer(player);
+		// communicator.setPlayer(player);
 
 		player.play();
 
@@ -103,4 +125,5 @@ public class VideoPlayer extends Application {
 	 * public void setCurrentPlayer(MediaPlayer currentPlayer) { this.currentPlayer
 	 * = currentPlayer; }
 	 */
+
 }
