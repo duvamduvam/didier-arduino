@@ -3,6 +3,8 @@ package fr.duvam.video;
 import java.util.HashMap;
 import java.util.Map;
 
+import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
+
 public class MediaManager{
 
 	Map<String, String> medias = new HashMap<String, String>();
@@ -33,4 +35,9 @@ public class MediaManager{
 		return VIDEO_PATH + media + VIDEO_EXTENSION;
 	}
 
+	public void play(EmbeddedMediaPlayer player, String key) {
+		String media = getMedia(key);
+		player.playMedia(media);
+	}
+	
 }

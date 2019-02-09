@@ -3,26 +3,23 @@ package fr.duvam.video;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
+import fr.duvam.arduino.Communicator2;
 import uk.co.caprica.vlcj.component.EmbeddedMediaPlayerComponent;
+import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
 import uk.co.caprica.vlcj.player.embedded.FullScreenStrategy;
 import uk.co.caprica.vlcj.player.embedded.x.XFullScreenStrategy;
 
-/**
- * An example of using the "X" full-screen strategy.
- * <p>
- * This is without doubt the recommended strategy to use for full-screen media
- * players - at least it is on Linux.
- */
 public class VlcPlayer{
 
 	private JFrame frame;
-	private EmbeddedMediaPlayerComponent mediaPlayerComponent;
+	private EmbeddedMediaPlayer mediaPlayer;
 
+	private Communicator2 communicator;
+	private PlayerManager2 playerManager;
+	private KeyListener2 listener;
+	
 	public static void main(String[] args) {
-		/*
-		 * if(args.length != 1) { System.err.println("Specify an MRL to play");
-		 * System.exit(1); }
-		 */
+
         MediaManager mediaManager = new MediaManager();
 
 		final String mrl = mediaManager.getMedia(MediaManager.KEY_VIDEO_BASE);
@@ -37,24 +34,46 @@ public class VlcPlayer{
 
 	@SuppressWarnings("serial")
 	public VlcPlayer() {
+	
 		frame = new JFrame("LibX11 Full Screen Strategy");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setLocation(100, 100);
 		frame.setSize(1200, 800);
-
-		mediaPlayerComponent = new EmbeddedMediaPlayerComponent() {
+		
+		EmbeddedMediaPlayerComponent mediaPlayerComponent = new EmbeddedMediaPlayerComponent() {
 			@Override
 			protected FullScreenStrategy onGetFullScreenStrategy() {
 				return new XFullScreenStrategy(frame);
 			}
 		};
+		mediaPlayer = mediaPlayerComponent.getMediaPlayer();
+		
 		frame.setContentPane(mediaPlayerComponent);
 		frame.setVisible(true);
+		
+		// Listener
+		listener = new KeyListener2(mediaPlayer);
+		PlayerManager2 playerManager = new PlayerManager2(mediaPlayer);
+		
+		playerManager.setKeyListener(listener);
+		communicator = new Communicator2(listener);
+		// end listener
+		
 	}
 
 	protected void start(String mrl) {
-		mediaPlayerComponent.getMediaPlayer().playMedia(mrl);
-		mediaPlayerComponent.getMediaPlayer().setFullScreen(true);
-		mediaPlayerComponent.getMediaPlayer().setRepeat(true);
+		
+		mediaPlayer.playMedia(mrl);
+		mediaPlayer.setFullScreen(true);
+		mediaPlayer.setRepeat(true);
+		
+		initArduinoListener(listener);
 	}
+	
+	private void initArduinoListener(KeyListener2 listener) {
+		
+        Thread thread = new Thread(listener);
+		thread.setDaemon(true);
+		thread.start();
+	}	
 }

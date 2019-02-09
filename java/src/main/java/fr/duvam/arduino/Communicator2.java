@@ -1,8 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package fr.duvam.arduino;
 
 import java.io.BufferedReader;
@@ -13,8 +8,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.TooManyListenersException;
 
-import fr.duvam.video.PlayerManager;
-import fr.duvam.video.KeyListener;
+import fr.duvam.video.KeyListener2;
 import gnu.io.CommPort;
 import gnu.io.CommPortIdentifier;
 import gnu.io.PortInUseException;
@@ -22,10 +16,9 @@ import gnu.io.SerialPort;
 import gnu.io.SerialPortEvent;
 import gnu.io.SerialPortEventListener;
 
-public class Communicator implements SerialPortEventListener {
+public class Communicator2 implements SerialPortEventListener {
 	// passed from main GUI
-	private PlayerManager layout;
-	private KeyListener listener;
+	private KeyListener2 listener;
 
 	final static String selectedPort = "/dev/ttyS4";
 	// for containing the ports that will be found
@@ -60,7 +53,7 @@ public class Communicator implements SerialPortEventListener {
 	// this string is written to the GUI
 	String logText = "";
 
-	public Communicator(KeyListener listener) {
+	public Communicator2(KeyListener2 listener) {
 		super();
 		this.listener = listener;
 		
@@ -215,14 +208,6 @@ public class Communicator implements SerialPortEventListener {
 				System.err.println(e.toString());
 			}
 		}
-	}
-
-	public PlayerManager getLayout() {
-		return layout;
-	}
-
-	public void setLayout(PlayerManager layout) {
-		this.layout = layout;
 	}
 
 	// method that can be called to send data
