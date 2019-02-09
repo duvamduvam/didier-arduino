@@ -14,11 +14,11 @@
 	<url>http://maven.apache.org</url>
 
 	<properties>
-		<jdk.version>1.8</jdk.version>
+		<jdk.version>11</jdk.version>
 		<jodatime.version>2.5</jodatime.version>
 		<junit.version>4.11</junit.version>
 		<log4j.version>1.2.17</log4j.version>
-		<main.class>embeddedmediaplayer.EmbeddedMediaPlayer</main.class>
+		<main.class>fr.duvam.video.VideoPlayer</main.class>
 	</properties>
 
 	<dependencies>
@@ -26,6 +26,12 @@
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>${junit.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.testfx</groupId>
+			<artifactId>testfx-core</artifactId>
+			<version>4.0.1-alpha</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -48,7 +54,7 @@
 		<dependency>
 			<groupId>uk.co.caprica</groupId>
 			<artifactId>vlcj</artifactId>
-			<version>3.11.0</version>
+			<version>3.12.1</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/ch.ethz.ganymed/ganymed-ssh2 -->
 		<dependency>
@@ -90,6 +96,11 @@
 			<artifactId>javafx-web</artifactId>
 			<version>12-ea+9</version>
 		</dependency>
+		<dependency>
+			<groupId>org.rxtx</groupId>
+			<artifactId>rxtx</artifactId>
+			<version>2.2pre1</version>
+		</dependency>
 
 
 	</dependencies>
@@ -99,14 +110,6 @@
 		<plugins>
 
 			<!-- download source code in Eclipse, best practice -->
-			<plugin>
-				<groupId>com.zenjava</groupId>
-				<artifactId>javafx-maven-plugin</artifactId>
-				<version>8.8.3</version>
-				<configuration>
-					<mainClass>${main.class}</mainClass>
-				</configuration>
-			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-eclipse-plugin</artifactId>
@@ -121,31 +124,30 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.3.2</version>
+				<version>3.8.0</version>
 				<configuration>
 					<source>${jdk.version}</source>
 					<target>${jdk.version}</target>
 				</configuration>
 			</plugin>
 
-			<!-- Make this jar executable -->
+			<!-- install rxtx -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<version>3.1.1</version>
+				<artifactId>maven-install-plugin</artifactId>
+				<version>3.0.0-M1</version>
 				<configuration>
-					<!-- DO NOT include log4j.properties file in your Jar -->
-					<excludes>
-						<exclude>**/log4j.properties</exclude>
-					</excludes>
-					<archive>
-						<manifest>
-							<!-- Jar file entry point -->
-							<mainClass>fr.duvam.ReadVideo</mainClass>
-						</manifest>
-					</archive>
+					<groupId>org.rxtx</groupId>
+					<artifactId>rxtx</artifactId>
+					<version>2.2pre1</version>
+					<packaging>jar</packaging>
+					<systemPath>${project.basedir}/lib/RXTXcomm.jar</systemPath>
+					<generatePom>true</generatePom>
 				</configuration>
+
 			</plugin>
+			<!-- Make this jar executable -->
+
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
 				<version>3.1.1</version>

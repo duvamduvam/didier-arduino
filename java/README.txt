@@ -1,5 +1,10 @@
+
+install rxtx localy :
+mvn install:install-file -Dfile=lib/RXTXcomm.jar -DgroupId=org.rxtx -DartifactId=rxtx -Dversion=2.2pre1 -Dpackaging=jar
+
+
 run with
 
-java -jar --module-path /home/david/softs/openjfx-11.0.2_linux-x64_bin-sdk/javafx-sdk-11.0.2/lib --add-modules=javafx.controls --add-modules=javafx.media rosita-jar-with-dependencies.jar 
+java -jar --module-path /home/david/softs/libraries/javafx-sdk-11.0.2/lib --add-modules=javafx.controls --add-modules=javafx.media  
 
-test javafx / last version don't work well with arm paticulary the media class to work with video
+

@@ -165,7 +165,13 @@ void loop() {
   int joystick = getJystickValue();
 
   if (joystick != 0) {
-    String joyStickValue = "200" + (String)joystick;
+    String prefix = "0";
+    if(digitalRead(led1) == LOW){
+      prefix = "200";
+    }else{
+      prefix = "300";
+    }
+    String joyStickValue = prefix + (String)joystick;
     Serial.println(joyStickValue);
     hc12.println(joyStickValue);
   }
@@ -188,4 +194,3 @@ void loop() {
   delay(100);
 
 }
-

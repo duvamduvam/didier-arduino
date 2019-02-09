@@ -1,9 +1,15 @@
 package fr.duvam.video;
 
+import org.junit.Test;
+
+import javafx.application.Platform;
+import javafx.embed.swing.JFXPanel;
+import javafx.stage.Stage;
+
 /**
  * A Sample class used to show OmxplayerProcess capabilities
  */
-public class VideoManagerTest {
+public class VideoManagerTest{
 
 	
 	/*@Test
@@ -27,6 +33,7 @@ public class VideoManagerTest {
 		TimeUnit.SECONDS.sleep(20);
 		
 	}*/
+
 
 
 }
