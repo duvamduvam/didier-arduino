@@ -3,6 +3,7 @@ package fr.duvam.video;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
+import fr.duvam.arduino.Arduino;
 import fr.duvam.arduino.Communicator2;
 import uk.co.caprica.vlcj.component.EmbeddedMediaPlayerComponent;
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
@@ -67,13 +68,30 @@ public class VlcPlayer{
 		mediaPlayer.setFullScreen(true);
 		mediaPlayer.setRepeat(true);
 		
-		initArduinoListener(listener);
+		initListeners(listener);
 	}
 	
-	private void initArduinoListener(KeyListener2 listener) {
+	/*private void initArduinoListener(KeyListener2 listener) {
 		
         Thread thread = new Thread(listener);
 		thread.setDaemon(true);
 		thread.start();
+	}	*/
+
+	private void initListeners(KeyListener2 listener) {
+		
+		//arduino communicator
+		Arduino arduino = new Arduino(listener, "/dev/ttyS4");
+	    Thread arduinoThread = new Thread(arduino);
+	    arduinoThread.setDaemon(true);
+	    arduinoThread.start();
+		
+		//key listener
+        Thread listenerThread = new Thread(listener);
+        listenerThread.setDaemon(true);
+        listenerThread.start();
 	}	
+	
+
+	
 }

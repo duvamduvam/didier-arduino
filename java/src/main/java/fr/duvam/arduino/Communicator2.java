@@ -20,12 +20,12 @@ public class Communicator2 implements SerialPortEventListener {
 	// passed from main GUI
 	private KeyListener2 listener;
 
-	//final static String selectedPort = "/dev/ttyS4";
-	final static String selectedPort = "/dev/ttyACM0";
+	final static String selectedPort = "/dev/ttyS4";
+	//final static String selectedPort = "/dev/ttyACM0";
 	// for containing the ports that will be found
-	private Enumeration ports = null;
+	private Enumeration<CommPortIdentifier> ports = null;
 	// map the port names to CommPortIdentifiers
-	private HashMap portMap = new HashMap();
+	private HashMap<String, CommPortIdentifier> portMap = new HashMap<String, CommPortIdentifier>();
 
 	// this is the object that contains the opened port
 	private CommPortIdentifier selectedPortIdentifier = null;

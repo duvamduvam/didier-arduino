@@ -204,7 +204,7 @@ void loop() {
     }
 
     //if ((millis() - lastMoveTime) > 0) {
-    Serial.println("stop");
+    //Serial.println("stop");
     stop();
     //}//
 
