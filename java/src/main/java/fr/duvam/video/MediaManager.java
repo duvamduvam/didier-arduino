@@ -37,6 +37,7 @@ public class MediaManager{
 
 	public void play(EmbeddedMediaPlayer player, String key) {
 		String media = getMedia(key);
+		player.stop();
 		player.playMedia(media);
 	}
 	
