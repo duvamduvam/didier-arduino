@@ -3,7 +3,6 @@ package fr.duvam.video;
 import java.util.LinkedList;
 import java.util.List;
 
-import fr.duvam.arduino.Communicator2;
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
 
 public class KeyListener2 implements Runnable {
@@ -11,7 +10,6 @@ public class KeyListener2 implements Runnable {
 	private EmbeddedMediaPlayer player;
 	private List<String> keyList;
 	MediaManager mediaManager;
-	Communicator2 communicator;
 
 	public KeyListener2(EmbeddedMediaPlayer player) {
 		this.player = player;

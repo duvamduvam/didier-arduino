@@ -4,7 +4,6 @@ import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
 import fr.duvam.arduino.Arduino;
-import fr.duvam.arduino.Communicator2;
 import uk.co.caprica.vlcj.component.EmbeddedMediaPlayerComponent;
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
 import uk.co.caprica.vlcj.player.embedded.FullScreenStrategy;
@@ -14,9 +13,6 @@ public class VlcPlayer{
 
 	private JFrame frame;
 	private EmbeddedMediaPlayer mediaPlayer;
-
-	private Communicator2 communicator;
-	private PlayerManager2 playerManager;
 	private KeyListener2 listener;
 	
 	public static void main(String[] args) {
@@ -36,7 +32,7 @@ public class VlcPlayer{
 	@SuppressWarnings("serial")
 	public VlcPlayer() {
 	
-		frame = new JFrame("LibX11 Full Screen Strategy");
+		frame = new JFrame();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setLocation(100, 100);
 		frame.setSize(1200, 800);
@@ -57,7 +53,6 @@ public class VlcPlayer{
 		PlayerManager2 playerManager = new PlayerManager2(mediaPlayer);
 		
 		playerManager.setKeyListener(listener);
-		communicator = new Communicator2(listener);
 		// end listener
 		
 	}
