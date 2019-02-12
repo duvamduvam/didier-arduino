@@ -7,30 +7,22 @@ import org.apache.log4j.Logger;
 
 import com.fazecast.jSerialComm.SerialPort;
 
-import fr.duvam.video.KeyListener2;
+import fr.duvam.video.KeyListener;
 
 public class Arduino implements Runnable {
 	private SerialPort comPort;
-	private String portDescription;
-	private int baud_rate = 9600;
+	private final String portDescription = "/dev/ttyACM0";
+	private final int baud_rate = 9600;
 	
-	private KeyListener2 listener;
+	private KeyListener listener;
 
 	private static final Logger LOGGER = Logger.getLogger(Arduino.class);
 
-	public Arduino(KeyListener2 listener, String portDescription) {
+	public Arduino(KeyListener listener) {
 		// make sure to set baud rate after
 		this.listener = listener;
-		this.portDescription = portDescription;
 		comPort = SerialPort.getCommPort(this.portDescription);
-	}
-
-	public Arduino(String portDescription, int baud_rate) {
-		// preferred constructor
-		this.portDescription = portDescription;
-		comPort = SerialPort.getCommPort(this.portDescription);
-		this.baud_rate = baud_rate;
-		comPort.setBaudRate(this.baud_rate);
+		comPort.setBaudRate(baud_rate);
 	}
 
 	public boolean openConnection() {
@@ -48,24 +40,6 @@ public class Arduino implements Runnable {
 
 	public void closeConnection() {
 		comPort.closePort();
-	}
-
-	public void setPortDescription(String portDescription) {
-		this.portDescription = portDescription;
-		comPort = SerialPort.getCommPort(this.portDescription);
-	}
-
-	public void setBaudRate(int baud_rate) {
-		this.baud_rate = baud_rate;
-		comPort.setBaudRate(this.baud_rate);
-	}
-
-	public String getPortDescription() {
-		return portDescription;
-	}
-
-	public SerialPort getSerialPort() {
-		return comPort;
 	}
 
 	public String serialRead() {
@@ -174,8 +148,7 @@ public class Arduino implements Runnable {
 			try {
 				Thread.sleep(100);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				LOGGER.error("arduino thread interrupted", e);
 				closeConnection();
 			}
 			serialRead();

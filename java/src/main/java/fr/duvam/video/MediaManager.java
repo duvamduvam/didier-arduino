@@ -9,9 +9,9 @@ public class MediaManager{
 
 	Map<String, String> medias = new HashMap<String, String>();
 
-	private static String VIDEO_PATH = "/home/david/Nextcloud/robot/videos/";
-	private static String VIDEO_EXTENSION = ".mp4";
-	public static String KEY_VIDEO_BASE = "10000";
+	private final static String VIDEO_PATH = "videos/";
+	private final static String VIDEO_EXTENSION = ".mp4";
+	public final static String KEY_VIDEO_BASE = "10000";
 
 	public MediaManager() {
 		medias.put(KEY_VIDEO_BASE, "base");

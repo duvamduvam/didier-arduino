@@ -13,7 +13,7 @@ public class VlcPlayer{
 
 	private JFrame frame;
 	private EmbeddedMediaPlayer mediaPlayer;
-	private KeyListener2 listener;
+	private KeyListener listener;
 	
 	public static void main(String[] args) {
 
@@ -49,8 +49,8 @@ public class VlcPlayer{
 		frame.setVisible(true);
 		
 		// Listener
-		listener = new KeyListener2(mediaPlayer);
-		PlayerManager2 playerManager = new PlayerManager2(mediaPlayer);
+		listener = new KeyListener(mediaPlayer);
+		PlayerManager playerManager = new PlayerManager(mediaPlayer);
 		
 		playerManager.setKeyListener(listener);
 		// end listener
@@ -73,10 +73,10 @@ public class VlcPlayer{
 		thread.start();
 	}	*/
 
-	private void initListeners(KeyListener2 listener) {
+	private void initListeners(KeyListener listener) {
 		
 		//arduino communicator
-		Arduino arduino = new Arduino(listener, "/dev/ttyS4");
+		Arduino arduino = new Arduino(listener);
 	    Thread arduinoThread = new Thread(arduino);
 	    arduinoThread.setDaemon(true);
 	    arduinoThread.start();
