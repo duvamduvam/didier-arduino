@@ -107,7 +107,7 @@ public class MediaManager {
 		String audio = null;
 		switch (control) {
 		case NEXT:
-			if (currentAudio <= audios.size()) {
+			if (currentAudio < audios.size()) {
 				audio = audios.get(++currentAudio);
 			}
 			break;
