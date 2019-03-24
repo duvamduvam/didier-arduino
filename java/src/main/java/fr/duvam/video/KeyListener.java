@@ -3,22 +3,25 @@ package fr.duvam.video;
 import java.util.LinkedList;
 import java.util.List;
 
-import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class KeyListener implements Runnable {
 
-	private EmbeddedMediaPlayer player;
+	private static Logger LOGGER = LoggerFactory.getLogger(KeyListener.class);
+
 	private List<String> keyList;
+	PlayerManager playerManager;
 	MediaManager mediaManager;
 
-	public KeyListener(EmbeddedMediaPlayer player) {
-		this.player = player;
+	public KeyListener(PlayerManager playerManager, MediaManager mediaManager) {
 		keyList = new LinkedList<String>();
-		mediaManager = new MediaManager();
+		this.playerManager = playerManager;
+		this.mediaManager = mediaManager;
 	}
 
 	public void addKey(String key) {
-		if (!keyList.contains(key) && mediaManager.existKey(key)) {
+		if (!keyList.contains(key)) {
 			keyList.add(key);
 		}
 	}
@@ -28,17 +31,13 @@ public class KeyListener implements Runnable {
 	}
 
 	private synchronized void checkEvent() {
-		synchronized (keyList) {
-			String toRemove = new String();
-			for (String key : keyList) {
-
-				mediaManager.play(player, key);
-				
-				toRemove = key;
-			}
-			if (!toRemove.isEmpty()) {
-				removeKey(toRemove);
-			}
+		String toRemove = new String();
+		for (String key : keyList) {
+			playerManager.play(key);
+			toRemove = key;
+		}
+		if (!toRemove.isEmpty()) {
+			removeKey(toRemove);
 		}
 	}
 
@@ -48,8 +47,7 @@ public class KeyListener implements Runnable {
 			try {
 				Thread.sleep(100);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				LOGGER.error("erreur KeyListener", e);
 			}
 			checkEvent();
 		}
