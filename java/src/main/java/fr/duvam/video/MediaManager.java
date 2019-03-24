@@ -109,6 +109,8 @@ public class MediaManager {
 		case NEXT:
 			if ((currentAudio +1)< audios.size()) {
 				audio = audios.get(++currentAudio);
+			}else {
+				audio = audios.get(currentAudio);
 			}
 			break;
 		case CURRENT:
