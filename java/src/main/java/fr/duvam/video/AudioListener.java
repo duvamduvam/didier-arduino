@@ -7,15 +7,17 @@ public class AudioListener implements Runnable {
 
 	private static Logger LOGGER = LoggerFactory.getLogger(AudioListener.class);
 
+	private AudioPlayer audioPlayer;
 	private PlayerManager playerManager;
 
-	public AudioListener(PlayerManager playerManager) {
+	public AudioListener(PlayerManager playerPlayer) {
 		super();
-		this.playerManager = playerManager;
+		this.audioPlayer = new AudioPlayer();
+		this.playerManager = playerPlayer;
 	}
 
 	private void checkRunning() {
-		if (playerManager.isAudioFinised()) {
+		if (audioPlayer.isAudioFinised()) {
 			playerManager.playDefaultVideo();
 		}
 	}
@@ -28,7 +30,7 @@ public class AudioListener implements Runnable {
 			} catch (InterruptedException e) {
 				LOGGER.error("erreur AudioListener", e);
 			}
-			if (playerManager.isAudioTriggered()) {
+			if (audioPlayer.isAudioTriggered()) {
 				checkRunning();
 			}
 		}

@@ -33,10 +33,6 @@ public class PlayerManager {
 
 	private MediaManager mediaManager;
 
-	private boolean isAudioTriggeredButNotStarted = false;
-	private boolean isAudioTriggered = false;
-    private boolean playCompleted;
-
 	public PlayerManager(MediaManager mediaManager) {
 
 		this.mediaManager = mediaManager;
@@ -117,28 +113,6 @@ public class PlayerManager {
 		}
 	}
 
-	public boolean isAudioPlaying() {
-		boolean isPlaying = audioPlayer.isPlaying();
-		if (isPlaying) {
-			isAudioTriggeredButNotStarted = false;
-		}
-		return (isPlaying || isAudioTriggeredButNotStarted);
-	}
-
-	public boolean isAudioFinised() {
-		boolean isPlaying = isAudioPlaying();
-		boolean finished = isAudioTriggered && !isPlaying;
-		if (finished && isAudioTriggered) {
-			isAudioTriggered = false;
-		}
-		return finished;
-	}
-
-	public boolean isAudioTriggered() {
-		return isAudioTriggered;
-	}
-
-
 	public void speakAudio(String audio) {
 		final String video = mediaManager.getVideo(MediaManager.KEY_VIDEO_SPEAK);
 		playVideo(video);
@@ -152,4 +126,12 @@ public class PlayerManager {
 		audioPlayer.play(audio);
 	}
 
+	public AudioPlayer getAudioPlayer() {
+		return audioPlayer;
+	}
+
+	public void setAudioPlayer(AudioPlayer audioPlayer) {
+		this.audioPlayer = audioPlayer;
+	}
+	
 }

@@ -24,15 +24,17 @@ public class AudioPlayer implements LineListener {
     /**
      * this flag indicates whether the playback completes or not.
      */
-    boolean playCompleted;
-     
+    private static boolean playCompleted;
+	private static boolean isAudioTriggeredButNotStarted = false;
+	private static boolean isAudioTriggered = false;
     /**
      * Play a given audio file.
      * @param audioFilePath Path of the audio file.
      */
     public void play(String audioFilePath) {
         File audioFile = new File(audioFilePath);
- 
+		isAudioTriggeredButNotStarted = true;
+		isAudioTriggered = true;
         try {
             AudioInputStream audioStream = AudioSystem.getAudioInputStream(audioFile);
  
@@ -73,6 +75,28 @@ public class AudioPlayer implements LineListener {
          
     }
  
+	public boolean isAudioPlaying() {
+		boolean isPlaying = isPlaying();
+		if (isPlaying) {
+			isAudioTriggeredButNotStarted = false;
+		}
+		return (isPlaying || isAudioTriggeredButNotStarted);
+	}
+
+	public boolean isAudioFinised() {
+		boolean isPlaying = isAudioPlaying();
+		boolean finished = isAudioTriggered && !isPlaying;
+		if (finished && isAudioTriggered) {
+			isAudioTriggered = false;
+		}
+		return finished;
+	}
+
+	public boolean isAudioTriggered() {
+		return isAudioTriggered;
+	}
+
+    
     public boolean isPlaying() {
     	return !playCompleted;
     }
