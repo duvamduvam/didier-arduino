@@ -1,5 +1,6 @@
 package fr.duvam.video;
 
+import java.util.ConcurrentModificationException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -37,8 +38,12 @@ public class KeyListener implements Runnable {
 				playerManager.play(key);
 				toRemove = key;
 			}
-			if (!toRemove.isEmpty()) {
-				removeKey(toRemove);
+			try {
+				if (!toRemove.isEmpty()) {
+					removeKey(toRemove);
+				}
+			} catch (ConcurrentModificationException e) {
+				LOGGER.error("error when removing item");
 			}
 		}
 	}
