@@ -34,11 +34,12 @@ public class KeyListener implements Runnable {
 	private synchronized void checkEvent() {
 		String toRemove = new String();
 		synchronized (keyList) {
-			for (String key : keyList) {
-				playerManager.play(key);
-				toRemove = key;
-			}
 			try {
+				for (String key : keyList) {
+					playerManager.play(key);
+					toRemove = key;
+				}
+
 				if (!toRemove.isEmpty()) {
 					removeKey(toRemove);
 				}
