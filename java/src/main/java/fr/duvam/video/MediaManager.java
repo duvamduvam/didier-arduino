@@ -6,9 +6,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
+
 public class MediaManager {
 
-	// private static final Logger LOGGER = Logger.getLogger(MediaManager.class);
+	private static final Logger LOGGER = Logger.getLogger(MediaManager.class);
 
 	Map<String, String> videos = new HashMap<String, String>();
 
@@ -74,6 +77,7 @@ public class MediaManager {
 				}
 			}
 		}
+		LOGGER.error("can't determine key type");
 		return null;
 	}
 
@@ -100,7 +104,9 @@ public class MediaManager {
 	}
 
 	private String getVideoPath(String media) {
-		return VIDEO_PATH + media + VIDEO_EXTENSION;
+		String videoPath = VIDEO_PATH + media + VIDEO_EXTENSION;
+		LOGGER.debug("video path "+videoPath);
+		return videoPath;
 	}
 
 	public String getAudioNavigation(Control control) {

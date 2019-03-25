@@ -1,5 +1,15 @@
 package fr.duvam.video;
 
+import java.io.File;
+import java.io.IOException;
+
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.DataLine;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JFrame;
 
 import org.apache.log4j.Logger;
@@ -18,13 +28,14 @@ public class PlayerManager {
 	private static final Logger LOGGER = Logger.getLogger(PlayerManager.class);
 
 	private EmbeddedMediaPlayer videoPlayer;
-	private MediaPlayer audioPlayer;
+	private AudioPlayer audioPlayer;
 	//private Clip audioPlayer;
 
 	private MediaManager mediaManager;
 
 	private boolean isAudioTriggeredButNotStarted = false;
 	private boolean isAudioTriggered = false;
+    private boolean playCompleted;
 
 	public PlayerManager(MediaManager mediaManager) {
 
@@ -37,7 +48,7 @@ public class PlayerManager {
 	private void initVideo() {
 		////////// video
 		JFrame frame = new JFrame();
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		//frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setLocation(100, 100);
 		frame.setSize(1200, 800);
 
@@ -54,9 +65,10 @@ public class PlayerManager {
 	}
 
 	private void initAudio() {
-		AudioMediaPlayerComponent audioPlayerComponent = new AudioMediaPlayerComponent();
-		audioPlayer = audioPlayerComponent.getMediaPlayer();
+		//AudioMediaPlayerComponent audioPlayerComponent = new AudioMediaPlayerComponent();
+		//audioPlayer = audioPlayerComponent.getMediaPlayer();
 		//audioPlayer.setVolume(200);
+		audioPlayer = new AudioPlayer();
 
 	}
 
@@ -92,6 +104,8 @@ public class PlayerManager {
 
 	public void play(String key) {
 		Type type = mediaManager.getControlType(key);
+		if(type==null)
+			return;
 		switch (type) {
 		case VIDEO:
 			String video = mediaManager.getVideo(key);
@@ -124,25 +138,18 @@ public class PlayerManager {
 		return isAudioTriggered;
 	}
 
-	private void playAudio(String src) {
-		isAudioTriggeredButNotStarted = true;
-		isAudioTriggered = true;
-		audioPlayer.stop();
-		audioPlayer.prepareMedia(src);
-		audioPlayer.play();
-	}
 
 	public void speakAudio(String audio) {
 		final String video = mediaManager.getVideo(MediaManager.KEY_VIDEO_SPEAK);
 		playVideo(video);
-		playAudio(audio);
+		audioPlayer.play(audio);
 	}
 
 	public void speakControl(Control control) {
 		final String video = mediaManager.getVideo(MediaManager.KEY_VIDEO_SPEAK);
 		playVideo(video);
 		String audio = mediaManager.getAudioNavigation(control);
-		playAudio(audio);
+		audioPlayer.play(audio);
 	}
 
 }
