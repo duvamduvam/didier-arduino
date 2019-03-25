@@ -1,7 +1,5 @@
 package fr.duvam.video;
 
-import java.io.File;
-
 import javax.swing.JFrame;
 
 import org.apache.log4j.Logger;
@@ -14,7 +12,6 @@ import uk.co.caprica.vlcj.player.MediaPlayer;
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
 import uk.co.caprica.vlcj.player.embedded.FullScreenStrategy;
 import uk.co.caprica.vlcj.player.embedded.x.XFullScreenStrategy;
-import uk.co.caprica.vlcj.player.media.Media;
 
 public class PlayerManager {
 
@@ -59,7 +56,7 @@ public class PlayerManager {
 	private void initAudio() {
 		AudioMediaPlayerComponent audioPlayerComponent = new AudioMediaPlayerComponent();
 		audioPlayer = audioPlayerComponent.getMediaPlayer();
-		audioPlayer.setVolume(200);
+		//audioPlayer.setVolume(200);
 
 	}
 
