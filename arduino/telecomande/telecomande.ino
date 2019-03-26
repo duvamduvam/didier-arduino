@@ -81,7 +81,8 @@ void ledOnOff(int led) {
 }
 
 int getModValue() {
-  String bin = (String)digitalRead(led1) + (String)digitalRead(led2) + (String)digitalRead(led3);
+  //String bin = (String)digitalRead(led1) + (String)digitalRead(led2) + (String)digitalRead(led3);
+  String bin = (String)digitalRead(led1) + 0 + 0;
   int hexa = 0;
   if (bin == "000") {
     hexa = 0;

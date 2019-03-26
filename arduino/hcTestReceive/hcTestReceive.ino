@@ -28,7 +28,7 @@ int curServPos1 = SERVOMIN1;
 #define dir_2 8
 #define pwm_2 9
 
-int speed = 200;
+int speed = 100;
 unsigned long lastMoveTime;
 
 
@@ -61,10 +61,12 @@ void moveWeel(int dir, int turn)
 
   // go straight forward and backward
   if ( turn > 3 && turn < 7) {
+    printDebug("straight");
     analogWrite(pwm_1, speed);
     analogWrite(pwm_2, speed);
     //turn right
   } else if ( turn < 4) {
+    printDebug("turn left");
     analogWrite(pwm_1, speed);
     if (turn == 1) {
       analogWrite(pwm_2, 0);
@@ -75,6 +77,7 @@ void moveWeel(int dir, int turn)
     }
 
   } else {
+    printDebug("turn right");
     analogWrite(pwm_2, speed);
     if (turn == 9) {
       analogWrite(pwm_1, 0);
