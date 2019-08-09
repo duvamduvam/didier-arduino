@@ -1,31 +1,42 @@
 package fr.duvam.video;
 
 import java.io.File;
-import java.util.HashMap;
+import java.io.FileNotFoundException;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
+import java.util.Scanner;
 
 import org.apache.log4j.Logger;
-
 
 public class MediaManager {
 
 	private static final Logger LOGGER = Logger.getLogger(MediaManager.class);
 
-	Map<String, String> videos = new HashMap<String, String>();
-
 	List<String> audios = new LinkedList<String>();
 
-	private final static String AUDIO_PATH = "audios/";
-	private final static String VIDEO_PATH = "videos/";
+	LinkedList<RositaMedia> medias = new LinkedList<RositaMedia>();
 
-	private final static String VIDEO_EXTENSION = ".mp4";
+	private final static String MEDIA_FILE = "keys/medias.txt";
+
+	private final static String AUDIO_PATH = "audios/";
+
 	public final static String KEY_VIDEO_BASE = "10000";
 	public final static String KEY_VIDEO_SPEAK = "10001";
 
 	enum Type {
-		VIDEO, SPEAK
+		GIF, VIDEO, SPEAK, AUDIO_VIDEO;
+
+		public static Type getType(String type) {
+			if (VIDEO.toString().equals(type)) {
+				return VIDEO;
+			} else if (SPEAK.toString().equals(type)) {
+				return SPEAK;
+			} else if (GIF.toString().equals(type)) {
+				return GIF;
+			} else {
+				return AUDIO_VIDEO;
+			}
+		}
 	}
 
 	enum Control {
@@ -45,47 +56,48 @@ public class MediaManager {
 	private int currentAudio = 0;
 
 	public MediaManager() {
-		videos.put(KEY_VIDEO_BASE, "rbase");
-		videos.put(KEY_VIDEO_SPEAK, "rspeak");
 
-		videos.put("10002", "smile");
-		videos.put("10004", "anger");
-		videos.put("10005", "rspeak");
-
-		loadAudios();
+		loadMediaFile();
 	}
 
-	private void loadAudios() {
-		File[] files = new File("audios").listFiles();
-		// If this pathname does not denote a directory, then listFiles() returns null.
+	private void loadMediaFile() {
+		File file = new File(MEDIA_FILE);
 
-		for (File file : files) {
-			if (file.isFile()) {
-				audios.add(file.getName());
+		try {
+			Scanner s = new Scanner(file);
+			while (s.hasNext()) {
+				medias.add(getMediaFromLine(s.next()));
 			}
+			s.close();
+		} catch (FileNotFoundException e) {
+			LOGGER.error("can't find " + MEDIA_FILE, e);
 		}
-		java.util.Collections.sort(audios);
+
 	}
 
-	public Type getControlType(String key) {
-		if (videos.containsKey(key)) {
-			return Type.VIDEO;
-		} else {
-			for (Control control : Control.values()) {
-				if (control.getKey().equals(key)) {
-					return Type.SPEAK;
-				}
-			}
-		}
-		LOGGER.error("can't determine key type");
-		return null;
+	private RositaMedia getMediaFromLine(String str) {
+
+		Scanner sc = new Scanner(str);
+		sc.useDelimiter("[|]");
+
+		RositaMedia media = new RositaMedia(sc.next(), Type.getType(sc.next()), sc.next(), sc.next());
+
+		sc.close();
+		return media;
 	}
 
-	public Control getControl(String key) {
+	/*
+	 * private void loadAudios() { File[] files = new File("audios").listFiles(); //
+	 * If this pathname does not denote a directory, then listFiles() returns null.
+	 * 
+	 * for (File file : files) { if (file.isFile()) { audios.add(file.getName()); }
+	 * } java.util.Collections.sort(audios); }
+	 */
 
-		for (Control control : Control.values()) {
-			if (control.getKey().equals(key)) {
-				return control;
+	public RositaMedia getMedia(String key) {
+		for (RositaMedia media : medias) {
+			if (key.equals(media.getKey())) {
+				return media;
 			}
 		}
 		return null;
@@ -93,29 +105,22 @@ public class MediaManager {
 
 	public String getVideo(String key) {
 
-		if (videos.containsKey(key)) {
-			return getVideoPath(videos.get(key));
+		for (RositaMedia media : medias) {
+			if (media.type.equals(Type.VIDEO) && media.getKey().equals(key)) {
+				return media.getVideo();
+			}
 		}
-		return getVideoPath(videos.get(KEY_VIDEO_BASE));
-	}
-
-	public boolean existVideoKey(String key) {
-		return videos.containsKey(key);
-	}
-
-	private String getVideoPath(String media) {
-		String videoPath = VIDEO_PATH + media + VIDEO_EXTENSION;
-		LOGGER.debug("video path "+videoPath);
-		return videoPath;
+		LOGGER.error("video key " + key + " not found");
+		return getVideo(KEY_VIDEO_BASE);
 	}
 
 	public String getAudioNavigation(Control control) {
 		String audio = null;
 		switch (control) {
 		case NEXT:
-			if ((currentAudio +1)< audios.size()) {
+			if ((currentAudio + 1) < audios.size()) {
 				audio = audios.get(++currentAudio);
-			}else {
+			} else {
 				audio = audios.get(currentAudio);
 			}
 			break;

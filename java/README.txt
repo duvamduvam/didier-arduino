@@ -4,7 +4,7 @@ mvn install:install-file -Dfile=lib/RXTXcomm.jar -DgroupId=org.rxtx -DartifactId
 
 
 run with
+java -jar --module-path /home/david/softs/libraries/javafx-sdk-11.0.2/lib --add-modules=javafx.controls --add-modules=javafx.media target/rosita-jar-with-dependencies.jar 
 
-java -jar --module-path /home/david/softs/libraries/javafx-sdk-11.0.2/lib --add-modules=javafx.controls --add-modules=javafx.media  
 
-
+in the java folder

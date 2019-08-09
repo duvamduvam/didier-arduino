@@ -7,15 +7,19 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class KeyListener implements Runnable {
+public class CommandListener implements Runnable {
 
-	private static Logger LOGGER = LoggerFactory.getLogger(KeyListener.class);
+	private static Logger LOGGER = LoggerFactory.getLogger(CommandListener.class);
 
 	private List<String> keyList;
 	PlayerManager playerManager;
 	MediaManager mediaManager;
+	
+	public void setPlayerManager(PlayerManager playerManager) {
+		this.playerManager = playerManager;
+	}
 
-	public KeyListener(PlayerManager playerManager, MediaManager mediaManager) {
+	public CommandListener(PlayerManager playerManager, MediaManager mediaManager) {
 		keyList = new LinkedList<String>();
 		this.playerManager = playerManager;
 		this.mediaManager = mediaManager;

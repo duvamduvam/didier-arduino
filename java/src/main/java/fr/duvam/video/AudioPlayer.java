@@ -118,10 +118,5 @@ public class AudioPlayer implements LineListener {
  
     }
  
-    public static void main(String[] args) {
-        String audioFilePath = "audios/201introCommune.wav";
-        AudioPlayer player = new AudioPlayer();
-        player.play(audioFilePath);
-    }
  
 }

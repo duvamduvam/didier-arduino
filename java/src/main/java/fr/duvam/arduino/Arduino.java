@@ -7,18 +7,18 @@ import org.apache.log4j.Logger;
 
 import com.fazecast.jSerialComm.SerialPort;
 
-import fr.duvam.video.KeyListener;
+import fr.duvam.video.CommandListener;
 
 public class Arduino implements Runnable {
 	private SerialPort comPort;
 	private final String portDescription = "/dev/ttyACM0";
 	private final int baud_rate = 9600;
 	
-	private KeyListener listener;
+	private CommandListener listener;
 
 	private static final Logger LOGGER = Logger.getLogger(Arduino.class);
 
-	public Arduino(KeyListener listener) {
+	public Arduino(CommandListener listener) {
 		// make sure to set baud rate after
 		this.listener = listener;
 		comPort = SerialPort.getCommPort(this.portDescription);

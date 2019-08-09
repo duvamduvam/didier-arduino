@@ -3,14 +3,14 @@ package fr.duvam;
 import javax.swing.SwingUtilities;
 
 import fr.duvam.arduino.Arduino;
-import fr.duvam.video.AudioListener;
-import fr.duvam.video.KeyListener;
+import fr.duvam.video.CommandListener;
+import fr.duvam.video.MediaListener;
 import fr.duvam.video.MediaManager;
 import fr.duvam.video.PlayerManager;
 
 public class Main {
 
-	private KeyListener listener;
+	private CommandListener listener;
 	private PlayerManager playerManager;
 
 	public static void main(String[] args) {
@@ -26,9 +26,9 @@ public class Main {
 	public Main() {
 
 		MediaManager mediaManager = new MediaManager();
-		playerManager = new PlayerManager(mediaManager);
-		listener = new KeyListener(playerManager, mediaManager);
-		
+		listener = new CommandListener(playerManager, mediaManager);
+		playerManager = new PlayerManager(mediaManager, listener);
+		listener.setPlayerManager(playerManager);
 	}
 
 	protected void start() {
@@ -44,24 +44,36 @@ public class Main {
 		initListeners(listener);
 	}
 
-	private void initListeners(KeyListener listener) {
+	private void initListeners(CommandListener keyListener) {
 
 		// arduino communicator
-		Arduino arduino = new Arduino(listener);
+		Arduino arduino = new Arduino(keyListener);
 		Thread arduinoThread = new Thread(arduino);
 		arduinoThread.setDaemon(true);
 		arduinoThread.start();
 
 		// key listener
-		Thread keyListenerThread = new Thread(listener);
+		Thread keyListenerThread = new Thread(keyListener);
 		keyListenerThread.setDaemon(true);
 		keyListenerThread.start();
 		
 		// audio listener
-		AudioListener audioListener = new AudioListener(playerManager);
+		/*AudioListener audioListener = new AudioListener(playerManager);
 		Thread audioListenerThread = new Thread(audioListener);
 		audioListenerThread.setDaemon(true);
-		audioListenerThread.start();
+		audioListenerThread.start();*/
+
+		// video listener
+		MediaListener mediaListener = new MediaListener(playerManager, keyListener);
+		Thread mediaListenerThread = new Thread(mediaListener);
+		mediaListenerThread.setDaemon(true);
+		mediaListenerThread.start();		
+		
+		// test key listener
+		/*TestKeyProvider testKeyListener = new TestKeyProvider(listener);
+		Thread testKeyListenerThread = new Thread(testKeyListener);
+		testKeyListenerThread.setDaemon(true);
+		testKeyListenerThread.start();	*/	
 		
 	}
 
