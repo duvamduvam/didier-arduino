@@ -1,0 +1,21 @@
+#
+# A fatal error has been detected by the Java Runtime Environment:
+#
+#  SIGSEGV (0xb) at pc=0x00007f3385d34ea1, pid=5899, tid=5914
+#
+# JRE version: OpenJDK Runtime Environment (13.0+13) (build 13+13-Ubuntu-0ubunt1)
+# Java VM: OpenJDK 64-Bit Server VM (13+13-Ubuntu-0ubunt1, mixed mode, sharing, tiered, compressed oops, g1 gc, linux-amd64)
+# Problematic frame:
+# C  [libjimage.so+0x2ea1]
+#
+# Core dump will be written. Default location: Core dumps may be processed with "/usr/share/apport/apport %p %s %c %d %P" (or dumping to /home/david/Nextcloud/rosita/java/core.5899)
+#
+# If you would like to submit a bug report, please visit:
+#   https://bugs.launchpad.net/ubuntu/+source/openjdk-13
+#
+
+---------------  S U M M A R Y ------------
+
+Command Line: -agentlib:jdwp=transport=dt_socket,suspend=y,address=localhost:41421 -javaagent:/home/david/eclipse/configuration/org.eclipse.osgi/692/0/.cp/lib/javaagent-shaded.jar -Dfile.encoding=UTF-8 fr.duvam.Main
+
+Host: 

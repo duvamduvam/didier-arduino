@@ -1,0 +1,8 @@
+10000|VIDEO|videos/rbase.mp4|*
+2000|AUDIO_VIDEO|videos/gifs/test.gif|audios/100bonjour.wav
+2003|AUDIO_VIDEO|videos/rspeak.mp4|audios/250conditionsDeTravail.wav
+2004|VIDEO|/home/david/Vidéos/Near.Death.Experience.2014.VFF.DVDRip.XviD.avi|*
+2005|VIDEO|videos/rspeak.mp4|*
+2006|VIDEO|videos/bored.mp4|*
+2007|VIDEO|videos/baket.mp4|*	
+a|VIDEO|videos/bored.mp4|*

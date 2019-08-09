@@ -16,7 +16,7 @@ int digitBut[] = {8, 9, 10, 11, 12, 13};
 int anlogBut[] = {0, 1, 2, 3, 4, 5};
 
 boolean isAnalogPressed(int i) {
-  if (analogRead(i) > 1000) {
+  if (analogRead(i) > 1017) {
     return true;
   }
   return false;
@@ -110,11 +110,13 @@ int getJystickValue() {
   int x = simplifyAnalogValue(analogRead(7));
   int y = simplifyAnalogValue(analogRead(6));
 
+  //printDebug(String(x), "x");
+  //printDebug(String(y), "y");
+
   if (x > 3 && x < 7 && y > 3 && y < 7) {
     return 0;
   }
-  // printDebug(String(x), "x");
-  //printDebug(String(y), "y");
+
   if (x == 0) {
     x = 10;
   } else {
@@ -124,6 +126,7 @@ int getJystickValue() {
 }
 
 int simplifyAnalogValue(int v) {
+  //printDebug("analog value", (String)v);
   return ((v * 10) / 1024);
 }
 
@@ -131,7 +134,7 @@ int simplifyAnalogValue(int v) {
 
 
 void printDebug(String value, String msg) {
-  Serial.println(msg);
+  Serial.print(msg);
   Serial.println(value);
 }
 
@@ -147,12 +150,15 @@ void setup() {
   pinMode(led3, OUTPUT);
 
   for (int i = 8; i < 14; i++) {
-    pinMode(i, INPUT);
+    pinMode(i, INPUT_PULLUP);
   }
 
 }
 
 void loop() {
+
+Serial.print(" 0 ");
+Serial.println(analogRead(0));
 
   int b = buttonValue();
   manageLed(b);

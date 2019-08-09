@@ -1,0 +1,33 @@
+#
+# A fatal error has been detected by the Java Runtime Environment:
+#
+#  SIGSEGV (0xb) at pc=0x00007ffa90d7e0d1, pid=8579, tid=8596
+#
+# JRE version: Java(TM) SE Runtime Environment (11.0.2+9) (build 11.0.2+9-LTS)
+# Java VM: Java HotSpot(TM) 64-Bit Server VM (11.0.2+9-LTS, mixed mode, tiered, compressed oops, g1 gc, linux-amd64)
+# Problematic frame:
+# C  [libjimage.so+0x40d1]  ImageStrings::find(Endian*, char const*, int*, unsigned int)+0x71
+#
+# No core dump will be written. Core dumps have been disabled. To enable core dumping, try "ulimit -c unlimited" before starting Java again
+#
+# If you would like to submit a bug report, please visit:
+#   http://bugreport.java.com/bugreport/crash.jsp
+#
+
+---------------  S U M M A R Y ------------
+
+Command Line: -agentlib:jdwp=transport=dt_socket,suspend=y,address=localhost:44373 -javaagent:/home/david/softs/eclipse-jee-2019-03-R-linux-gtk-x86_64/eclipse/configuration/org.eclipse.osgi/404/0/.cp/lib/javaagent-shaded.jar -Dfile.encoding=UTF-8 fr.duvam.Main
+
+Host: Intel(R) Core(TM) i7-4500U CPU @ 1.80GHz, 2 cores, 5G, Debian GNU/Linux 9 (stretch)
+Time: Wed Jun 12 19:01:40 2019 CEST elapsed time: 49 seconds (0d 0h 0m 49s)
+
+---------------  T H R E A D  ---------------
+
+Current thread (0x00007ffa8c1a0800):  JavaThread "Signal Dispatcher" daemon [_thread_in_vm, id=8596, stack(0x00007ffa6c7ff000,0x00007ffa6c900000)]
+
+Stack: [0x00007ffa6c7ff000,0x00007ffa6c900000],  sp=0x00007ffa6c8fd140,  free space=1016k
+Native frames: (J=compiled Java code, A=aot compiled Java code, j=interpreted, Vv=VM code, C=native code)
+C  [libjimage.so+0x40d1]  ImageStrings::find(Endian*, char const*, int*, unsigned int)+0x71
+C  [libjimage.so+0x4daa]  ImageFileReader::find_location_index(char const*, unsigned long long*) const+0x3a
+C  [libjimage.so+0x52aa]  JIMAGE_FindResource+0xfa
+V  [libjvm.so+0x5cfbee]

@@ -1,10 +1,14 @@
 #include <Wire.h>
 #include <SoftwareSerial.h>
 #include <Adafruit_PWMServoDriver.h>
-
+//#include <FastLED.h>
+#define NUM_LEDS 300
+// on cable yellow of led strip
+#define DATA_PIN 6
+//CRGB leds[NUM_LEDS];
 
 SoftwareSerial hc12(2, 3); // TX, RX
-// called this way, it uses the default address 0x40
+// SDA A4 SCL A5 default address 0x40
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 
 
@@ -28,11 +32,11 @@ int curServPos1 = SERVOMIN1;
 #define dir_2 8
 #define pwm_2 9
 
-int speed = 100;
+int speed = 1000;
 unsigned long lastMoveTime;
 
 
-boolean debugMsg = false;
+boolean debugMsg = true;
 
 
 int headStep = 10;
@@ -48,7 +52,7 @@ void printDebug(String msg) {
 int getDirNumber(String msg, int pos) {
   String s = (String)msg.charAt(pos);
   int p = s.toInt();
-  //printDebug((String)p);
+  printDebug((String)p);
   return p;
 }
 
@@ -58,6 +62,9 @@ void moveWeel(int dir, int turn)
 
   digitalWrite(dir_1, dir);
   digitalWrite(dir_2, dir);
+
+  printDebug("turn : " + (String)turn);
+  printDebug("dir : " + (String)dir);
 
   // go straight forward and backward
   if ( turn > 3 && turn < 7) {
@@ -143,6 +150,31 @@ int moveServo(int p, int servo, int currentPos, int MIN, int MAX) {
 }
 /// end head ////
 
+void showLed(){
+    //for (int dot = 0; dot < NUM_LEDS; dot++) {
+    //leds[dot] = CRGB::White;
+    //leds[dot].red = random(255);
+    //leds[dot].blue = random(255);
+    //leds[dot].green = random(255);
+    
+    //FastLED.show();
+    // clear this led for the next time around the loop
+    //leds[dot] = CRGB::Black;
+    //delay(30);
+  //} 
+
+  //for (int dot = 0; dot < NUM_LEDS; dot++) {
+    //int dot = random(500);
+    //leds[dot] = CRGB::White;
+    //leds[dot].red = random(255);
+    //leds[dot].blue = random(255);
+    //leds[dot].green = random(255);
+    
+    //FastLED.show();
+    // clear this led for the next time around the loop
+    //leds[dot] = CRGB::Black;
+}
+
 
 void setup() {
   hc12.begin(9600);
@@ -152,6 +184,8 @@ void setup() {
   pwm.setPWMFreq(60);  // Analog servos run at ~60 Hz updates
   pwm.setPWM(servo0, 0, curServPos0);
   pwm.setPWM(servo1, 0, curServPos1);
+
+  //FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
 
   delay(10);
 }
@@ -195,7 +229,7 @@ void loop() {
 
 
         delay(150);
-        stop();
+        //stop();
         Serial.println(lastMoveTime);
         //if (moveCount > 50) {
         //  Serial.println("stop");
@@ -214,6 +248,8 @@ void loop() {
     hc12.flush();//clear the serial buffer for unwanted inputs
     last = millis();//reset timer
   }
+
+  //showLed();
 
   delay(20);
 }
