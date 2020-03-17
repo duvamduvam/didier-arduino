@@ -1,4 +1,4 @@
-package fr.duvam.arduino;
+package fr.duvam.arduino.test;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

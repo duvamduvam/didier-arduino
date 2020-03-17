@@ -30,11 +30,11 @@ public class CommandListener implements Runnable {
 			keyList.add(key);
 		}
 	}
-
+	
 	private void removeKey(String key) {
 		keyList.remove(key);
 	}
-
+	
 	private synchronized void checkEvent() {
 		String toRemove = new String();
 		synchronized (keyList) {
@@ -43,10 +43,10 @@ public class CommandListener implements Runnable {
 					playerManager.play(key);
 					toRemove = key;
 				}
-
 				if (!toRemove.isEmpty()) {
 					removeKey(toRemove);
 				}
+			
 			} catch (ConcurrentModificationException e) {
 				LOGGER.error("error when removing item");
 			}
@@ -57,7 +57,7 @@ public class CommandListener implements Runnable {
 	public void run() {
 		while (true) {
 			try {
-				Thread.sleep(1000);
+				Thread.sleep(100);
 			} catch (InterruptedException e) {
 				LOGGER.error("erreur KeyListener", e);
 			}

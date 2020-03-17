@@ -1,8 +1,16 @@
 package fr.duvam;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import javax.swing.SwingUtilities;
 
-import fr.duvam.arduino.Arduino;
+import org.apache.log4j.Logger;
+
+import fr.duvam.arduino.test.ArduinoComm;
+import fr.duvam.midi.MidiHandler;
 import fr.duvam.video.CommandListener;
 import fr.duvam.video.MediaListener;
 import fr.duvam.video.MediaManager;
@@ -10,11 +18,13 @@ import fr.duvam.video.PlayerManager;
 
 public class Main {
 
+	private static Logger LOGGER;
+	
 	private CommandListener listener;
 	private PlayerManager playerManager;
 
 	public static void main(String[] args) {
-
+	
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
@@ -25,32 +35,43 @@ public class Main {
 
 	public Main() {
 
+		initLog();
+		
 		MediaManager mediaManager = new MediaManager();
 		listener = new CommandListener(playerManager, mediaManager);
 		playerManager = new PlayerManager(mediaManager, listener);
 		listener.setPlayerManager(playerManager);
+		new MidiHandler(listener);
+		
+		
 	}
 
+	
+	void initLog(){
+		//init log4j property logging
+		try {
+			String logPrefix = OSValidator.getOS()+"-"+InetAddress.getLocalHost().getHostName();			
+			System.setProperty("hostName", logPrefix);
+			Logger LOGGER = Logger.getLogger(Main.class);
+			LOGGER.info("<<<<<<<<<<<<<<<<<<<<<<<<<<< START >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+		} catch (UnknownHostException e) {
+			LOGGER.error(e);
+		} 
+	}
+	
 	protected void start() {
 
 		playerManager.playDefaultVideo();
-
-
-		
-		//audioPlayer.playMedia("/home/david/tmp/yom.mp3");
-		// audioPlayer.setRepeat(true);
-		//mediaManager.playMusic("/home/david/tmp/yom.mp3");
-		
 		initListeners(listener);
 	}
 
 	private void initListeners(CommandListener keyListener) {
 
 		// arduino communicator
-		Arduino arduino = new Arduino(keyListener);
-		Thread arduinoThread = new Thread(arduino);
-		arduinoThread.setDaemon(true);
-		arduinoThread.start();
+		//ArduinoComm arduino = new ArduinoComm(keyListener);
+		//Thread arduinoThread = new Thread(arduino);
+		//arduinoThread.setDaemon(true);
+		//arduinoThread.start();
 
 		// key listener
 		Thread keyListenerThread = new Thread(keyListener);

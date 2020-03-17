@@ -12,6 +12,10 @@ import javax.sound.sampled.LineEvent;
 import javax.sound.sampled.LineListener;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
+
+import org.apache.log4j.Logger;
+
+import fr.duvam.arduino.test.ArduinoComm;
  
 /**
  * This is an example program that demonstrates how to play back an audio file
@@ -21,6 +25,7 @@ import javax.sound.sampled.UnsupportedAudioFileException;
  */
 public class AudioPlayer implements LineListener {
      
+	private static final Logger LOGGER = Logger.getLogger(AudioPlayer.class);	
     /**
      * this flag indicates whether the playback completes or not.
      */
@@ -63,14 +68,11 @@ public class AudioPlayer implements LineListener {
             audioClip.close();
              
         } catch (UnsupportedAudioFileException ex) {
-            System.out.println("The specified audio file is not supported.");
-            ex.printStackTrace();
+        	LOGGER.info("The specified audio file is not supported.", ex);
         } catch (LineUnavailableException ex) {
-            System.out.println("Audio line for playing back is unavailable.");
-            ex.printStackTrace();
+        	LOGGER.info("Audio line for playing back is unavailable.", ex);
         } catch (IOException ex) {
-            System.out.println("Error playing the audio file.");
-            ex.printStackTrace();
+        	LOGGER.info("Error playing the audio file.", ex);
         }
          
     }

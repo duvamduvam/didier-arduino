@@ -1,4 +1,4 @@
-package fr.duvam.arduino;
+package fr.duvam.arduino.test;
 
 import java.io.PrintWriter;
 import java.util.Scanner;
@@ -7,22 +7,89 @@ import org.apache.log4j.Logger;
 
 import com.fazecast.jSerialComm.SerialPort;
 
+import fr.duvam.OSValidator;
 import fr.duvam.video.CommandListener;
 
-public class Arduino implements Runnable {
+public class ArduinoComm implements Runnable {
 	private SerialPort comPort;
-	private final String portDescription = "/dev/ttyACM0";
-	private final int baud_rate = 9600;
-	
+	private static final String linuxPort = "/dev/ttyACM0";
+	private static final String winPort = "COM11";
+
+	private static final int baud_rate = 9600;
+
 	private CommandListener listener;
 
-	private static final Logger LOGGER = Logger.getLogger(Arduino.class);
+	private static final Logger LOGGER = Logger.getLogger(ArduinoComm.class);
 
-	public Arduino(CommandListener listener) {
-		// make sure to set baud rate after
-		this.listener = listener;
-		comPort = SerialPort.getCommPort(this.portDescription);
+	/*
+	 * public ArduinoComm(CommandListener listener) { // make sure to set baud rate
+	 * after this.listener = listener;
+	 * 
+	 * initialize(); }
+	 */
+
+	// for testing
+	public ArduinoComm() {
+		initialize();
+		// comPort = SerialPort.getCommPort(portDescription);
+		// comPort.setBaudRate(baud_rate);
+	}
+
+	private void initialize() {
+
+		String port = null;
+		String os = OSValidator.getOS();
+
+		SerialPort[] ports = SerialPort.getCommPorts();
+		for (SerialPort p : ports) {
+			LOGGER.info(p.getDescriptivePortName());
+		}
+
+		if (os.contains("uni")) {
+			port = linuxPort;
+		}
+		if (os.contains("win")) {
+			port = winPort;
+		}
+
+		LOGGER.info(" os : " + os + ", port : " + port);
+
+		if (port == null) {
+			LOGGER.info("Could not find COM port, is arduino plugged in ?");
+			return;
+		}
+
+		comPort = SerialPort.getCommPort(port);
+		if (comPort == null) {
+			LOGGER.info("failed to initalise arduino port");
+		}
 		comPort.setBaudRate(baud_rate);
+
+	}
+
+	public void sendString(String msg) {
+		LOGGER.info("arduino msg :" + msg);
+		openConnection();
+		serialWrite(msg);
+		closeConnection();
+	}
+
+	public static void main(String[] args) throws InterruptedException {
+
+		ArduinoComm arduino = new ArduinoComm();
+		arduino.openConnection();
+
+		// for(int i=0;i<100;i++) {
+		// arduino.serialWrite(Integer.toString(i));
+		// Thread.sleep(5000);
+		// }
+		Thread.sleep(5000);
+		arduino.serialWrite("a");
+
+		arduino.closeConnection();
+
+		// Arduino obj = new Arduino(portDescription, baud_rate);
+		// obj.openConnection();
 	}
 
 	public boolean openConnection() {
@@ -81,10 +148,12 @@ public class Arduino implements Runnable {
 	public void serialWrite(String s) {
 		// writes the entire string at once.
 		comPort.setComPortTimeouts(SerialPort.TIMEOUT_SCANNER, 0, 0);
+
 		try {
 			Thread.sleep(5);
 		} catch (Exception e) {
 		}
+
 		PrintWriter pout = new PrintWriter(comPort.getOutputStream());
 		pout.print(s);
 		pout.flush();
@@ -153,7 +222,5 @@ public class Arduino implements Runnable {
 			}
 			serialRead();
 		}
-		
-
 	}
 }

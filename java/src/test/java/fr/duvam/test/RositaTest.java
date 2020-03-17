@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.Scanner;
 
 import javax.swing.ImageIcon;
@@ -12,6 +14,10 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 
 import org.junit.Test;
+
+import fr.duvam.arduino.test.ArduinoComm;
+import jssc.SerialPort;
+import jssc.SerialPortException;
 
 public class RositaTest {
 
@@ -37,8 +43,9 @@ public class RositaTest {
 
 		String music = "/home/david/Nextcloud/InstantUpload/Son/artiste.wav";
 
-		//AudioMediaPlayerComponent mediaPlayerComponent = new AudioMediaPlayerComponent(); // <--- 1
-		//mediaPlayerComponent.getMediaPlayer().playMedia(music); // <--- 2
+		// AudioMediaPlayerComponent mediaPlayerComponent = new
+		// AudioMediaPlayerComponent(); // <--- 1
+		// mediaPlayerComponent.getMediaPlayer().playMedia(music); // <--- 2
 
 		// mediaPlayerComponent.
 
@@ -53,7 +60,7 @@ public class RositaTest {
 
 	}
 
-	//@Test
+	// @Test
 	public void readAndRemove() throws IOException {
 
 		String keyFile = "/home/david/Nextcloud/rosita/java/src/test/resources/keys.txt";
@@ -79,7 +86,7 @@ public class RositaTest {
 		}
 	}
 
-	//@Test
+	// @Test
 	public void testGIF() throws MalformedURLException {
 
 		// URL url =
@@ -94,6 +101,39 @@ public class RositaTest {
 		f.pack();
 		f.setLocationRelativeTo(null);
 		f.setVisible(true);
+	}
+
+	@Test
+	public void testArduinoCom() throws Exception {
+		ArduinoComm arduino = new ArduinoComm();
+
+		LinkedList<String> inputs = 	
+				new LinkedList<String>(Arrays.asList("a", "b", "c", "aaa", "bbb"));
+
+		//arduino.openConnection();
+		for (String input: inputs) {
+			//String input = "12345";
+			arduino.sendString(input);
+			System.out.println(input);
+			Thread.sleep(5000);
+		}
+		//arduino.closeConnection();
+
+	}
+	
+	@Test
+	public void sendArduinoMsg() {
+        SerialPort serialport = new SerialPort("/dev/ttyACM0");
+        try{
+            serialport.openPort();
+            serialport.setParams(9600, 8, 1, 0);
+            serialport.writeString("a");
+            serialport.closePort();
+
+        }
+        catch(SerialPortException ex){
+            System.err.println(ex);
+        }
 	}
 
 }

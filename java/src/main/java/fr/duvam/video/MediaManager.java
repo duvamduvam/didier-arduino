@@ -24,17 +24,21 @@ public class MediaManager {
 	public final static String KEY_VIDEO_SPEAK = "10001";
 
 	enum Type {
-		GIF, VIDEO, SPEAK, AUDIO_VIDEO;
+		GIF, VIDEO, VIDEOR, SPEAK, AUDIO_VIDEO, ARDUINO;
 
 		public static Type getType(String type) {
 			if (VIDEO.toString().equals(type)) {
 				return VIDEO;
+			} else if (VIDEOR.toString().equals(type)) {
+				return VIDEOR;
 			} else if (SPEAK.toString().equals(type)) {
 				return SPEAK;
 			} else if (GIF.toString().equals(type)) {
 				return GIF;
-			} else {
+			} else if (AUDIO_VIDEO.toString().equals(type)) {
 				return AUDIO_VIDEO;
+			} else {
+				return ARDUINO;
 			}
 		}
 	}
@@ -66,7 +70,10 @@ public class MediaManager {
 		try {
 			Scanner s = new Scanner(file);
 			while (s.hasNext()) {
-				medias.add(getMediaFromLine(s.next()));
+				RositaMedia media = getMediaFromLine(s.next());
+				if (media != null) {
+					medias.add(media);
+				}
 			}
 			s.close();
 		} catch (FileNotFoundException e) {
@@ -77,22 +84,19 @@ public class MediaManager {
 
 	private RositaMedia getMediaFromLine(String str) {
 
-		Scanner sc = new Scanner(str);
-		sc.useDelimiter("[|]");
+		if (str.contains("|")) {
+			Scanner sc = new Scanner(str);
+			sc.useDelimiter("[|]");
 
-		RositaMedia media = new RositaMedia(sc.next(), Type.getType(sc.next()), sc.next(), sc.next());
+			RositaMedia media = new RositaMedia(sc.next(), Type.getType(sc.next()), sc.next(), sc.next());
 
-		sc.close();
-		return media;
+			sc.close();
+			return media;
+		} else {
+			return null;
+		}
+
 	}
-
-	/*
-	 * private void loadAudios() { File[] files = new File("audios").listFiles(); //
-	 * If this pathname does not denote a directory, then listFiles() returns null.
-	 * 
-	 * for (File file : files) { if (file.isFile()) { audios.add(file.getName()); }
-	 * } java.util.Collections.sort(audios); }
-	 */
 
 	public RositaMedia getMedia(String key) {
 		for (RositaMedia media : medias) {

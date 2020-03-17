@@ -7,7 +7,6 @@ public class MediaListener implements Runnable {
 
 	AudioPlayer audioPlayer;
 	PlayerManager playerManager;
-	TestKeyProvider testKeyProvider;
 	CommandListener listener;
 
 	private static Logger LOGGER = LoggerFactory.getLogger(MediaListener.class);
@@ -15,7 +14,6 @@ public class MediaListener implements Runnable {
 	public MediaListener(PlayerManager playerManager, CommandListener listener) {
 		super();
 		this.audioPlayer = new AudioPlayer();
-		this.testKeyProvider = new TestKeyProvider(listener);
 		this.playerManager = playerManager;
 	}
 
@@ -39,7 +37,6 @@ public class MediaListener implements Runnable {
 			if (!playerManager.isPlaying() && !playerManager.isDefaultVideoPlaying()) {
 				playerManager.playDefaultVideo();
 			}
-			testKeyProvider.checkTestInputFile();
 		}
 	}
 

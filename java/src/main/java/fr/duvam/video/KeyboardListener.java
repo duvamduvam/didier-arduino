@@ -8,8 +8,8 @@ public class KeyboardListener implements KeyListener {
 
 	private static final Logger LOGGER = Logger.getLogger(KeyboardListener.class);
 
-	private CommandListener commandListener;
-	
+	CommandListener commandListener;
+
 	public KeyboardListener(CommandListener commandListener) {
 		super();
 		this.commandListener = commandListener;
@@ -18,7 +18,6 @@ public class KeyboardListener implements KeyListener {
 	@Override
 	public void keyTyped(java.awt.event.KeyEvent e) {
 		LOGGER.info(e);
-
 	}
 
 	@Override
@@ -29,7 +28,8 @@ public class KeyboardListener implements KeyListener {
 	@Override
 	public void keyReleased(java.awt.event.KeyEvent e) {
 		LOGGER.info(e);
-		commandListener.addKey(String.valueOf(e.getKeyChar()));
+		String command = String.valueOf(e.getKeyChar());
+		commandListener.addKey(command);
 	}
 
 }

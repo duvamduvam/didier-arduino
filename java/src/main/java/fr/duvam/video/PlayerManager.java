@@ -1,8 +1,5 @@
 package fr.duvam.video;
 
-import java.awt.Component;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Paths;
@@ -13,7 +10,9 @@ import javax.swing.JLabel;
 
 import org.apache.log4j.Logger;
 
+import fr.duvam.arduino.ArduinoComm;
 import fr.duvam.video.MediaManager.Type;
+import uk.co.caprica.vlcj.media.Media;
 import uk.co.caprica.vlcj.player.base.MediaPlayer;
 import uk.co.caprica.vlcj.player.base.MediaPlayerEventAdapter;
 import uk.co.caprica.vlcj.player.component.EmbeddedMediaPlayerComponent;
@@ -26,6 +25,10 @@ public class PlayerManager {
 
 	private boolean defaultVideoPlaying = true;
 	private boolean isPlaying = false;
+	private boolean repeat = false;
+
+	// ArduinoComm arduino = new ArduinoComm();
+	ArduinoComm arduino = new ArduinoComm();
 
 	private EmbeddedMediaPlayer videoPlayer;
 	private EmbeddedMediaPlayerComponent videoPlayerComponent;
@@ -45,7 +48,7 @@ public class PlayerManager {
 		frame.setSize(1200, 800);
 
 		frame.addKeyListener(new KeyboardListener(commandListener));
-		
+
 		initVideo();
 		initAudio();
 	}
@@ -69,95 +72,86 @@ public class PlayerManager {
 	private void initVideo() {
 		////////// video
 
-		videoPlayerComponent = new EmbeddedMediaPlayerComponent(null, null,
-				new AdaptiveFullScreenStrategy(frame), null, null);
+		videoPlayerComponent = new EmbeddedMediaPlayerComponent(null, null, new AdaptiveFullScreenStrategy(frame), null,
+				null);
 
-		
 		videoPlayer = videoPlayerComponent.mediaPlayer();
-
+		
 		videoPlayer.events().addMediaPlayerEventListener(new MediaPlayerEventAdapter() {
 			@Override
 			public void finished(final MediaPlayer mediaPlayer) {
-				isPlaying = false;
-				//exit(0);
+				if (!repeat) {
+					isPlaying = false;
+				}
 			}
-           /* @Override
-            public void error(MediaPlayer mediaPlayer) {
-                exit(1);
-            }*/
 		});
 
 		frame.setContentPane(videoPlayerComponent);
 		frame.setVisible(true);
 	}
 
-    private void exit(int result) {
-    	videoPlayerComponent.release();
-        System.exit(result);
-    }
-	
 	private void initAudio() {
-		// AudioMediaPlayerComponent audioPlayerComponent = new
-		// AudioMediaPlayerComponent();
-		// audioPlayer = audioPlayerComponent.getMediaPlayer();
-		// audioPlayer.setVolume(200);
 		audioPlayer = new AudioPlayer();
-
 	}
 
 	public EmbeddedMediaPlayer getVideoPlayer() {
 		return videoPlayer;
 	}
 
-	public void playVideoKey(String key) {
-		String video = mediaManager.getVideo(key);
-		// Media media = new Media();
-
-		stopVideo();
-		// videoPlayer.playMedia(media)
-
-		getVideoPlayer().media().play(video);
-	}
-
 	public void playDefaultVideo() {
 		final String defaultVideo = mediaManager.getVideo(MediaManager.KEY_VIDEO_BASE);
-		// getVideoPlayer().setFullScreen(true);
-		// getVideoPlayer().controls().setRepeat(repeat);
 		playVideo(defaultVideo, true);
-		defaultVideoPlaying = true;
 	}
 
+	public void playVideo(String video, boolean r) {
+		// stopVideo();
+		//initVideo();
+		repeat = r;
+		getVideoPlayer().controls().setRepeat(repeat);
+		LOGGER.info("play video : " + video);
+		videoPlayer.media().play(video);
+		isPlaying = true;
+		videoPlayer.fullScreen().set(true);
+	}	
+	
 	public void stopVideo() {
 		getVideoPlayer().controls().stop();
-		videoPlayerComponent.release();
+		//videoPlayerComponent.release();
 	}
 
-	// public boolean isVideoPlaying() {
-	// return videoPlayer.
-	// }
-
 	public void play(String key) {
-		
+
 		LOGGER.info("fire : " + key);
 		RositaMedia media = mediaManager.getMedia(key);
+
+		if (media == null) {
+			LOGGER.error("no media for key " + key);
+			return;
+		}
+
 		Type type = media.getType();
 
-		if (type == null)
-			return;
 		switch (type) {
 		case GIF:
 			// TODO make full screen integrated to jpane
 			playGIF(media.getVideo());
 			break;
 		case VIDEO:
-			String video = mediaManager.getVideo(key);
+			String video = media.getVideo();
 			playVideo(video, false);
+			break;
+		case VIDEOR:
+			String videor = media.getVideo();
+			playVideo(videor, true);
 			break;
 		case SPEAK:
 			speak(media.getSound());
 			break;
 		case AUDIO_VIDEO:
 			playAudioVideo(media.getSound(), media.getVideo());
+			break;
+		case ARDUINO:
+			arduino.sendString(media.getVideo());
 			break;
 		}
 		defaultVideoPlaying = false;
@@ -178,15 +172,6 @@ public class PlayerManager {
 		speakAudio(audio);
 	}
 
-	public void playVideo(String video, boolean repeat) {
-		stopVideo();
-		initVideo();
-		getVideoPlayer().controls().setRepeat(repeat);
-		videoPlayer.media().play(video);
-		videoPlayer.fullScreen().set(true);
-		isPlaying = true;
-	}
-
 	public void playGIF(String gif) {
 		stopVideo();
 		try {
@@ -194,18 +179,6 @@ public class PlayerManager {
 			URL url = Paths.get(gif).toUri().toURL();
 
 			ImageIcon imageIcon = new ImageIcon(url);
-			// JLabel label = new JLabel(imageIcon);
-
-			// frame.getContentPane().add(label);
-			// frame.setContentPane(label);
-			// frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-			// frame.pack();
-			// frame.setLocationRelativeTo(null);
-			// frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-			// frame.setUndecorated(true);
-			// frame.setVisible(true);
-
-			// Icon imgIcon = new ImageIcon(this.getClass().getResource("ajax-loader.gif"));
 			JLabel label = new JLabel(imageIcon);
 			// label.setBounds(668, 43, 46, 14); // You can use your own values
 			frame2.getContentPane().add(label);
@@ -216,8 +189,7 @@ public class PlayerManager {
 			frame2.setVisible(true);
 
 		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.error(e);
 		}
 
 	}

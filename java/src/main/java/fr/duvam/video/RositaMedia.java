@@ -16,11 +16,7 @@ public class RositaMedia {
 	String video;
 
 	public RositaMedia(String key, Type type, String video, String sound) {
-		LOGGER.info("loading media");
-		LOGGER.info("key = "+key);
-		LOGGER.info("type = "+type.toString());
-		LOGGER.info("video = "+video);
-		LOGGER.info("sound = "+sound);
+		LOGGER.info("loading media : key = "+key+", type = "+type.toString()+", video = "+video+", sound = "+sound);
 		this.key = key;
 		this.type = type;
 		this.video = video;
