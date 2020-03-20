@@ -11,8 +11,8 @@ import javax.swing.JLabel;
 import org.apache.log4j.Logger;
 
 import fr.duvam.arduino.ArduinoComm;
+import fr.duvam.lights.Lights;
 import fr.duvam.video.MediaManager.Type;
-import uk.co.caprica.vlcj.media.Media;
 import uk.co.caprica.vlcj.player.base.MediaPlayer;
 import uk.co.caprica.vlcj.player.base.MediaPlayerEventAdapter;
 import uk.co.caprica.vlcj.player.component.EmbeddedMediaPlayerComponent;
@@ -27,8 +27,7 @@ public class PlayerManager {
 	private boolean isPlaying = false;
 	private boolean repeat = false;
 
-	// ArduinoComm arduino = new ArduinoComm();
-	ArduinoComm arduino = new ArduinoComm();
+	ArduinoComm arduino;
 
 	private EmbeddedMediaPlayer videoPlayer;
 	private EmbeddedMediaPlayerComponent videoPlayerComponent;
@@ -38,9 +37,10 @@ public class PlayerManager {
 
 	private final MediaManager mediaManager;
 
-	public PlayerManager(MediaManager mediaManager, CommandListener commandListener) {
+	public PlayerManager(MediaManager mediaManager, CommandListener commandListener, ArduinoComm arduino) {
 
 		this.mediaManager = mediaManager;
+		this.arduino = arduino;
 
 		frame = new JFrame();
 		// frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -144,6 +144,8 @@ public class PlayerManager {
 			String videor = media.getVideo();
 			playVideo(videor, true);
 			break;
+			
+		//TODO use speak video with time frame ?
 		case SPEAK:
 			speak(media.getSound());
 			break;
@@ -152,6 +154,9 @@ public class PlayerManager {
 			break;
 		case ARDUINO:
 			arduino.sendString(media.getVideo());
+			break;
+		case LIGHTS:
+			Lights.mod = Integer.parseInt(media.getVideo());
 			break;
 		}
 		defaultVideoPlaying = false;

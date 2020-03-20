@@ -2,14 +2,13 @@ package fr.duvam;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import javax.swing.SwingUtilities;
 
 import org.apache.log4j.Logger;
 
-import fr.duvam.arduino.test.ArduinoComm;
+import fr.duvam.arduino.ArduinoComm;
+import fr.duvam.lights.Lights;
 import fr.duvam.midi.MidiHandler;
 import fr.duvam.video.CommandListener;
 import fr.duvam.video.MediaListener;
@@ -18,10 +17,11 @@ import fr.duvam.video.PlayerManager;
 
 public class Main {
 
-	private static Logger LOGGER;
+	private static Logger LOGGER = Logger.getLogger(Main.class);
 	
 	private CommandListener listener;
 	private PlayerManager playerManager;
+	private Lights lights;
 
 	public static void main(String[] args) {
 	
@@ -37,9 +37,11 @@ public class Main {
 
 		initLog();
 		
+		ArduinoComm arduino = new ArduinoComm();
 		MediaManager mediaManager = new MediaManager();
 		listener = new CommandListener(playerManager, mediaManager);
-		playerManager = new PlayerManager(mediaManager, listener);
+		playerManager = new PlayerManager(mediaManager, listener, arduino);
+		lights = new Lights(arduino);
 		listener.setPlayerManager(playerManager);
 		new MidiHandler(listener);
 		
@@ -62,33 +64,28 @@ public class Main {
 	protected void start() {
 
 		playerManager.playDefaultVideo();
-		initListeners(listener);
+		initListeners(listener, lights);
 	}
 
-	private void initListeners(CommandListener keyListener) {
-
-		// arduino communicator
-		//ArduinoComm arduino = new ArduinoComm(keyListener);
-		//Thread arduinoThread = new Thread(arduino);
-		//arduinoThread.setDaemon(true);
-		//arduinoThread.start();
+	private void initListeners(CommandListener keyListener, Lights lights) {
 
 		// key listener
 		Thread keyListenerThread = new Thread(keyListener);
 		keyListenerThread.setDaemon(true);
 		keyListenerThread.start();
-		
-		// audio listener
-		/*AudioListener audioListener = new AudioListener(playerManager);
-		Thread audioListenerThread = new Thread(audioListener);
-		audioListenerThread.setDaemon(true);
-		audioListenerThread.start();*/
+
+
 
 		// video listener
 		MediaListener mediaListener = new MediaListener(playerManager, keyListener);
 		Thread mediaListenerThread = new Thread(mediaListener);
 		mediaListenerThread.setDaemon(true);
 		mediaListenerThread.start();		
+
+		// light listener
+		Thread lightsListenerThread = new Thread(lights);
+		lightsListenerThread.setDaemon(true);
+		lightsListenerThread.start();	
 		
 		// test key listener
 		/*TestKeyProvider testKeyListener = new TestKeyProvider(listener);
