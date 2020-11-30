@@ -24,7 +24,7 @@ public class MediaManager {
 	public final static String KEY_VIDEO_SPEAK = "10001";
 
 	enum Type {
-		GIF, VIDEO, VIDEOR, SPEAK, AUDIO_VIDEO, ARDUINO, LIGHTS;
+		GIF, VIDEO, VIDEOR, SPEAK, AUDIO_VIDEO, ARDUINO, LIGHTS, MIDI, EMOTION;
 
 		public static Type getType(String type) {
 			if (VIDEO.toString().equals(type)) {
@@ -41,6 +41,10 @@ public class MediaManager {
 				return ARDUINO;
 			} else if (LIGHTS.toString().equals(type)) {
 				return LIGHTS;
+			} else if (MIDI.toString().equals(type)) {
+				return MIDI;
+			} else if (EMOTION.toString().equals(type)) {
+				return EMOTION;				
 			}else {
 				return null;
 			}

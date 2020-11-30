@@ -2,7 +2,7 @@ package fr.duvam.video;
 
 import java.io.File;
 import java.io.IOException;
- 
+
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
@@ -14,8 +14,6 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
 import org.apache.log4j.Logger;
-
-import fr.duvam.arduino.test.ArduinoComm;
  
 /**
  * This is an example program that demonstrates how to play back an audio file

@@ -1,7 +1,7 @@
 // Arduino pin numbers
 const int SW_pin = 2; // digital pin connected to switch output
-const int X_pin = 3; // analog pin connected to X output
-const int Y_pin = 4; // analog pin connected to Y output
+const int X_pin = 0; // analog pin connected to X output
+const int Y_pin = 1; // analog pin connected to Y output
 
 void setup() {
   pinMode(SW_pin, INPUT);

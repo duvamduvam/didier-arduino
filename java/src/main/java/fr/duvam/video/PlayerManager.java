@@ -10,8 +10,10 @@ import javax.swing.JLabel;
 
 import org.apache.log4j.Logger;
 
+import fr.duvam.KeyboardListener;
 import fr.duvam.arduino.ArduinoComm;
 import fr.duvam.lights.Lights;
+import fr.duvam.midi.MidiHandler;
 import fr.duvam.video.MediaManager.Type;
 import uk.co.caprica.vlcj.player.base.MediaPlayer;
 import uk.co.caprica.vlcj.player.base.MediaPlayerEventAdapter;
@@ -27,7 +29,8 @@ public class PlayerManager {
 	private boolean isPlaying = false;
 	private boolean repeat = false;
 
-	ArduinoComm arduino;
+	//ArduinoComm arduino;
+	MidiHandler midi;
 
 	private EmbeddedMediaPlayer videoPlayer;
 	private EmbeddedMediaPlayerComponent videoPlayerComponent;
@@ -37,10 +40,11 @@ public class PlayerManager {
 
 	private final MediaManager mediaManager;
 
-	public PlayerManager(MediaManager mediaManager, CommandListener commandListener, ArduinoComm arduino) {
+	public PlayerManager(MediaManager mediaManager, CommandListener commandListener, MidiHandler midi) {
 
 		this.mediaManager = mediaManager;
-		this.arduino = arduino;
+		//this.arduino = arduino;
+		this.midi = midi;
 
 		frame = new JFrame();
 		// frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -152,11 +156,15 @@ public class PlayerManager {
 		case AUDIO_VIDEO:
 			playAudioVideo(media.getSound(), media.getVideo());
 			break;
-		case ARDUINO:
-			arduino.sendString(media.getVideo());
-			break;
+		//case ARDUINO:
+		//	arduino.sendString(media.getVideo());
+		//	break;
 		case LIGHTS:
 			Lights.mod = Integer.parseInt(media.getVideo());
+			break;
+		case MIDI:
+			midi.sendMsg();
+			//Lights.mod = Integer.parseInt(media.getVideo());
 			break;
 		}
 		defaultVideoPlaying = false;
@@ -176,6 +184,7 @@ public class PlayerManager {
 	public void speak(String audio) {
 		speakAudio(audio);
 	}
+
 
 	public void playGIF(String gif) {
 		stopVideo();
