@@ -1,4 +1,5 @@
 //local arduino_midi_library-master.zip
+
 #include <MIDI.h>
 #include <SPI.h>
 //local RadioHead-master.zip
@@ -13,6 +14,7 @@
 #include "Lights.cpp"
 #include "Head.cpp"
 #include "Mapping.cpp"
+
 
 /*PINMAP
 0 COM
@@ -38,7 +40,7 @@
 #define LED 13
 
 
-Move move;
+Move wheel;
 long lastMove = 0;
 bool stopped = true;
 #define moveTime 300
@@ -129,13 +131,14 @@ void loop()
   if (Serial.available()) {
     input = Serial.readStringUntil('\n');
     Log.notice("You typed: %s \n", radioMsg );
-    input.toCharArray(radioMsg, 10);
+    //TODO fix : invalid conversion from 'uint8_t* {aka unsigned char*}' to 'char*' [-fpermissive]
+    // input.toCharArray(radioMsg, 10);
   }
   // end test monitor
 
   if (strcmp((char*)radioMsg, "") != 0) {
-    Log.notice("input msg %s translate %s midi \n", radioMsg, midiNote);
-    move.process(radioMsg);
+    //Log.notice("input msg %s translate %s midi \n", radioMsg, midiNote);
+    wheel.process(radioMsg);
     lastMove = millis();
     stopped = false;
 
@@ -153,17 +156,17 @@ void loop()
   }
 
   if ((millis() - lastMove > moveTime) && !stopped) {
-    move.stop();
+    wheel.stop();
     
     stopped = true;
   }
 
   if (lightOn) {
-    lights.process();
+    //lights.ledRandom(10);
+    lights.process(radioMsg);
   }
 
-  //delay(30);
-
-  move.execute();
+  wheel.execute();
+  
   memset(radioMsg, 0, sizeof(radioMsg));
 }

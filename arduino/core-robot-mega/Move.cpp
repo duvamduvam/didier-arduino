@@ -13,7 +13,7 @@
 
 #define SPEED_MAX_LEFT  255
 #define SPEED_MAX_RIGHT  255
-#define SPEED_ACCELERATION  3 //1ms
+#define SPEED_ACCELERATION  10 //1ms
 
 
 class Move 
@@ -134,18 +134,26 @@ class Move
         if (runningMode == STOP)
         {
           if (speedleft>0)
-            speedleft--;
+            speedleft-=10;
           if (speedright>0)
-            speedright--;
+            speedright-=10;
         }
         else
         {
           if (speedleft<SPEED_MAX_LEFT)
-            speedleft++;
+            speedleft+=10;
           if (speedright<SPEED_MAX_RIGHT)
-            speedright++;
+            speedright+=10;
         }
-        
+
+         if (speedleft<0)
+            speedleft=0;
+          if (speedright<0)
+            speedright=0;
+          if (speedleft>SPEED_MAX_LEFT)
+            speedleft=SPEED_MAX_LEFT;
+          if (speedright>SPEED_MAX_RIGHT)
+            speedright=SPEED_MAX_LEFT;
        
 
         //Attends la fin de l'acceleration pour la nouvelle consigne
