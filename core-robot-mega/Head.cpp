@@ -12,51 +12,36 @@ class Head {
 
     Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 
-    //SDA 4 SCL 5
-    uint8_t servo0 = 0;
-    uint8_t servo1 = 1;
-
-#define SERVOMIN0  200 // this is the 'minimum' pulse length count (out of 4096)
-#define SERVOMAX0  320 // this is the 'maximum' pulse length count (out of 4096)
-
-#define SERVOMIN1  0 // this is the 'minimum' pulse length count (out of 4096)
-#define SERVOMAX1  500 // this is the 'maximum' pulse length count (out of 4096)
-
-    int curServPos0 = SERVOMIN0;
-    int curServPos1 = SERVOMIN1;
+#define SERVOMIN  80 // this is the 'minimum' pulse length count (out of 4096)
+#define SERVOMAX  640 // this is the 'maximum' pulse length count (out of 4096)
 
     int speed = 200;
     unsigned long lastMoveTime;
-    int headStep = 10;
+    int step = 10;
+    int currentPos = 400;
 
-    int moveServo(int p, int servo, int currentPos, int MIN, int MAX) {
+    int moveServo(int step) {
 
       //printStringLn(debug, "servo " + (String) servo);
       //printStringLn(debug, "pos " + (String) p);
       //printStringLn(debug, (String) currentPos);
 
-      if (p > 7 && currentPos < MAX) {
-        currentPos = currentPos + headStep;
-        pwm.setPWM(servo, 0, currentPos);
-      } else if (p < 3 && currentPos > MIN) {
-        currentPos = currentPos - headStep;
-        pwm.setPWM(servo, 0, currentPos);
+      if (currentPos < SERVOMAX) {
+        currentPos = currentPos + step;
+        pwm.setPWM(0, 0, currentPos);
       }
-
-      return currentPos;
     }
 
   public:
-    void process(int input) {
+    void process(uint8_t in[]) {
       //delay(500);
-
-
-      //move head up and dow
-      //curServPos0 = moveServo(p0, servo0, curServPos0, SERVOMIN0, SERVOMAX0);
-      //curServPos1 = moveServo(p1, servo1, curServPos1, SERVOMIN1, SERVOMAX1);
-
-
-
+      if (strstr((char*)in, "B37") != 0)
+      {
+        moveServo(step);
+      } else if (strstr((char*)in, "B31") != 0)
+      {
+        moveServo(-step);
+      }
     }
 
 };

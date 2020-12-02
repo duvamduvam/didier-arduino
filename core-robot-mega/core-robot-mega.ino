@@ -17,20 +17,20 @@
 
 
 /*PINMAP
-0 COM
-1 COM
-2 RFM95_INT
-3 DIR_RIGHT
-4 PWM_RIGHT
-5
-6 LIGHT
-7
-8
-9 RFM95_RST
-10 RFM95_CS
-11 DIR_LEFT
-12 PWM_LEFT
-13 LED
+  0 COM
+  1 COM
+  2 RFM95_INT
+  3 DIR_RIGHT
+  4 PWM_RIGHT
+  5
+  6 LIGHT
+  7
+  8
+  9 RFM95_RST
+  10 RFM95_CS
+  11 DIR_LEFT
+  12 PWM_LEFT
+  13 LED
 
 
 */
@@ -55,7 +55,8 @@ uint8_t radioMsg[12];
 uint8_t len = sizeof(radioMsg);
 
 Lights lights;
-bool lightOn = true;
+
+//Head head;
 
 MIDI_CREATE_DEFAULT_INSTANCE();
 
@@ -142,11 +143,6 @@ void loop()
     lastMove = millis();
     stopped = false;
 
-    if (strstr((char*)radioMsg, "A47")) {
-      Log.notice("light");
-      lightOn = !lightOn;
-    }
-
     if (midiNote[0] == 'N') {
       int note;
       char mod;
@@ -157,16 +153,16 @@ void loop()
 
   if ((millis() - lastMove > moveTime) && !stopped) {
     wheel.stop();
-    
     stopped = true;
   }
 
-  if (lightOn) {
-    //lights.ledRandom(10);
-    lights.process(radioMsg);
-  }
+
+  lights.process(radioMsg);
+
 
   wheel.execute();
-  
+
+  //head.process(radioMsg);
+
   memset(radioMsg, 0, sizeof(radioMsg));
 }
