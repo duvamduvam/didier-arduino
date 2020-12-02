@@ -7,6 +7,8 @@
 
 
 #include <Arduino.h>
+//make the compilation silent
+#define FASTLED_INTERNAL 
 #include <FastLED.h>
 #include <string.h>
 #include <stdio.h>
@@ -122,7 +124,7 @@ class Lights {
     int snakeIndex;
     int tintScroll;
 
-    typedef struct Snake
+    struct Snake
     {
       int Pos;
       int Size;
@@ -146,7 +148,7 @@ class Lights {
       FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
     }
 
-    void process(char in[]) 
+    void process(uint8_t in[]) 
     {
       bool present = true;
       
