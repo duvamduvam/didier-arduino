@@ -55,8 +55,7 @@ uint8_t radioMsg[12];
 uint8_t len = sizeof(radioMsg);
 
 Lights lights;
-
-//Head head;
+Head head;
 
 MIDI_CREATE_DEFAULT_INSTANCE();
 
@@ -77,6 +76,8 @@ void setup()
   Log.begin   (LOG_LEVEL, &Serial);
 
   delay(100);
+
+  head.init();
 
   //// init radio
   //printStringLn(debug, "Arduino LoRa RX Test!");
@@ -132,13 +133,9 @@ void loop()
   if (Serial.available()) {
     input = Serial.readStringUntil('\n');
     Log.notice("You typed: %s \n", radioMsg );
-    //TODO fix : invalid conversion from 'uint8_t* {aka unsigned char*}' to 'char*' [-fpermissive]
-    // input.toCharArray(radioMsg, 10);
   }
-  // end test monitor
 
   if (strcmp((char*)radioMsg, "") != 0) {
-    //Log.notice("input msg %s translate %s midi \n", radioMsg, midiNote);
     wheel.process(radioMsg);
     lastMove = millis();
     stopped = false;
@@ -156,13 +153,11 @@ void loop()
     stopped = true;
   }
 
-
   lights.process(radioMsg);
-
 
   wheel.execute();
 
-  //head.process(radioMsg);
+  head.process(radioMsg);
 
   memset(radioMsg, 0, sizeof(radioMsg));
 }

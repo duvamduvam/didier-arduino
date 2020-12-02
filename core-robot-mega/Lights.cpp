@@ -349,17 +349,8 @@ class Lights {
             intens = 1;
           motif[i] =  Brightness(color, intens);
         }
-
-
       }
-
-
-
-
     }
-
-
-
 
     //Test Faces
     void Effet3()
@@ -374,20 +365,15 @@ class Lights {
       //stars
       starsEnabled = false;
 
-
       //Effect
       chaserDelay = 50;
       chaser2Delay = 500;
-
-
-
 
       if (millis() - chaserTimer > chaserDelay)
       {
         chaserTimer = millis();
         for (i = 0; i < NUM_LEDS; i++)
         {
-
           int barIndex = FindBarIndex(i);
           int barModulo = barIndex % 4;
           int tint = map(barModulo, 0, NB_BARS, 0, 360);
@@ -395,15 +381,8 @@ class Lights {
 
           motif[i] =  color;
         }
-
-
       }
-
-
-
     }
-
-
 
     //Test Faces
     void Effet4()
@@ -418,7 +397,6 @@ class Lights {
       //stars
       starsEnabled = false;
 
-
       //Effect
       chaserDelay = 50;
       chaser2Delay = 500;
@@ -432,9 +410,7 @@ class Lights {
 
         int tint = random(360);
         motif[0] = ColorTint(tint);
-
       }
-
 
       if (millis() - chaser2Timer > chaser2Delay)
       {
@@ -449,13 +425,8 @@ class Lights {
           if (i == chaser2Index)
             masterBar[i] = 1;
         }
-
-
       }
-
-
     }
-
 
     //Heart Beat
     void Effet5()
@@ -469,7 +440,6 @@ class Lights {
 
       //stars
       starsEnabled = false;
-
 
       //Effect
       chaserDelay = 50;
@@ -491,19 +461,10 @@ class Lights {
           if (heartIntensity <= 0)
             heartInspire = true;
         }
-
         motif[0] =   CRGB::Red;
         SetAllFaces(heartIntensity);
       }
-
-
-
     }
-
-
-
-
-
 
 
     //Test Palette
