@@ -6,6 +6,8 @@
 //#ifndef FONCTIONS
 //#define FONCTIONS
 
+//make the compilation silent
+#define FASTLED_INTERNAL
 #include <FastLED.h>
 
 
@@ -23,4 +25,6 @@ CRGB RandomColor();
 CRGB RandomColorTint();
 CRGB Gradient(int startAngle, int stopAngle, float ratio);
 
-//#endif
+//######### UTILS ##########
+//--------------------------
+char* strtrim_safe(char* in);

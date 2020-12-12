@@ -149,35 +149,42 @@ class Lights {
       FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
     }
 
-    void process(uint8_t in[])
+    void process(char in[])
     {
-      bool present = true;
+      if (in[0] == 'L')
+      {
+        Log.notice("input in light process %s\n", in);
+        bool present = true;
 
+        if (strstr((char*)in, "LE+") != 0) {
+          Log.notice("input in light process %s\n", in);
+          choixEffect++;
+        } else if (strstr((char*)in, "LE-") != 0) {
+          choixEffect--;
+        } else if (strstr((char*)in, "LS+") != 0) {
+          brightSpan++;
+        } else if (strstr((char*)in, "LS-") != 0) {
+          brightSpan--;
+        } else if (strstr((char*)in, "LT+") != 0) {
+          choixTint++;
+        } else if (strstr((char*)in, "LT-") != 0) {
+          choixTint--;
+        } else if (strstr((char*)in, "LC+") != 0) {
+          nbColors++;
+        } else if (strstr((char*)in, "LC-") != 0) {
+          nbColors--;
+        } else if (strstr((char*)in, "LON") != 0) {
+          lightOn = !lightOn;
+        } else
+          present = false;
 
-      if (strstr((char*)in, "A28") != 0) {
-        choixEffect++;
-      } else if (strstr((char*)in, "A34") != 0) {
-        choixEffect--;
-      } else if (strstr((char*)in, "A29") != 0) {
-        brightSpan++;
-      } else if (strstr((char*)in, "A35") != 0) {
-        brightSpan--;
-      } else if (strstr((char*)in, "A26") != 0) {
-        choixTint++;
-      } else if (strstr((char*)in, "A32") != 0) {
-        choixTint--;
-      } else if (strstr((char*)in, "A27") != 0) {
-        nbColors++;
-      } else if (strstr((char*)in, "A33") != 0) {
-        nbColors--;
-      } else if (strstr((char*)in, "A47") != 0) {
-        lightOn = !lightOn;
-      } else
-        present = false;
+        if (present)
+          Log.notice("effet %d | brightSpan %d | tint %d  | nbColors %d \n", choixEffect, brightSpan, choixTint, nbColors );
+      }
+    }
 
-      if (present)
-        Log.notice("effet %d | brightSpan %d | tint %d  | nbColors %d \n", choixEffect, brightSpan, choixTint, nbColors );
-
+    void execute()
+    {
       if (lightOn)
       {
         switch (choixEffect)

@@ -61,8 +61,6 @@ MIDI_CREATE_DEFAULT_INSTANCE();
 
 Mapping mapping;
 
-String input;
-
 void setup()
 {
   pinMode(LED, OUTPUT);
@@ -127,37 +125,39 @@ void loop()
 
   radioRead();
 
-  char* midiNote = mapping.getValue((char*)radioMsg);
-
+  char* input = mapping.getValue((char*)radioMsg);
   // test monitor
   if (Serial.available()) {
-    input = Serial.readStringUntil('\n');
-    Log.notice("You typed: %s \n", radioMsg );
+    String in = Serial.readStringUntil('\n');
+    Log.notice("You typed: %s \n", in );
   }
 
   if (strcmp((char*)radioMsg, "") != 0) {
-    wheel.process(radioMsg);
+    Log.notice("radio: %s \n", radioMsg );
+    Log.notice("input: %s \n", input );
+
+    head.process(input);
+    lights.process(input);
+    
+    wheel.process(input);
     lastMove = millis();
     stopped = false;
 
-    if (midiNote[0] == 'N') {
+    if (input[0] == 'N') {
       int note;
       char mod;
-      sscanf(midiNote, "%s %d", mod, &note);
+      sscanf(input, "%s %d", mod, &note);
       sendNote(note);
     }
   }
+
+  wheel.execute();
+  lights.execute();
 
   if ((millis() - lastMove > moveTime) && !stopped) {
     wheel.stop();
     stopped = true;
   }
-
-  lights.process(radioMsg);
-
-  wheel.execute();
-
-  head.process(radioMsg);
 
   memset(radioMsg, 0, sizeof(radioMsg));
 }

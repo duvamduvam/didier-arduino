@@ -12,17 +12,18 @@
 #define SPEED_MAX_RIGHT  255
 #define SPEED_ACCELERATION  10 //1ms
 
-class Move
-{
-
-    //left
+//left
 #define pwm_left 12
 #define dir_left 11
 
-    //right
+//right
 #define pwm_right 4
 #define dir_right 3
 
+
+class Move
+{
+  private :
     int speedleft;
     int speedright;
 
@@ -30,18 +31,15 @@ class Move
     int consigneMode;
     long lastSpeedTc; //dernier timecode pour tempo acceleration
     bool mouvement;
-    bool stoped;
 
-  public:
-
-    // Class Member Variables
-    // These are initialized at startup
     int ledPin;      // the number of the LED pin
     long OnTime;     // milliseconds of on-time
     long OffTime;    // milliseconds of off-time
 
     // These maintain the current state
     unsigned long previousMillis;    // will store last time LED was updated
+
+  public:
 
     Move()
     {
@@ -51,25 +49,28 @@ class Move
       pinMode(dir_right, OUTPUT);
     }
 
-    void process(uint8_t in[])
+    void process(char in[])
     {
-      //Serial.print("move : ");
-      //Serial.println(in);
-      if (strstr((char*)in, "A37") != 0)
+      if (in[0] == 'M')
       {
-        forward();
-      }
-      else if (strstr((char*)in, "A31") != 0)
-      {
-        backward();
-      }
-      else if (strstr((char*)in, "A36") != 0)
-      {
-        left();
-      }
-      else if (strstr((char*)in, "A30") != 0)
-      {
-        right();
+        //Serial.print("move : ");
+        //Serial.println(in);
+        if (strstr((char*)in, "MFORWARD") != 0)
+        {
+          forward();
+        }
+        else if (strstr((char*)in, "MBACKWARD") != 0)
+        {
+          backward();
+        }
+        else if (strstr((char*)in, "MLEFT") != 0)
+        {
+          left();
+        }
+        else if (strstr((char*)in, "MRIGHT") != 0)
+        {
+          right();
+        }
       }
     }
 
@@ -107,10 +108,12 @@ class Move
 
     void stop()
     {
-      Log.notice("stop");
-      runningMode = STOP;
-      consigneMode = STOP;
-
+      if (speedleft > 0 || speedright > 0)
+      {
+        Log.notice("stop\n");
+        runningMode = STOP;
+        consigneMode = STOP;
+      }
     }
 
     void execute()
@@ -147,7 +150,7 @@ class Move
         if (speedleft == 0 && speedright == 0)
         {
           runningMode = consigneMode;
-          
+
           switch (runningMode)
           {
             case FORWARD:
