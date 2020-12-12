@@ -70,7 +70,7 @@ void setup()
   MIDI.begin();
   while (!Serial);
   // eratics problem with lora radio when changing baud rate
-  Serial.begin(9600);
+  Serial.begin(115300);
   Log.begin   (LOG_LEVEL, &Serial);
 
   delay(100);
