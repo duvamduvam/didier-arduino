@@ -70,7 +70,7 @@ void setup()
   MIDI.begin();
   while (!Serial);
   // eratics problem with lora radio when changing baud rate
-  Serial.begin(115300);
+  Serial.begin(115200);
   Log.begin   (LOG_LEVEL, &Serial);
 
   delay(100);
@@ -114,7 +114,7 @@ void radioRead() {
 }
 
 void sendNote(int note) {
-  Log.notice("send midi %d, %d", note);
+  Log.notice("send midi %d, %d\n", note);
   MIDI.sendNoteOn(note, 127, 3);    // Send a Note (pitch 42, velo 127 on channel 1)
   delay(10);                // Wait for a second
   MIDI.sendNoteOff(note, 0, 3);

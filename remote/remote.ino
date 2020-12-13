@@ -1,14 +1,11 @@
-// LoRa 9x_TX8
-
-// -*- mode: C++ -*-
-// Example sketch showing how to create a simple messaging client (transmitter)
-// with the RH_RF95 class. RH_RF95 class does not provide for addressing or
-// reliability, so you should only use RH_RF95 if you do not need the higher
-// level messaging abilities.
-// It is designed to work with the other example LoRa9x_RX
-
+#include "Mapping.cpp"
 #include <SPI.h>
 #include <RH_RF95.h>
+
+#include "ArduinoLog.h"
+//#define LOG_LEVEL LOG_LEVEL_SILENT
+//#define LOG_LEVEL LOG_LEVEL_ERROR
+#define LOG_LEVEL LOG_LEVEL_VERBOSE
 
 #define RFM95_CS 10
 #define RFM95_RST 9
@@ -19,9 +16,9 @@
 
 #define KEYBOARD_DELAY  100
 
-
-// Change to 434.0 or other frequency, must match RX's freq!
 #define RF95_FREQ 868.0
+
+Mapping mapping;
 
 //oled
 #include "U8glib.h"
@@ -33,7 +30,7 @@ RH_RF95 rf95(RFM95_CS, RFM95_INT);
 
 char charVoltage[20];
 char msg[4];
-char* mod = "A";
+char mod = 'A';
 
 Button button22 = Button(22, PULLUP);
 Button button23 = Button(23, PULLUP);
@@ -68,13 +65,15 @@ Button button51 = Button(51, PULLUP);
 Button button52 = Button(52, PULLUP);
 Button button53 = Button(53, PULLUP);
 Button button54 = Button(54, PULLUP);
-#define buttonSize 30
+#define buttonSize 31
 
 Button buttons[] = {button22, button23, button24, button25, button26, button27, button28, button29,
                     button30, button31, button32, button33, button34, button35, button36, button37, button38, button39,
                     button40, button41, button42, button43, button44, button45, button46, button47, button48, button49,
-                    button51, button53,
+                    button51, button52, button53,
                    };
+
+
 
 void setup()
 {
@@ -83,10 +82,9 @@ void setup()
   pinMode(RFM95_RST, OUTPUT);
   digitalWrite(RFM95_RST, HIGH);
   while (!Serial);
-  Serial.begin(9600);
+  Serial.begin(115200);
+  Log.begin   (LOG_LEVEL, &Serial);
   delay(100);
-
-  Serial.println("Arduino LoRa Remote");
 
   // manual reset
   digitalWrite(RFM95_RST, LOW);
@@ -110,21 +108,15 @@ void setup()
 
 int16_t packetnum = 0;  // packet counter, we increment per xmission
 
-void sendMsg(int msg) {
-
+void sendMsg(int key) {
   char charNumber[10] = "";
-  itoa ( msg, charNumber, 10);
-  Serial.print("int to char "); Serial.println(charNumber);
-  sendMsg(charNumber);
-}
-
-void sendMsg(char input[]) {
-
+  itoa(key, charNumber, 10);
   msg[0] = '$';
-  msg[1] = mod[0];
-  msg[2] = input[0];
-  msg[3] = input[1];
-  Serial.print("Sending "); Serial.println(msg);
+  msg[1] = mod;
+  msg[2] = charNumber[0];
+  msg[3] = charNumber[1];
+  msg[4] = '$';
+  Log.notice("sending %s\n", msg);
   rf95.send((uint8_t *)msg, 4);
 }
 
@@ -134,7 +126,11 @@ void draw(void)
 
   u8g.setColorIndex(1);
   u8g.setFont(u8g_font_gdr30r);
-  u8g.drawStr(3, 50, mod);
+
+  char modScreen[1];
+  modScreen[0] = mod;
+  //Log.notice("mod screen %s\n", modScreen);
+  u8g.drawStr(3, 50, modScreen);
 
   u8g.setFont(u8g_font_gdr14r);
   u8g.drawStr(60, 20, msg);
@@ -153,12 +149,10 @@ void draw(void)
 
 int checkButton() {
   for (int i = 0; i < buttonSize; i++) {
-    //Serial.print("test "); Serial.println(buttons[i].getPin());
-    //    if (buttons[i].uniquePress())
     if (buttons[i].isPressed())
     {
-      Serial.print(buttons[i].getPin()); Serial.println(" pressed");
-      return buttons[i].getPin();
+      //Log.notice("%d pressed\n", buttons[i].getPin());
+      return mapping.getValue(buttons[i].getPin());
     }
   }
   return 0;
@@ -174,31 +168,38 @@ void loop()
     lastKeyboardTc = millis();
 
     buttonPressed = checkButton();
+    //Log.notice("button pressed after check button %d\n", buttonPressed);
     if (buttonPressed != 0)
     {
+      if (buttonPressed == 17)
+      {
+        Log.notice("mod A\n");
+        mod = 'A';
+      }
+      else if (buttonPressed == 18)
+      {
+        Log.notice("mod B\n");
+        mod = 'B';
+      }
+      else if (buttonPressed == 21)
+      {
+        Log.notice("mod C\n");
+        mod = 'C';
+      }
+      else if (buttonPressed == 22)
+      {
+        Log.notice("mod D\n");
+        mod = 'D';
+      }
       sendMsg(buttonPressed);
     }
-
   }
-
-
 
   u8g.firstPage();
   do {
     draw();
     u8g.setColorIndex(1);
   } while ( u8g.nextPage() );
-
-
-
-  if (buttonPressed == 48)
-    mod = "A";
-  else if (buttonPressed == 42)
-    mod = "B";
-  else if (buttonPressed == 49)
-    mod = "C";
-  else if (buttonPressed == 43)
-    mod = "D";
 
   delay(30);
 }
