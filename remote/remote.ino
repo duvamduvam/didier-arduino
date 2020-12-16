@@ -163,6 +163,12 @@ int buttonPressed;
 
 void loop()
 {
+
+  if (Serial.available()) {
+    String in = Serial.readStringUntil('\n');
+    //Log.notice("You typed sth", in );
+  }
+  
   if (millis() - lastKeyboardTc > KEYBOARD_DELAY)
   {
     lastKeyboardTc = millis();
@@ -201,5 +207,10 @@ void loop()
     u8g.setColorIndex(1);
   } while ( u8g.nextPage() );
 
-  delay(30);
+  /*delay(1000);
+  // pingprobe
+  Serial.print("alp://rply/");
+  Serial.print("ok?id=0");
+  Serial.print('\n'); // End of Message
+  Serial.flush();*/
 }

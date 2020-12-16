@@ -6,9 +6,9 @@
 //used pin 9 2 maybe used 13 12 11 10 8 7 6
 #include <RH_RF95.h>
 #include "ArduinoLog.h"
-//#define LOG_LEVEL LOG_LEVEL_SILENT
+#define LOG_LEVEL LOG_LEVEL_SILENT
 //#define LOG_LEVEL LOG_LEVEL_ERROR
-#define LOG_LEVEL LOG_LEVEL_VERBOSE
+//#define LOG_LEVEL LOG_LEVEL_VERBOSE
 
 #include "Move.cpp"
 #include "Lights.cpp"
@@ -31,7 +31,8 @@
   11 DIR_LEFT
   12 PWM_LEFT
   13 LED
-
+  SDA MEGA Adafruit_PWMServoDriver
+  SCL MEGA Adafruit_PWMServoDriver
 
 */
 #define RFM95_INT 2
@@ -148,6 +149,8 @@ void loop()
       char mod;
       sscanf(input, "%s %d", mod, &note);
       sendNote(note);
+      //arduino mega reboot after sending note without delay
+      delay(30);
     }
   }
 

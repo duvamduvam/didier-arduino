@@ -4,7 +4,7 @@
 #include "ArduinoLog.h"
 #include "Fonctions.h"
 
-#define TABLE_SIZE 104
+#define TABLE_SIZE 192
 
 class Mapping {
 
@@ -27,10 +27,10 @@ class Mapping {
       mapping[7] = (char*)"MBACKWARD";
 
       mapping[8] = (char*)"$A5";
-      mapping[9] = (char*)"N 5";
+      mapping[9] = (char*)"Z 5";
 
       mapping[10] = (char*)"$A6";
-      mapping[11] = (char*)"N 6";
+      mapping[11] = (char*)"Z 6";
 
       mapping[12] = (char*)"$A7";
       mapping[13] = (char*)"MLEFT";
@@ -39,60 +39,60 @@ class Mapping {
       mapping[15] = (char*)"MRIGHT";
 
       mapping[16] = (char*)"$A9";
-      mapping[17] = (char*)"N 9";
+      mapping[17] = (char*)"Z 9";
 
       mapping[18] = (char*)"$A10";
-      mapping[19] = (char*)"N 10";
+      mapping[19] = (char*)"Z 10";
 
       mapping[20] = (char*)"$A11";
-      mapping[21] = (char*)"N 11";
+      mapping[21] = (char*)"Z 11";
 
       mapping[22] = (char*)"$A12";
-      mapping[23] = (char*)"N 12";
+      mapping[23] = (char*)"Z 12";
 
       mapping[24] = (char*)"$A13";
-      mapping[25] = (char*)"N 13";
+      mapping[25] = (char*)"Z 13";
 
       mapping[26] = (char*)"$A14";
-      mapping[27] = (char*)"N 14";
+      mapping[27] = (char*)"Z 14";
 
       mapping[28] = (char*)"$A15";
-      mapping[29] = (char*)"N 15";
+      mapping[29] = (char*)"HRIGHT";
 
       mapping[30] = (char*)"$A16";
-      mapping[31] = (char*)"N 16";
+      mapping[31] = (char*)"HLEFT";
 
       mapping[32] = (char*)"$A17";
-      mapping[33] = (char*)"HRIGHT";
+      mapping[33] = (char*)"";
 
       mapping[34] = (char*)"$A18";
-      mapping[35] = (char*)"N 21";
+      mapping[35] = (char*)"Z 21";
 
       mapping[36] = (char*)"A19";
-      mapping[37] = (char*)"HLEFT";
+      mapping[37] = (char*)"";
 
       mapping[38] = (char*)"$A20";
-      mapping[39] = (char*)"N 23";
+      mapping[39] = (char*)"Z 23";
 
       mapping[40] = (char*)"$A21";
-      mapping[41] = (char*)"N 24";
+      mapping[41] = (char*)"Z 24";
 
       mapping[42] = (char*)"$A22";
-      mapping[43] = (char*)"N 25";
+      mapping[43] = (char*)"Z 25";
 
       mapping[44] = (char*)"$A23";
-      mapping[45] = (char*)"N 26";
+      mapping[45] = (char*)"LE+";
 
       mapping[46] = (char*)"$A24";
-      mapping[47] = (char*)"N 27";
+      mapping[47] = (char*)"LE-";
 
 
 
       mapping[48] = (char*)"$B1";
-      mapping[49] = (char*)"N 28";
+      mapping[49] = (char*)"Z 28";
 
       mapping[50] = (char*)"$B2";
-      mapping[51] = (char*)"N 29";
+      mapping[51] = (char*)"Z 29";
 
       mapping[52] = (char*)"$B3";
       mapping[53] = (char*)"HLEFT";
@@ -101,64 +101,64 @@ class Mapping {
       mapping[55] = (char*)"HRIGHT";
 
       mapping[56] = (char*)"$B5";
-      mapping[57] = (char*)"N 32";
+      mapping[57] = (char*)"Z 32";
 
       mapping[58] = (char*)"$B6";
-      mapping[59] = (char*)"N 33";
+      mapping[59] = (char*)"Z 33";
 
       mapping[60] = (char*)"$B7";
-      mapping[61] = (char*)"N 34";
+      mapping[61] = (char*)"Z 34";
 
       mapping[62] = (char*)"$B8";
-      mapping[63] = (char*)"N 35";
+      mapping[63] = (char*)"Z 35";
 
       mapping[64] = (char*)"$B9";
       mapping[65] = (char*)"LE+";
 
       mapping[66] = (char*)"$B10";
-      mapping[67] = (char*)"N 37";
+      mapping[67] = (char*)"Z 37";
 
       mapping[68] = (char*)"$B11";
-      mapping[69] = (char*)"LE-";
+      mapping[69] = (char*)"$B11";
 
       mapping[70] = (char*)"$B12";
-      mapping[71] = (char*)"N 39";
+      mapping[71] = (char*)"$B12";
 
       mapping[72] = (char*)"$B13";
-      mapping[73] = (char*)"N 40";
+      mapping[73] = (char*)"Z 40";
 
       mapping[74] = (char*)"$B14";
-      mapping[75] = (char*)"N 41";
+      mapping[75] = (char*)"Z 41";
 
       mapping[76] = (char*)"$B15";
-      mapping[77] = (char*)"N 42";
+      mapping[77] = (char*)"Z 42";
 
       mapping[78] = (char*)"$B16";
-      mapping[79] = (char*)"N 43";
+      mapping[79] = (char*)"Z 43";
 
       mapping[80] = (char*)"$B17";
-      mapping[81] = (char*)"N 44";
+      mapping[81] = (char*)"Z 44";
 
       mapping[82] = (char*)"$B18";
-      mapping[83] = (char*)"N 45";
+      mapping[83] = (char*)"Z 45";
 
       mapping[84] = (char*)"$B19";
-      mapping[85] = (char*)"N 46";
+      mapping[85] = (char*)"Z 46";
 
       mapping[86] = (char*)"$B20";
-      mapping[87] = (char*)"N 47";
+      mapping[87] = (char*)"Z 47";
 
       mapping[88] = (char*)"$B21";
-      mapping[89] = (char*)"N 48";
+      mapping[89] = (char*)"Z 48";
 
       mapping[90] = (char*)"$B22";
-      mapping[91] = (char*)"N 49";
+      mapping[91] = (char*)"Z 49";
 
       mapping[92] = (char*)"$B23";
-      mapping[93] = (char*)"N 50";
+      mapping[93] = (char*)"Z 50";
 
       mapping[94] = (char*)"$B24";
-      mapping[95] = (char*)"N 51";
+      mapping[95] = (char*)"Z 51";
 
 
       mapping[96] = (char*)"$C1";
@@ -235,76 +235,76 @@ class Mapping {
 
 
       mapping[144] = (char*)"$D1";
-      mapping[145] = (char*)"$D37";
+      mapping[145] = (char*)"N 1";
 
       mapping[146] = (char*)"$D2";
-      mapping[147] = (char*)"$D31";
+      mapping[147] = (char*)"N 10";
 
       mapping[148] = (char*)"$D3";
-      mapping[149] = (char*)"$D36";
+      mapping[149] = (char*)"N 3";
 
       mapping[150] = (char*)"$D4";
-      mapping[151] = (char*)"$D30";
+      mapping[151] = (char*)"N 4";
 
       mapping[152] = (char*)"$D5";
-      mapping[153] = (char*)"$D37";
+      mapping[153] = (char*)"N 5";
 
       mapping[154] = (char*)"$D6";
-      mapping[155] = (char*)"$D31";
+      mapping[155] = (char*)"N 6";
 
       mapping[156] = (char*)"$D7";
-      mapping[157] = (char*)"$D36";
+      mapping[157] = (char*)"N 7";
 
       mapping[158] = (char*)"$D8";
-      mapping[159] = (char*)"$D30";
+      mapping[159] = (char*)"N 8";
 
       mapping[160] = (char*)"$D9";
-      mapping[161] = (char*)"$D37";
+      mapping[161] = (char*)"N 9";
 
       mapping[162] = (char*)"$D10";
-      mapping[163] = (char*)"$D31";
+      mapping[163] = (char*)"N 10";
 
       mapping[164] = (char*)"$D11";
-      mapping[165] = (char*)"$D36";
+      mapping[165] = (char*)"N 11";
 
       mapping[166] = (char*)"$D12";
-      mapping[167] = (char*)"$D30";
+      mapping[167] = (char*)"N 12";
 
       mapping[168] = (char*)"$D13";
-      mapping[169] = (char*)"$D37";
+      mapping[169] = (char*)"N 13";
 
       mapping[170] = (char*)"$D14";
-      mapping[171] = (char*)"$D31";
+      mapping[171] = (char*)"N 14";
 
       mapping[172] = (char*)"$D15";
-      mapping[173] = (char*)"$D36";
+      mapping[173] = (char*)"N 15";
 
       mapping[174] = (char*)"$D16";
-      mapping[175] = (char*)"$D30";
+      mapping[175] = (char*)"N 16";
 
       mapping[176] = (char*)"$D17";
-      mapping[177] = (char*)"$D37";
+      mapping[177] = (char*)"N 17";
 
       mapping[178] = (char*)"$D18";
-      mapping[179] = (char*)"$D31";
+      mapping[179] = (char*)"N 18";
 
       mapping[180] = (char*)"$D19";
-      mapping[181] = (char*)"$D36";
+      mapping[181] = (char*)"N 19";
 
       mapping[182] = (char*)"$D20";
-      mapping[183] = (char*)"$D30";
+      mapping[183] = (char*)"N 520";
 
       mapping[184] = (char*)"$D21";
-      mapping[185] = (char*)"$D37";
+      mapping[185] = (char*)"N 21";
 
       mapping[186] = (char*)"$D22";
-      mapping[187] = (char*)"$D31";
+      mapping[187] = (char*)"N 22";
 
       mapping[188] = (char*)"$D23";
-      mapping[189] = (char*)"$D36";
+      mapping[189] = (char*)"N 23";
 
       mapping[190] = (char*)"$D24";
-      mapping[191] = (char*)"$D30";
+      mapping[191] = (char*)"N 24";
 
     }
 
@@ -318,7 +318,7 @@ class Mapping {
         for (int i = 0; i < TABLE_SIZE - 1; i++) {
           //Log.notice("mapping %d->%s\n", i, mapping[i]);
           if (strcmp(mapping[i], copy) == 0) {
-            Serial.println(mapping[i + 1]);
+            //Serial.println(mapping[i + 1]);
             return mapping[i + 1];
           }
         }
