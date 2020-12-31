@@ -12,7 +12,7 @@ class Mapping {
   public :
     Mapping() {
 
-      mapping[0] = 53;
+      mapping[0] = 40; //bouton 1 ligne 1 colonne
       mapping[1] = 1;
 
       mapping[2] = 47;
@@ -24,7 +24,7 @@ class Mapping {
       mapping[6] = 31;
       mapping[7] = 4;
 
-      mapping[8] = 999; //bouton 2 ligne 1 colonne
+      mapping[8] = 41; // 52 bouton 2 ligne 1 colonne
       mapping[9] = 5;
 
       mapping[10] = 46;
@@ -36,7 +36,7 @@ class Mapping {
       mapping[14] = 30;
       mapping[15] = 8;
 
-      mapping[16] = 999; //3 eme ligne 1 colone
+      mapping[16] = 38; //3 eme ligne 1 colone
       mapping[17] = 9;
 
       mapping[18] = 44;
@@ -48,7 +48,7 @@ class Mapping {
       mapping[22] = 28;
       mapping[23] = 12;
 
-      mapping[24] = 51; // bouton 4 ligne 1ere colonne -> fait tout bugger
+      mapping[24] = 39; // bouton 4 ligne 1ere colonne -> fait tout bugger
       mapping[25] = 13;
 
       mapping[26] = 45;
@@ -88,9 +88,12 @@ class Mapping {
 
     int getValue(int key) {
 
+      
+      Log.notice("input key %d\n", key);
+
       for (int i = 0; i < TABLE_SIZE - 1; i++) {
         if (mapping[i] ==  key) {
-          Log.notice("mapping key %d -> %d\n",key,  mapping[i + 1]);
+          Log.notice("mapping key %d -> %d\n", key,  mapping[i + 1]);
           return mapping[i + 1];
         }
       }

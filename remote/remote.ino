@@ -61,16 +61,12 @@ Button button47 = Button(47, PULLUP);
 Button button48 = Button(48, PULLUP);
 Button button49 = Button(49, PULLUP);
 Button button50 = Button(50, PULLUP);
-Button button51 = Button(51, PULLUP);
-Button button52 = Button(52, PULLUP);
-Button button53 = Button(53, PULLUP);
-Button button54 = Button(54, PULLUP);
-#define buttonSize 31
+#define buttonSize 29
 
-Button buttons[] = {button22, button23, button24, button25, button26, button27, button28, button29,
+Button buttons[] = {                    button22, button23, button24, button25, button26, button27, button28, button29,
                     button30, button31, button32, button33, button34, button35, button36, button37, button38, button39,
                     button40, button41, button42, button43, button44, button45, button46, button47, button48, button49,
-                    button51, button52, button53,
+                    button50,
                    };
 
 
@@ -168,7 +164,7 @@ void loop()
     String in = Serial.readStringUntil('\n');
     //Log.notice("You typed sth", in );
   }
-  
+
   if (millis() - lastKeyboardTc > KEYBOARD_DELAY)
   {
     lastKeyboardTc = millis();
@@ -208,9 +204,9 @@ void loop()
   } while ( u8g.nextPage() );
 
   /*delay(1000);
-  // pingprobe
-  Serial.print("alp://rply/");
-  Serial.print("ok?id=0");
-  Serial.print('\n'); // End of Message
-  Serial.flush();*/
+    // pingprobe
+    Serial.print("alp://rply/");
+    Serial.print("ok?id=0");
+    Serial.print('\n'); // End of Message
+    Serial.flush();*/
 }

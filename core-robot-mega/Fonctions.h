@@ -1,7 +1,7 @@
 #pragma once
 //#include <Arduino.h>
 //#include <String.h>
-
+#include <Servo.h>
 
 //#ifndef FONCTIONS
 //#define FONCTIONS
@@ -28,3 +28,5 @@ CRGB Gradient(int startAngle, int stopAngle, float ratio);
 //######### UTILS ##########
 //--------------------------
 char* strtrim_safe(char* in);
+
+void moveServo(Servo servo, int pos);

@@ -1,3 +1,4 @@
+
 #include <Arduino.h>
 #include "ArduinoLog.h"
 
@@ -8,13 +9,13 @@
 #define LEFT     3
 #define RIGHT    4
 
-#define SPEED_MAX_LEFT  255
-#define SPEED_MAX_RIGHT  255
+#define SPEED_MAX_LEFT  150
+#define SPEED_MAX_RIGHT  150
 #define SPEED_ACCELERATION  10 //1ms
 
 //left
-#define pwm_left 12
-#define dir_left 11
+#define pwm_left 8
+#define dir_left 7
 
 //right
 #define pwm_right 4

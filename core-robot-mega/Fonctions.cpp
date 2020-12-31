@@ -123,3 +123,10 @@ char* strtrim_safe( char* input ) {
   }
   return input;
 }
+
+void moveServo(Servo servo, int pos)
+{  if (0 >= pos <= 180)
+  {
+    servo.write(pos);
+  }
+}

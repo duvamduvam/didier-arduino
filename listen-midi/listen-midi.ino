@@ -1,5 +1,6 @@
-//local arduino_midi_library-master.zip / conflit with servo lib #define RH_ASK_ARDUINO_USE_TIMER2 in RH_ASK.h
-#include <Servo.h>
+//local arduino_midi_library-master.zip
+
+#include <MIDI.h>
 #include <SPI.h>
 //local RadioHead-master.zip
 //used pin 9 2 maybe used 13 12 11 10 8 7 6
@@ -9,9 +10,7 @@
 //#define LOG_LEVEL LOG_LEVEL_ERROR
 //#define LOG_LEVEL LOG_LEVEL_VERBOSE
 
-#include "Move.cpp"
-#include "Lights.cpp"
-#include "Mapping.cpp"
+//#include "Mapping.cpp"
 
 
 /*PINMAP
@@ -39,11 +38,6 @@
 #define LED 13
 
 
-Move wheel;
-long lastMove = 0;
-bool stopped = true;
-#define moveTime 300
-
 /// start radio def /////
 
 #define RF95_FREQ 868.0
@@ -53,14 +47,9 @@ RH_RF95 rf95(RFM95_CS, RFM95_INT);
 uint8_t radioMsg[12];
 uint8_t len = sizeof(radioMsg);
 
-Lights lights;
-//Head head;
+MIDI_CREATE_DEFAULT_INSTANCE();
 
-Mapping mapping;
-
-Servo headServo;
-int currentPos = 90;
-#define STEP 3
+//Mapping mapping;
 
 void setup()
 {
@@ -68,17 +57,13 @@ void setup()
   pinMode(RFM95_RST, OUTPUT);
   digitalWrite(RFM95_RST, HIGH);
 
-  //MIDI.begin();
+  MIDI.begin();
   while (!Serial);
   // eratics problem with lora radio when changing baud rate
   Serial.begin(115200);
   Log.begin   (LOG_LEVEL, &Serial);
 
   delay(100);
-
-  headServo.attach(A8);
-  headServo.write(currentPos);
-  //head.init();
 
   //// init radio
   //printStringLn(debug, "Arduino LoRa RX Test!");
@@ -101,7 +86,6 @@ void setup()
 }
 
 void radioRead() {
-
   if (rf95.available())
   {
     if (rf95.recv(radioMsg, &len))
@@ -117,12 +101,23 @@ void radioRead() {
   }
 }
 
-void sendNote(int note) {
+void sendNote(char mod, int note) {
   //Log.notice("send midi %d, %d\n", note);
-  //MIDI.sendNoteOn(note, 127, 3);    // Send a Note (pitch 42, velo 127 on channel 1)
-  //delay(10);                // Wait for a second
-  //MIDI.sendNoteOff(note, 0, 3);
-  //Serial.println(note);
+  int channel = 1;
+  if (mod == 'A') {
+    channel = 3;
+  } else if (mod == 'B') {
+    channel = 4;
+  } else if (mod == 'C') {
+    channel = 5;
+  } else if (mod == 'D') {
+    channel = 6;
+  }
+
+  MIDI.sendNoteOn(note, 127, channel);    // Send a Note (pitch 42, velo 127 on channel 1)
+  delay(10);                // Wait for a second
+  MIDI.sendNoteOff(note, 0, channel);
+  Log.notice("midi note: %d on channel %d\n", note, channel );
 }
 
 void loop()
@@ -130,60 +125,34 @@ void loop()
 
   radioRead();
 
-  char* input = mapping.getValue((char*)radioMsg);
+  // char* input = mapping.getValue((char*)radioMsg);
+  char* input = (char*)radioMsg;
   // test monitor
   if (Serial.available()) {
-    char in = Serial.read();
-    Serial.print("you typed : "); Serial.println(in);
-    if (in != 'a') {
-      currentPos += STEP;
-      moveServo(headServo, currentPos);
-      Log.notice ("position %d \n", currentPos);
-    }
-    if (in != 'z') {
-      currentPos -= STEP;
-      moveServo(headServo, currentPos);
-      Log.notice ("position %d \n", currentPos);
-    }
-
+    String in = Serial.readStringUntil('\n');
+    //Log.notice("You typed: %s \n", in );
   }
 
   if (strcmp((char*)radioMsg, "") != 0) {
     Log.notice("radio: %s \n", radioMsg );
     Log.notice("input: %s \n", input );
 
-    //head.process(input);
-    lights.process(input);
+    //int note;
+    //char* mod;
+    //sscanf(input, "%s %d", mod, &note);
 
-    wheel.process(input);
-    lastMove = millis();
-    stopped = false;
-
-    //to remove
-    if (input[0] == 'X') {
-      int note;
-      char mod;
-
-      sscanf(input, "%s %d", mod, &note);
-      //Serial.println(note);
-      //sendNote(note);
-      //arduino mega reboot after sending note without delay
-      delay(30);
-    }
-
-
-    Serial.println(input);
-
+    //Serial.print("input[0] : "); Serial.print(input[0]); Serial.print(" input[1] : " ); Serial.println(input[1]);
+    //Serial.print("mod : "); Serial.print(mod); Serial.print(" input[1] : "); Serial.println(note);
+    //Serial.println(note);
+    char note[2];
+    note[0] = input[2];
+    note[1] = input[3];
+    sendNote(input[1], atoi(note));
+    //arduino mega reboot after sending note without delay
+    delay(30);
 
   }
 
-  wheel.execute();
-  lights.execute();
-
-  if ((millis() - lastMove > moveTime) && !stopped) {
-    wheel.stop();
-    stopped = true;
-  }
 
   memset(radioMsg, 0, sizeof(radioMsg));
 }
