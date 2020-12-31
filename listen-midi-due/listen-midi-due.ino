@@ -1,6 +1,7 @@
 //local arduino_midi_library-master.zip
 
-#include <MIDI.h>
+
+#include "MIDIUSB.h"
 #include <SPI.h>
 //local RadioHead-master.zip
 //used pin 9 2 maybe used 13 12 11 10 8 7 6
@@ -47,8 +48,6 @@ RH_RF95 rf95(RFM95_CS, RFM95_INT);
 uint8_t radioMsg[12];
 uint8_t len = sizeof(radioMsg);
 
-MIDI_CREATE_DEFAULT_INSTANCE();
-
 //Mapping mapping;
 
 void setup()
@@ -56,8 +55,7 @@ void setup()
   pinMode(LED, OUTPUT);
   pinMode(RFM95_RST, OUTPUT);
   digitalWrite(RFM95_RST, HIGH);
-
-  MIDI.begin();
+  
   while (!Serial);
   // eratics problem with lora radio when changing baud rate
   Serial.begin(115200);
@@ -102,8 +100,18 @@ void radioRead() {
 }
 
 void sendNote(char mod, int note) {
+
+
+  midiEventPacket_t noteOn = {0x09, 0x90 | 0, note, 64};
+  MidiUSB.sendMIDI(noteOn);
+
+  midiEventPacket_t noteOff = {0x08, 0x80 | 0, note, 64};
+  MidiUSB.sendMIDI(noteOff);
+  
+
+  
   //Log.notice("send midi %d, %d\n", note);
-  int channel = 1;
+  /*int channel = 1;
   if (mod == 'A') {
     channel = 3;
   } else if (mod == 'B') {
@@ -117,13 +125,11 @@ void sendNote(char mod, int note) {
   MIDI.sendNoteOn(note, 127, channel);    // Send a Note (pitch 42, velo 127 on channel 1)
   delay(10);                // Wait for a second
   MIDI.sendNoteOff(note, 0, channel);
-  Log.notice("midi note: %d on channel %d\n", note, channel );
+  Log.notice("midi note: %d on channel %d\n", note, channel );*/
 }
 
 void loop()
 {
-
-  Log.notice("test");
 
   radioRead();
 
