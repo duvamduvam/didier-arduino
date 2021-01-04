@@ -1,5 +1,6 @@
-//local arduino_midi_library-master.zip / conflit with servo lib #define RH_ASK_ARDUINO_USE_TIMER2 in RH_ASK.h
-#include <Servo.h>
+//local arduino_midi_library-master.zip
+
+#include <MIDI.h>
 #include <SPI.h>
 //local RadioHead-master.zip
 //used pin 9 2 maybe used 13 12 11 10 8 7 6
@@ -11,6 +12,7 @@
 
 #include "Move.cpp"
 #include "Lights.cpp"
+#include "Head.cpp"
 #include "Mapping.cpp"
 
 
@@ -54,13 +56,11 @@ uint8_t radioMsg[12];
 uint8_t len = sizeof(radioMsg);
 
 Lights lights;
-//Head head;
+Head head;
+
+MIDI_CREATE_DEFAULT_INSTANCE();
 
 Mapping mapping;
-
-Servo headServo;
-int currentPos = 90;
-#define STEP 3
 
 void setup()
 {
@@ -68,7 +68,7 @@ void setup()
   pinMode(RFM95_RST, OUTPUT);
   digitalWrite(RFM95_RST, HIGH);
 
-  //MIDI.begin();
+  MIDI.begin();
   while (!Serial);
   // eratics problem with lora radio when changing baud rate
   Serial.begin(115200);
@@ -76,9 +76,7 @@ void setup()
 
   delay(100);
 
-  headServo.attach(A8);
-  headServo.write(currentPos);
-  //head.init();
+  head.init();
 
   //// init radio
   //printStringLn(debug, "Arduino LoRa RX Test!");
@@ -101,7 +99,6 @@ void setup()
 }
 
 void radioRead() {
-
   if (rf95.available())
   {
     if (rf95.recv(radioMsg, &len))
@@ -118,11 +115,10 @@ void radioRead() {
 }
 
 void sendNote(int note) {
-  //Log.notice("send midi %d, %d\n", note);
-  //MIDI.sendNoteOn(note, 127, 3);    // Send a Note (pitch 42, velo 127 on channel 1)
-  //delay(10);                // Wait for a second
-  //MIDI.sendNoteOff(note, 0, 3);
-  //Serial.println(note);
+  Log.notice("send midi %d, %d\n", note);
+  MIDI.sendNoteOn(note, 127, 3);    // Send a Note (pitch 42, velo 127 on channel 1)
+  delay(10);                // Wait for a second
+  MIDI.sendNoteOff(note, 0, 3);
 }
 
 void loop()
@@ -133,48 +129,30 @@ void loop()
   char* input = mapping.getValue((char*)radioMsg);
   // test monitor
   if (Serial.available()) {
-    char in = Serial.read();
-    Serial.print("you typed : "); Serial.println(in);
-    if (in != 'a') {
-      currentPos += STEP;
-      moveServo(headServo, currentPos);
-      Log.notice ("position %d \n", currentPos);
-    }
-    if (in != 'z') {
-      currentPos -= STEP;
-      moveServo(headServo, currentPos);
-      Log.notice ("position %d \n", currentPos);
-    }
-
+    String in = Serial.readStringUntil('\n');
+    Log.notice("You typed: %s \n", in );
   }
 
   if (strcmp((char*)radioMsg, "") != 0) {
-    Log.notice("radio: %s \n", radioMsg );
+    Log.notice("radio: " );
+    Serial.println((char*)radioMsg);
     Log.notice("input: %s \n", input );
-
-    //head.process(input);
+    
+    head.process(input);
     lights.process(input);
-
+    
     wheel.process(input);
     lastMove = millis();
     stopped = false;
 
-    //to remove
-    if (input[0] == 'X') {
+    if (input[0] == 'N') {
       int note;
       char mod;
-
       sscanf(input, "%s %d", mod, &note);
-      //Serial.println(note);
-      //sendNote(note);
+      sendNote(note);
       //arduino mega reboot after sending note without delay
       delay(30);
     }
-
-
-    Serial.println(input);
-
-
   }
 
   wheel.execute();
