@@ -5,19 +5,16 @@
 // 5 -> 7 / 8
 //
 
-
 #include <Arduino.h>
 //make the compilation silent
 #define FASTLED_INTERNAL
 #include <FastLED.h>
-#include <string.h>
-#include <stdio.h>
-#include "ArduinoLog.h"
 
+#include "ArduinoLog.h"
+#include "Commands.h"
 #include "Fonctions.h"
 
 #include "ColorPalette.cpp"
-
 
 #define NUM_LEDS 265
 // on cable yellow of led strip
@@ -82,6 +79,9 @@ class Lights {
     CRGB leds[NUM_LEDS];
     int i, outputIndex, ledIndex;
     bool lightOn = true;
+
+    Command command;
+    char action[3];
 
   public:
 
@@ -149,32 +149,40 @@ class Lights {
       FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
     }
 
+    void next() {
+      strcpy(action, command.nextCommand(0, 1, 5, 6, 2, 4));
+    }
+
     void process(char in[])
     {
-      if (in[0] == 'L')
+      Log.notice("light process\n");
+      command.set(in);
+      next();
+
+      if (action[0] == 'L')
       {
-        Log.notice("input in light process %s\n", in);
+        Log.notice("input in light process %s\n", action);
         bool present = true;
         lightOn = true;
 
-        if (strstr((char*)in, "LE+") != 0) {
-          Log.notice("input in light process %s\n", in);
+        if (strstr((char*)action, "LE+") != 0) {
+          Log.notice("input action light process %s\n", action);
           choixEffect++;
-        } else if (strstr((char*)in, "LE-") != 0) {
+        } else if (strstr((char*)action, "LE-") != 0) {
           choixEffect--;
-        } else if (strstr((char*)in, "LS+") != 0) {
+        } else if (strstr((char*)action, "LS+") != 0) {
           brightSpan++;
-        } else if (strstr((char*)in, "LS-") != 0) {
+        } else if (strstr((char*)action, "LS-") != 0) {
           brightSpan--;
-        } else if (strstr((char*)in, "LT+") != 0) {
+        } else if (strstr((char*)action, "LT+") != 0) {
           choixTint++;
-        } else if (strstr((char*)in, "LT-") != 0) {
+        } else if (strstr((char*)action, "LT-") != 0) {
           choixTint--;
-        } else if (strstr((char*)in, "LC+") != 0) {
+        } else if (strstr((char*)action, "LC+") != 0) {
           nbColors++;
-        } else if (strstr((char*)in, "LC-") != 0) {
+        } else if (strstr((char*)action, "LC-") != 0) {
           nbColors--;
-        } else if (strstr((char*)in, "LON") != 0) {
+        } else if (strstr((char*)action, "LON") != 0) {
           lightOn = false;
         } else
           present = false;
@@ -186,8 +194,16 @@ class Lights {
 
     void execute()
     {
-      if (lightOn)
-      {
+
+      if (command.doFinish()) {
+        if (command.hasNext()) {
+          next();
+        } else {
+          choixEffect = 7;
+        }
+      }
+      if (command.doAttack()) {
+        //Log.notice("Light effect %i\n", choixEffect);
         switch (choixEffect)
         {
           case 1: Effet1(); break;
@@ -198,10 +214,9 @@ class Lights {
           case 6: Effet6(); break;
           case 7: Effet7(); break;
           case 8: Effet8(); break;
+            //ajout effet light off
         }
         Generate();
-      } else {
-        clearLeds();
       }
     }
 

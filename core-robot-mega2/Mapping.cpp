@@ -3,6 +3,7 @@
 #include <string.h>
 #include "ArduinoLog.h"
 #include "Fonctions.h"
+#include "Commands.h"
 
 #define TABLE_SIZE 23
 
@@ -12,6 +13,7 @@ class Mapping {
     char* mapping[TABLE_SIZE];
 
   public :
+
     Mapping() {
 
       mapping[1] = (char*)"$A3";
@@ -47,12 +49,11 @@ class Mapping {
       mapping[21] = (char*)"$A20";
       mapping[22] = (char*)"LON";
 
-
-
     }
 
-    char* getValue(char* key) {
+    Commands getCommands(char* key) {
 
+      Commands commands;
 
       char* copy = strtrim_safe(key);
       if (strcmp((char*)key, "") != 0) {
@@ -61,12 +62,47 @@ class Mapping {
         for (int i = 0; i < TABLE_SIZE - 1; i++) {
           //Log.notice("mapping %d->%s\n", i, mapping[i]);
           if (strcmp(mapping[i], copy) == 0) {
-            //Serial.println(mapping[i + 1]);
+            switch (mapping[i][0])
+            {
+              case 'W':
+                commands.wheel = mapping[i + 1];
+                break;
+              case 'N':
+                commands.lights = mapping[i + 1];
+                break;
+              case 'L':
+                commands.neck = mapping[i + 1];
+                break;
+              case 'S':
+                commands.mouth = mapping[i + 1];
+                break;
+              case 'E':
+                commands.eyes = mapping[i + 1];
+                break;
+              case 'H':
+                commands.heart = mapping[i + 1];
+                break;
+            }
+          }
+        }
+      }
+      return commands;
+    }
+
+    char* getValue(char* key) {
+      char* copy = strtrim_safe(key);
+      if (strcmp((char*)key, "") != 0) {
+        //Log.notice("copy %s\n", copy);
+        //Log.notice("copy : %s\n", copy);
+        for (int i = 0; i < TABLE_SIZE - 1; i++) {
+          //Log.notice("mapping %d->%s\n", i, mapping[i]);
+          if (strcmp(mapping[i], copy) == 0) {
+
             return mapping[i + 1];
           }
         }
       }
-
       return key;
     }
+
 };

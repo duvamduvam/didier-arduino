@@ -7,9 +7,9 @@
 //used pin 9 2 maybe used 13 12 11 10 8 7 6
 #include <RH_RF95.h>
 #include "ArduinoLog.h"
-#define LOG_LEVEL LOG_LEVEL_SILENT
+//#define LOG_LEVEL LOG_LEVEL_SILENT
 //#define LOG_LEVEL LOG_LEVEL_ERROR
-//#define LOG_LEVEL LOG_LEVEL_VERBOSE
+#define LOG_LEVEL LOG_LEVEL_VERBOSE
 
 //#include "Mapping.cpp"
 
@@ -59,6 +59,7 @@ void setup()
   while (!Serial);
   // eratics problem with lora radio when changing baud rate
   Serial.begin(115200);
+  Serial1.begin(115200);
   Log.begin   (LOG_LEVEL, &Serial);
 
   delay(100);
@@ -136,9 +137,9 @@ void loop()
   // char* input = mapping.getValue((char*)radioMsg);
   char* input = (char*)radioMsg;
   // test monitor
-  if (Serial.available()) {
-    String in = Serial.readStringUntil('\n');
-    //Log.notice("You typed: %s \n", in );
+  if (Serial1.available()) {
+    String in = Serial1.readStringUntil('\n');
+   Serial.println(in);
   }
 
   if (strcmp((char*)radioMsg, "") != 0) {

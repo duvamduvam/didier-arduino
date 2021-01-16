@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include "ArduinoLog.h"
 #include <Adafruit_PWMServoDriver.h>
+#include "Commands.h"
 
 #define SERVOMIN  80 // this is the 'minimum' pulse length count (out of 4096)
 #define SERVOMAX  640 // this is the 'maximum' pulse length count (out of 4096)
@@ -8,11 +9,13 @@
 class Head {
 
   private :
+    Command command;
     Adafruit_PWMServoDriver pwm;
     int step = 30;
     int currentPos = 400;
+    int pos = 0;
 
-    int moveServo(int step)
+    int nextStep(int step)
     {
       if (SERVOMIN >= currentPos <= SERVOMAX)
       {
@@ -35,18 +38,42 @@ class Head {
       pwm.setPWM(0, 0, currentPos);
     }
 
-    void process(char in[]) {
+    void process(char* in) {
+      command.set(in);
+      next();
+    }
 
-      if (in[0] == 'H')
-      {
-        if (strstr((char*)in, "HLEFT") != 0)
-        {
-          moveServo(step);
-        } else if (strstr((char*)in, "HRIGHT") != 0)
-        {
-          moveServo(-step);
+    void next() {
+      char action[2];
+      strcpy(action, command.nextCommand(0, 1, 4, 5, 2, 3));
+      pos = ((action[0] - 32) * 100) + (action[1] - 32);
+      Log.notice("Head next %s %i", action, pos);
+    }
+
+    void execute() {
+
+      if (pos != 0) {
+        //manuel mouvement
+        if (pos == 1) {
+          nextStep(step);
+        } else if (pos == -1) {
+          nextStep(-step);
+        } else {
+          //automatic mouvement
+          if (pos == currentPos) {
+            if (command.hasNext()) {
+              next();
+            } else {
+              pos = 0;
+            }
+          } else if (pos > currentPos) {
+            nextStep(1);
+          } else {
+            nextStep(-1);
+          }
         }
       }
     }
+
 
 };
