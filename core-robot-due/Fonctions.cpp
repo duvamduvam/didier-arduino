@@ -1,3 +1,4 @@
+#pragma once
 #include "ArduinoLog.h"
 #include "Fonctions.h"
 
@@ -124,12 +125,12 @@ char* strtrim_safe( char* input ) {
   return input;
 }
 
-void moveServo(Servo servo, int pos)
+/*void moveServo(Servo servo, int pos)
 { if (0 >= pos <= 180)
   {
     servo.write(pos);
   }
-}
+}*/
 
 char* nextToken(char* str)
 {

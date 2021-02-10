@@ -1,35 +1,20 @@
-/*
-  This is a simple example show the Heltec.LoRa sended data in OLED.
-
-  The onboard OLED display is SSD1306 driver and I2C interface. In order to make the
-  OLED correctly operation, you should output a high-low-high(1-0-1) signal by soft-
-  ware to OLED's reset pin, the low-level signal at least 5ms.
-
-  OLED pins to ESP32 GPIOs via this connecthin:
-  OLED_SDA -- GPIO4
-  OLED_SCL -- GPIO15
-  OLED_RST -- GPIO16
-
-  by Aaron.Lee from HelTec AutoMation, ChengDu, China
-  成都惠利特自动化科技有限公司
-  https://heltec.org
-
-  this project also realess in GitHub:
-  https://github.com/Heltec-Aaron-Lee/WiFi_Kit_series
-*/
+#include <Arduino.h>
+//#include <analogWrite.h>
 
 #include "heltec.h"
 #include "images.h"
 
 #define BAND    868E6  //you can set band here directly,e.g. 868E6,915E6
 
-unsigned int counter = 0;
-String rssi = "RSSI --";
-String packSize = "--";
-String packet ;
-
 const byte inputSize = 5;
-char arduinoReceive[inputSize];
+char nanoReceive;
+char charSend[2];
+
+const int xpin = 36;                  // x-axis of the accelerometer
+const int ypin = 37;                  // y-axis
+const int zpin = 38;                  // z-axis (only on 3-axis models)
+const int vibration_pin = 25;
+
 boolean newData = false;
 
 void logo()
@@ -54,10 +39,15 @@ void setup()
   Heltec.display->drawString(0, 0, "Heltec.LoRa Initial success!");
   Heltec.display->display();
   delay(1000);
+
+  charSend[0] = 'E';
+
+  pinMode(vibration_pin, OUTPUT);
+
 }
 
 
-void recvWithStartEndMarkers() {
+/*void recvWithStartEndMarkers() {
   static boolean recvInProgress = false;
   static byte ndx = 0;
   char startMarker = '<';
@@ -85,18 +75,19 @@ void recvWithStartEndMarkers() {
       recvInProgress = true;
     }
   }
-}
+  }*/
 
 void oledPrint(char* toPrint) {
   Heltec.display->clear();
   Heltec.display->setTextAlignment(TEXT_ALIGN_LEFT);
   Heltec.display->setFont(ArialMT_Plain_10);
-  Heltec.display->display();
+  //Heltec.display->display();
   Heltec.display->drawString(0, 0, "Sending packet: ");
   Heltec.display->drawString(90, 0, toPrint);
-    Heltec.display->display();
+  Heltec.display->display();
 }
 
+//TODO -> remove delay
 void flashLed() {
   for (int i = 0; i < 3; i++) {
     digitalWrite(LED, HIGH);   // turn the LED on (HIGH is the voltage level)
@@ -107,14 +98,18 @@ void flashLed() {
 }
 
 void sendData() {
-  if (newData == true) {
-    LoRa.beginPacket();
-    LoRa.print(arduinoReceive);
-    LoRa.endPacket();
-    Serial.print("send : "); Serial.println(arduinoReceive);
-    oledPrint(arduinoReceive);
-    flashLed();
-    newData = false;
+  charSend[1] = nanoReceive;
+  LoRa.beginPacket();
+  LoRa.print(charSend);
+  LoRa.endPacket();
+  Serial.print("send : "); Serial.println(charSend);
+  oledPrint(charSend);
+  //flashLed();
+}
+
+void updateMod() {
+  if (nanoReceive >= 69 && nanoReceive <= 72) {
+    charSend[0] = nanoReceive;
   }
 }
 
@@ -124,11 +119,64 @@ void loop()
   //recvWithStartEndMarkers();
   //sendData();
 
+  if (Serial.available()) {
+    nanoReceive = Serial.read();
+    if (nanoReceive >= 65 && nanoReceive <= 88) {
+      updateMod();
+      sendData();
+      Serial.print((int)nanoReceive); Serial.print(" : "); Serial.println(nanoReceive);
+    };
+  }
+
+  /* 3 axis
+
+     Serial.print(analogRead(xpin));
+
+    // print a tab between values:
+
+    Serial.print("\t");
+
+    Serial.print(analogRead(ypin));
+
+    // print a tab between values:
+
+    Serial.print("\t");
+
+    Serial.print(analogRead(zpin));
+
+    Serial.println();
+
+    // delay before next reading:
+
+    delay(100);
+  */
+
+
+
+  /* vibrator motor
+
+
+    for (int fadeValue = 0 ; fadeValue <= 255; fadeValue += 5)
+    {
+    // sets the value (range from 0 to 255):
+    analogWrite(vibration_pin, fadeValue);
+    // wait for 30 milliseconds to see the dimming effect
+    delay(30);
+    }
+
+    // fade out from max to min in increments of 5 points:
+    for (int fadeValue = 255 ; fadeValue >= 0; fadeValue -= 5)
+    {
+    // sets the value (range from 0 to 255):
+    analogWrite(vibration_pin, fadeValue);
+    // wait for 30 milliseconds to see the dimming effect
+    delay(30);
+    }*/
 
   // send packet
-    LoRa.beginPacket();
 
-    char* packetToSend;
+  /*char* packetToSend;
+         LoRa.beginPacket();
     if (Serial.available()) {
     Serial.print("serial available");
     Serial.readBytesUntil('\n', packetToSend, 2);
@@ -140,6 +188,6 @@ void loop()
 
     Heltec.display->drawString(0, 0, "Sending packet: ");
     Heltec.display->drawString(90, 0, packetToSend);
-    }
+    }*/
 
 }

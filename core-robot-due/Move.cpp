@@ -1,6 +1,6 @@
-
 #include <Arduino.h>
 #include "ArduinoLog.h"
+#include "Commands.h"
 
 //Modes
 #define STOP     0
@@ -14,17 +14,18 @@
 #define SPEED_ACCELERATION  10 //1ms
 
 //left
-#define pwm_left 8
-#define dir_left 7
+#define pwm_left 4
+#define dir_left 5
 
 //right
-#define pwm_right 4
-#define dir_right 3
+#define pwm_right 3
+#define dir_right 2
 
 
 class Move
 {
   private :
+    Command command;
     int speedleft;
     int speedright;
 
@@ -40,6 +41,8 @@ class Move
     // These maintain the current state
     unsigned long previousMillis;    // will store last time LED was updated
 
+    char action[2];
+
   public:
 
     Move()
@@ -50,29 +53,37 @@ class Move
       pinMode(dir_right, OUTPUT);
     }
 
-    void process(char in[])
-    {
-      if (in[0] == 'M')
+    void process(char* action) {
+      Log.notice("Move.h 57 move process %s\n", action);
+      if (strcmp(action, "WF") == 0)
       {
-        //Serial.print("move : ");
-        //Serial.println(in);
-        if (strstr((char*)in, "MFORWARD") != 0)
-        {
-          forward();
-        }
-        else if (strstr((char*)in, "MBACKWARD") != 0)
-        {
-          backward();
-        }
-        else if (strstr((char*)in, "MLEFT") != 0)
-        {
-          left();
-        }
-        else if (strstr((char*)in, "MRIGHT") != 0)
-        {
-          right();
-        }
+        forward();
       }
+      else if (strcmp(action, "WB") == 0)
+      {
+        backward();
+      }
+      else if (strcmp(action, "WL") == 0)
+      {
+        left();
+      }
+      else if (strcmp(action, "WR") == 0)
+      {
+        right();
+      } else if (strcmp(action, "WS") == 0)
+      {
+        stop();
+      } else {
+        //command joystick
+      }
+
+      // TODO finish multi action move
+      //command.set(action);
+      //next();
+    }
+    //input structure char[0,1] -> attack, char[2,3,4] -> music, char[5,6] ex : "+ 123? "
+    void next() {
+      strcpy(action, command.nextCommand(0, 1, 4, 5, 2, 3));
     }
 
     void forward()
@@ -177,6 +188,8 @@ class Move
               break;
           }
         }
+        Log.notice("Move.cpp 188 pwm_left %i speed %i\n", pwm_left, speedleft);
+        Log.notice("Move.cpp 189 pwm_right %i speed %i\n", pwm_left, speedleft);
         analogWrite(pwm_left, speedleft);
         analogWrite(pwm_right, speedright);
       }

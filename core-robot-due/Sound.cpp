@@ -14,14 +14,16 @@ class Sound {
 
     Sound() {
       Log.notice("init sound player\n");
-      Serial3.begin(115200);
+      Serial2.begin(115200);
     }
 
 
     void process(char* in) {
-      Log.notice("sound process\n");
-      command.set(in);
-      next();
+      Log.notice("sound process %s\n", in);
+      if (arraySize(in) > 2) {
+        command.set(in);
+        next();
+      }
     }
 
     //input structure char[0,1] -> attack, char[2,3,4] -> music, char[5,6] ex : "+ 123? "
@@ -30,7 +32,7 @@ class Sound {
     }
 
     void execute() {
-      if (Serial3.available()) {
+      if (Serial2.available()) {
         char in = Serial.read();
         if (in == 'S') {
           playing = false;
@@ -41,7 +43,7 @@ class Sound {
       if (strcmp(music, "")) {
         if (playing) {
           if (command.doFinish()) {
-            Serial3.println('S');
+            Serial2.println('S');
             Log.notice("stop playing %s\n", music);
             playing = false;
             if (command.hasNext()) {
@@ -52,7 +54,7 @@ class Sound {
           }
         } else {
           if (command.doAttack()) {
-            Serial3.println(music);
+            Serial2.println(music);
             Log.notice("start playing %s\n", music);
             playing = true;
           }

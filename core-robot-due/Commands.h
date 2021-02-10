@@ -14,13 +14,13 @@
 
 struct Commands
 {
-  char* wheel;
-  char* lights;
-  char* neck;
-  char* mouth;
-  char* eyes;
-  char* heart;
-  char* sound;
+  char* wheel = {};
+  char* lights = {};
+  char* neck = {};
+  char* mouth = {};
+  char* eyes = {};
+  char* heart = {};
+  char sound[20] = {};
 };
 
 typedef struct Commands;
@@ -34,7 +34,7 @@ class Command {
 
   public:
 
-    long attack;
+   unsigned  long attack;
     long finish;
 
     void set(char* command) {
@@ -51,11 +51,11 @@ class Command {
 
     boolean hasNext() {
       /*Log.notice("hasNext current token %i < nbToken %i ", token, nbToken);
-      if(token < nbToken){
+        if(token < nbToken){
         Log.notice("true\n");
-      }else{
+        }else{
         Log.notice("false\n");
-      }*/
+        }*/
       return (token < nbToken);
     }
 
