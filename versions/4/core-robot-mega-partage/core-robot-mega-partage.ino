@@ -103,7 +103,7 @@ void radioRead() {
     if (rf95.recv(radioMsg, &len))
     {
       digitalWrite(LED, HIGH);
-      //Log.notice(F("radio received %s")CR, radioMsg);
+      Log.notice("radio received %s\n", radioMsg);
       digitalWrite(LED, LOW);
     }
     else

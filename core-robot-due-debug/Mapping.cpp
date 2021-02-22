@@ -7,8 +7,6 @@
 
 #define TABLE_SIZE 23
 
-
-
 class Mapping {
 
   private:
@@ -42,8 +40,9 @@ class Mapping {
       mapping[15] = (char*)"XCC";
       mapping[16] = (char*)"HRIGHT";
 
-      mapping[17] = (char*)"HUU";
+      mapping[17] = (char*)"HU";
       mapping[18] = (char*)"L! LE+% |L! LE-% ";
+      //mapping[18] = (char*)"S! 123% |S! 321% ";
 
       mapping[19] = (char*)"HTT";
       mapping[20] = (char*)"LE-";
@@ -58,53 +57,41 @@ class Mapping {
 
     Commands getCommands(char* key)
     {
-      //Log.notice("Mapping.cpp getComand 55 input : %s \n", key);
       Commands commands;
-      char* copy = strtrim_safe(key);
+
+      Log.notice("Mapping.cpp getComand 55 input : %s \n", key);
       if (strcmp((char*)key, "") != 0) {
 
-
-        //Joystick
-        if (copy[0] == 'J') {
-
-          byte bX = copy[1];
-          byte bY = copy[2];
-          SpeedVector robot = ToRobot(bX, bY);
-          commands.leftSpeed = robot.left;
-          commands.rightSpeed = robot.right;
-        }
-        else {
-          //Recherche dictionnaire (mapping)
-          for (int i = 0; i < TABLE_SIZE - 1; i++)
-          {
-            if (strcmp(mapping[i], copy) == 0) {
-              switch (mapping[i + 1][0])
-              {
-                case 'W':
-                  commands.wheel = mapping[i + 1];
-                  break;
-                case 'N':
-                  commands.neck = mapping[i + 1];
-                  break;
-                case 'L':
-                  commands.lights = mapping[i + 1];
-                  Log.notice("Light mapping command %s : %s\n", copy, mapping[i + 1] );
-                  break;
-                case 'S':
-                  Log.notice("Mapping load sound process");
-                  //remove first char
-                  strcpy(commands.sound, mapping[i + 1]);
-                  break;
-                case 'M':
-                  commands.mouth = mapping[i + 1];
-                  break;
-                case 'E':
-                  commands.eyes = mapping[i + 1];
-                  break;
-                case 'H':
-                  commands.heart = mapping[i + 1];
-                  break;
-              }
+        //Recherche dictionnaire (mapping)
+        for (int i = 0; i < TABLE_SIZE - 1; i++)
+        {
+          if (strcmp(mapping[i], key) == 0) {
+            switch (mapping[i + 1][0])
+            {
+              case 'W':
+                strcpy(commands.wheel, mapping[i + 1]);
+                break;
+              case 'N':
+                strcpy(commands.neck, mapping[i + 1]);
+                break;
+              case 'L':
+                strcpy(commands.lights, mapping[i + 1]);
+                Log.notice("Light mapping command %s : mapping[i + 1]:%s commands.lights:%s\n", key, mapping[i + 1], commands.lights );
+                break;
+              case 'S':
+                Log.notice("Mapping load sound process");
+                //remove first char
+                strcpy(commands.sound, mapping[i + 1]);
+                break;
+              case 'M':
+                strcpy(commands.mouth, mapping[i + 1]);
+                break;
+              case 'E':
+                strcpy(commands.eyes, mapping[i + 1]);
+                break;
+              case 'H':
+                strcpy(commands.heart, mapping[i + 1]);
+                break;
             }
           }
         }

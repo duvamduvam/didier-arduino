@@ -80,6 +80,7 @@ class Face {
     BmpTime heartTest[7] = {{11, 200}, {0, 200}, {11, 200}, {0, 200} } ;
 
     Sequence sequences[3] = {
+      //strcopy pour éviter de passer sizeof ?
       {5000, sizeof(mouthTest) / sizeof(mouthTest[0]), mouthTest, sizeof(heartTest) / sizeof(heartTest[0]), heartTest, sizeof(eyesTest) / sizeof(eyesTest[0]), eyesTest, sizeof(eyesTest) / sizeof(eyesTest[0]), eyesTest},
       //{7000, mouthTest2, heartTest, eyesTest, eyesTest},
       //{3000, mouthTest, heartTest, eyesTest, eyesTest}

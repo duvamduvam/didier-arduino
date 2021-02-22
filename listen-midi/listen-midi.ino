@@ -1,15 +1,15 @@
 //local arduino_midi_library-master.zip
 
 
-#include "MIDIUSB.h"
+//#include "MIDIUSB.h"
 #include <SPI.h>
 //local RadioHead-master.zip
 //used pin 9 2 maybe used 13 12 11 10 8 7 6
 #include <RH_RF95.h>
 #include "ArduinoLog.h"
-#define LOG_LEVEL LOG_LEVEL_SILENT
+//#define LOG_LEVEL LOG_LEVEL_SILENT
 //#define LOG_LEVEL LOG_LEVEL_ERROR
-//#define LOG_LEVEL LOG_LEVEL_VERBOSE
+#define LOG_LEVEL LOG_LEVEL_VERBOSE
 
 /*PINMAP
   0 COM
@@ -86,7 +86,7 @@ void radioRead() {
     if (rf95.recv(radioMsg, &len))
     {
       digitalWrite(LED, HIGH);
-      //Log.notice(F("radio received %s")CR, radioMsg);
+      Log.notice("radio received %s\n", radioMsg);
       digitalWrite(LED, LOW);
     }
     else
@@ -96,20 +96,20 @@ void radioRead() {
   }
 }
 
-void sendNote(char mod, int note) {
+/*void sendNote(char mod, int note) {
 
   midiEventPacket_t noteOn = {0x09, 0x90 | 0, note, 64};
-  MidiUSB.sendMIDI(noteOn);
+  //MidiUSB.sendMIDI(noteOn);
 
   midiEventPacket_t noteOff = {0x08, 0x80 | 0, note, 64};
-  MidiUSB.sendMIDI(noteOff);
+  //MidiUSB.sendMIDI(noteOff);
 
   Serial1.println("send");
   debugMidiEventPacket(noteOn);
 
-}
+}*/
 
-void debugMidiEventPacket(midiEventPacket_t in) {
+/*void debugMidiEventPacket(midiEventPacket_t in) {
   if (in.header != 0 && in.byte1 != 0 && in.byte2 != 0 && in.byte3 != 0) {
     Serial1.print("Received: ");
     Serial1.print(in.header, HEX);
@@ -120,16 +120,16 @@ void debugMidiEventPacket(midiEventPacket_t in) {
     Serial1.print("-");
     Serial1.println(in.byte3, HEX);
   }
-}
+}*/
 
 void loop()
 {
-  midiEventPacket_t rx;
+/*  midiEventPacket_t rx;
   do {
     rx = MidiUSB.read();
     debugMidiEventPacket(rx);
   } while (rx.header != 0);
-
+*/
   radioRead();
 
   // char* input = mapping.getValue((char*)radioMsg);
@@ -146,7 +146,7 @@ void loop()
     char note[2];
     note[0] = input[2];
     note[1] = input[3];
-    sendNote(input[1], atoi(note));
+    //sendNote(input[1], atoi(note));
     //arduino mega reboot after sending note without delay
     delay(30);
 

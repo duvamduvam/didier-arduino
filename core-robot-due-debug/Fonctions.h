@@ -16,19 +16,6 @@
 float MapFloat(float x, float in_min, float in_max, float out_min, float out_max);
 
 
-//######### TO ROBOT ##########
-//--------------------------
-
-struct SpeedVector
-{
-  float left;
-  float right;
-};
-
-SpeedVector ToRobot(int bX, int bY);
-
-
-
 //######### COLORS ##########
 //--------------------------
 CRGB Brightness(CRGB Base, float intens);
@@ -51,5 +38,5 @@ char* nextToken(char* str);
 long extractTime(char* input, int seconds, int minutes);
 
 //char** getInputList(char* str);
-char* extractChar(char*str, int s, int e);
+void extractChar(char*receiver, char*str, int s, int e);
 byte arraySize(char array[]);

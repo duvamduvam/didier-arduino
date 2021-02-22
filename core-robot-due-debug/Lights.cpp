@@ -150,19 +150,17 @@ class Lights {
     }
 
     void next() {
-      strcpy(action, command.nextCommand(1, 2, 6, 7, 3, 5));
+      command.nextCommand(action, 1, 2, 6, 7, 3, 5);
     }
 
     void process(char* in)
     {
-      Log.notice("######## Lights process input:\"%s\" action[%d] : \"%s\" ########\n", command.token, in, action);
       command.set(in);
       next();
-
-
+   
       if (action[0] == 'L')
       {
-        Log.notice("input in light process %s\n", action);
+        Log.notice("######## Lights process input:\"%s\" action : \"%s\" ########\n", in,  action);
         bool present = true;
         lightOn = true;
 

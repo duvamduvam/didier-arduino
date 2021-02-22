@@ -39,14 +39,14 @@ class Sound {
 
     //input structure char[0,1] -> attack, char[2,3,4] -> music, char[5,6] ex : "+ 123? "
     void next() {
-      strcpy(music, command.nextCommand(1, 2, 6, 7, 3, 5));
+      command.nextCommand(music, 1, 2, 6, 7, 3, 5);
     }
 
     void execute() {
 
       if (strcmp(music, "")) {
-            //Log.notice("Sound music : %s\n", music);
-        
+        Log.notice("Sound music : %s\n", music);
+
         if (playing) {
           if (command.doFinish()) {
             Serial3.println('S');
@@ -56,6 +56,7 @@ class Sound {
               next();
             } else {
               strcpy(music, "");
+              playing = false;
             }
           }
         } else {

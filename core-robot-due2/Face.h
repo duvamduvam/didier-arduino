@@ -9,9 +9,10 @@ class Face {
   private :
 
     const byte BRIGHTNESS = 5;
+
     const byte MOUTH_PIN = 13;
-    const byte L_EYE_PIN = 12;
-    const byte R_EYE_PIN = 11;
+    const byte L_EYE_PIN = 11;
+    const byte R_EYE_PIN = 12;
     const byte HEART_PIN = 10;
 
     const byte MOUTH = 1;
@@ -81,7 +82,7 @@ class Face {
 
     Sequence sequences[3] = {
       {5000, sizeof(mouthTest) / sizeof(mouthTest[0]), mouthTest, sizeof(heartTest) / sizeof(heartTest[0]), heartTest, sizeof(eyesTest) / sizeof(eyesTest[0]), eyesTest, sizeof(eyesTest) / sizeof(eyesTest[0]), eyesTest},
-      //{7000, mouthTest2, heartTest, eyesTest, eyesTest},
+      {7000, sizeof(mouthTest2) / sizeof(mouthTest[0]), mouthTest2, sizeof(heartTest) / sizeof(heartTest[0]), heartTest, sizeof(eyesTest) / sizeof(eyesTest[0]), eyesTest, sizeof(eyesTest) / sizeof(eyesTest[0]), eyesTest},
       //{3000, mouthTest, heartTest, eyesTest, eyesTest}
     };
 
@@ -102,10 +103,16 @@ class Face {
 
     }
 
-    void process(byte new_seq) {
-      if (current_seq_nb != new_seq) {
-        current_seq_nb = new_seq;
-        loadSequence(current_seq_nb);
+    void process(char* in) {
+      if (in[0] == 'F') {
+        char numChar[2];
+        extractChar(numChar, in, 1, 2) ;
+        int new_seq = atoi(numChar);
+        Log.notice("######## Face process input:\"%s\" sequence:%d current_seq_nb:%d ########\n", in, new_seq, current_seq_nb );
+        if (current_seq_nb != new_seq) {
+          current_seq_nb = new_seq;
+          loadSequence(current_seq_nb);
+        }
       }
     }
 
@@ -118,8 +125,7 @@ class Face {
 
     void loadSequence(byte seq_nb) {
 
-
-      Log.notice("loadSequence millis():%d seq_nb:%d seq_time:%d\n", millis(), seq_nb, seq_time);
+      //Log.notice("loadSequence millis():%d seq_nb:%d seq_time:%d\n", millis(), seq_nb, seq_time);
 
       current_seq = sequences[seq_nb];
       seq_time = millis() + sequences[seq_nb].seq_time;
@@ -146,7 +152,7 @@ class Face {
         loadSequence(default_seq);
       } else {
         if (millis() > mouth_t) {
-          Log.notice("mouth next current_seq.mouth_size:%d mouth_p:%d\n", current_seq.mouth_size, mouth_p);
+          //Log.notice("mouth next current_seq.mouth_size:%d mouth_p:%d\n", current_seq.mouth_size, mouth_p);
           if (current_seq.mouth_size > mouth_p + 1) {
             mouth_p++;
           } else {

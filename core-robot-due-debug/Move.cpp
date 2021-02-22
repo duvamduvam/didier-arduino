@@ -3,12 +3,11 @@
 #include "Commands.h"
 
 
-#define SPEED_MAX  100
+#define SPEED_MAX  255
 #define SPEED_RATIO  1
-#define SPEED_ACCELERATION  20 //2ms
-#define INCREMENT_ACCELERATION  0.05f //2ms
+#define SPEED_ACCELERATION  200 //2ms
+#define INCREMENT_ACCELERATION  2 //2ms
 
-/*
 //left
 #define pwm_left 4
 #define dir_left 5
@@ -16,16 +15,6 @@
 //right
 #define pwm_right 3
 #define dir_right 2
-*/
-
-
-//left
-#define pwm_left 3
-#define dir_left 2
-
-//right
-#define pwm_right 4
-#define dir_right 5
 
 
 class Move
@@ -41,16 +30,16 @@ class Move
 
     long lastSpeedTc; //dernier timecode pour tempo acceleration
 
+//    int ledPin;      // the number of the LED pin
+//    long OnTime;     // milliseconds of on-time
+//    long OffTime;    // milliseconds of off-time
 
     // These maintain the current state
-    unsigned int previousMillis;  
-    unsigned int TimeoutTimer;    
+    unsigned long previousMillis;    // will store last time LED was updated
 
     char* action;
-    
 
   public:
-
 
     Move()
     {
@@ -113,15 +102,12 @@ class Move
     
     //input structure char[0,1] -> attack, char[2,3,4] -> music, char[5,6] ex : "+ 123? "
     void next() {
-      strcpy(action, command.nextCommand(0, 1, 4, 5, 2, 3));
+      command.nextCommand(action, 0, 1, 4, 5, 2, 3);
     }
 
 
     void execute()
     {
-
-      
-            
       if (millis() - lastSpeedTc > SPEED_ACCELERATION)
       {
         lastSpeedTc = millis();
@@ -129,12 +115,6 @@ class Move
 
         float deltaL = cmdLeft - spLeft;
         float deltaR = cmdRight - spRight;
-
-
-        int decCmdL = (int)(cmdLeft * 1000);
-        int decCmdR = (int)(cmdRight * 1000);
-        
-       // Log.notice("JOY - L=%d - R=%d \n", decCmdL,decCmdR);
 
         if (abs(deltaL)>0)
           if (deltaL>0)
@@ -148,49 +128,25 @@ class Move
           else
             spRight-=INCREMENT_ACCELERATION;
 
-        int dL=0;
-        int dR=0;
+            bool dL,dR;
         if (spLeft>0)
           dL=1;
          if (spRight>0)
           dR=1;
-
-
-        int decL = (int)(spLeft * 1000);
-        int decR = (int)(spRight * 1000);
-        
-       // Log.notice("JOY - L=%d - R=%d \n", decL,decR);
           
-        speedleft =  abs((int)(spLeft * SPEED_MAX));
-        speedright = abs((int)(spRight * SPEED_MAX));
+        speedleft =  (int)abs(spLeft * SPEED_MAX);
+        speedright = (int)abs(spRight * SPEED_MAX);
 
-        if (speedleft<10)
-          speedleft=0;
-        if (speedright<10)
-          speedright=0;
+        Log.notice("JOY - L=%d - R=%d \n", speedleft,speedright);
 
-       // Log.notice("JOY - L=%d - R=%d \n", speedleft,speedright);
-
-      //  Log.notice("JOY - CMD L=%d - R=%d | CUR L=%d - R=%d | DIR L=%d - R=%d \n", decCmdL,decCmdR, decL,decR,dL,dR);
+       
 
         digitalWrite(dir_left, dL);
         digitalWrite(dir_right, dR);
 
-        analogWrite(pwm_left, speedleft);
-        analogWrite(pwm_right, speedright);
-      }
-
-      
-      if (millis() - TimeoutTimer > 1000)
-      {
-        TimeoutTimer = millis();
-        stop();
+   //     analogWrite(pwm_left, speedleft);
+     //   analogWrite(pwm_right, speedright);
       }
     }
-
-          
-
-
-    
 
 };

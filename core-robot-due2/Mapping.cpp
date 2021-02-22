@@ -18,41 +18,41 @@ class Mapping {
 
     Mapping() {
 
-      mapping[1] = (char*)"XG";
+      mapping[1] = (char*)"A42";
       mapping[2] = (char*)"WF";
 
-      mapping[3] = (char*)"XF";
+      mapping[3] = (char*)"A43";
       mapping[4] = (char*)"WL";
 
-      mapping[5] = (char*)"XH";
+      mapping[5] = (char*)"A49";
       mapping[6] = (char*)"WR";
 
-      mapping[7] = (char*)"XO";
+      mapping[7] = (char*)"A48";
       mapping[8] = (char*)"WB";
 
       mapping[9] = (char*)"QOO";
       mapping[10] = (char*)"WS";
 
-      mapping[11] = (char*)"A08";
-      mapping[12] = (char*)"MRIGHT";
+      mapping[11] = (char*)"A26";
+      mapping[12] = (char*)"F01";
 
       mapping[13] = (char*)"XBB";
       mapping[14] = (char*)"HLEFT";
 
-      mapping[15] = (char*)"XCC";
-      mapping[16] = (char*)"HRIGHT";
+      mapping[15] = (char*)"A32";
+      mapping[16] = (char*)"N! N+% |N! N-% ";
 
-      mapping[17] = (char*)"HUU";
-      mapping[18] = (char*)"L! LE+% |L! LE-% ";
+      mapping[17] = (char*)"A27";
+      mapping[18] = (char*)"L! LE+% |L! LE-% |L! LE-% ";
 
-      mapping[19] = (char*)"HTT";
+      mapping[19] = (char*)"L";
       mapping[20] = (char*)"LE-";
 
-      mapping[21] = (char*)"HQQ";
-      mapping[22] = (char*)"S! 123% ";
+      mapping[21] = (char*)"A33";
+      mapping[22] = (char*)"S! 123% |S! 321% ";
 
-      mapping[23] = (char*)"HQQ";
-      mapping[24] = (char*)"S! 123% S! 321% ";
+      mapping[23] = (char*)"HTT";
+      mapping[24] = (char*)"S! 123% |S! 321% ";
 
     }
 
@@ -72,37 +72,29 @@ class Mapping {
           SpeedVector robot = ToRobot(bX, bY);
           commands.leftSpeed = robot.left;
           commands.rightSpeed = robot.right;
+          strcpy(commands.wheel, copy);
         }
         else {
           //Recherche dictionnaire (mapping)
-          for (int i = 0; i < TABLE_SIZE - 1; i++)
-          {
+          for (int i = 0; i < TABLE_SIZE - 1; i++) {
             if (strcmp(mapping[i], copy) == 0) {
-              switch (mapping[i + 1][0])
-              {
+              switch (mapping[i + 1][0]) {
                 case 'W':
-                  commands.wheel = mapping[i + 1];
+                  strcpy(commands.wheel, mapping[i + 1]);
                   break;
                 case 'N':
-                  commands.neck = mapping[i + 1];
+                  strcpy(commands.neck, mapping[i + 1]);
+                  //Log.notice("Light mapping command %s : mapping[i + 1]:%s commands.lights:%s\n", key, mapping[i + 1], commands.neck );
                   break;
                 case 'L':
-                  commands.lights = mapping[i + 1];
-                  Log.notice("Light mapping command %s : %s\n", copy, mapping[i + 1] );
+                  strcpy(commands.lights, mapping[i + 1]);
+                  //Log.notice("Light mapping command %s : mapping[i + 1]:%s commands.lights:%s\n", key, mapping[i + 1], commands.lights );
                   break;
                 case 'S':
-                  Log.notice("Mapping load sound process");
-                  //remove first char
                   strcpy(commands.sound, mapping[i + 1]);
                   break;
-                case 'M':
-                  commands.mouth = mapping[i + 1];
-                  break;
-                case 'E':
-                  commands.eyes = mapping[i + 1];
-                  break;
-                case 'H':
-                  commands.heart = mapping[i + 1];
+                case 'F':
+                  strcpy(commands.face, mapping[i + 1]);
                   break;
               }
             }

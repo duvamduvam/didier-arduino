@@ -10,7 +10,7 @@
 #include "Mapping.cpp"
 #include "Commands.h"
 #include "Sound.cpp"
-#include "Face.h"
+//#include "Face.h"
 
 
 /*PINMAP
@@ -38,8 +38,8 @@ unsigned int recv_size = 0;
 unsigned long prev, interval = 5000;
 
 
-const int inputSize = 4;
-char radio  [4];
+const int inputSize = 5;
+char radio  [5];
 bool newData = false;
 byte inputCount = 0;
 
@@ -51,7 +51,8 @@ bool stopped = true;
 Lights lights;
 Head head;
 Sound sound;
-Face face;
+Commands commands;
+//Face face;
 
 bool testInputRead = false;
 
@@ -64,7 +65,7 @@ void setup()
   Serial2.begin(9600);
   Log.begin   (LOG_LEVEL, &Serial);
 
-  face.loadSequence(0);
+  //face.loadSequence(0);
 
   delay(100);
 
@@ -135,53 +136,39 @@ void loop()
 {
 
   //debug
-  if (Serial.available()) {
-    recvWithStartEndMarkers();
+  // if (Serial.available()) {
 
-    newData = true;
-  }
+  //keyboard debug
+  String keyboardInput =  Serial.readStringUntil('\0');
+  char debugInput[3];
+  keyboardInput.toCharArray(debugInput, 3);
+  newData = true;
+  Log.notice("Serial keyboard available : \"%s\"\n", debugInput);
 
-  if (Serial2.available()) {
+  commands = mapping.getCommands("HU");
 
-    recvWithStartEndMarkers2();
-    newData = true;
-    //Log.notice("message from modem : %s\n", radio);
+  //sound.process(commands.sound);
+  //wheel.process(commands);
+  //Log.notice("commands.wheels : \n", commands.wheel);
+  //head.process(commands.neck);
+    Log.notice("Loop before   lights.process(): \"%s\"\n", commands.lights);
+  lights.process(commands.lights);
 
-    //Serial.println(Serial2.read());
-    //String input = Serial2.readStringUntil('>');
-    //input.toCharArray(loraInput, 4);
-    //Serial.print("Serial input : "); Serial.println(loraInput);
 
-  }
+  lastMove = millis();
+  stopped = false;
 
-  if (newData) {
-    newData = false;
-    //Serial.println(radio);
-    // Log.notice("input from lora %s\n", loraInput);
 
-    Commands commands = mapping.getCommands(radio);
-
-    //sound.process(commands.sound);
-    wheel.process(commands);
-    //Log.notice("commands.wheels : \n", commands.wheel);
-    //head.process(commands.neck);
-    //lights.process(commands.lights);
-
-    lastMove = millis();
-    stopped = false;
-  }
-
-  wheel.execute();
+  //wheel.execute();
   lights.execute();
   //head.execute();
   //sound.execute();
   //face.execute();
 
-/*
   if ((millis() - lastMove > moveTime) && !stopped) {
     wheel.stop();
     stopped = true;
   }
-*/
 
+  delay(50000);
 }

@@ -8,6 +8,7 @@ class Sound {
   private :
     Command command;
     char music[3];
+    int token = 0;
     bool playing = false;
 
     long lastInput = 0;
@@ -20,17 +21,15 @@ class Sound {
       Serial3.begin(115200);
     }
 
-
     void process(char* in) {
-
       //avoid continous fire button
-      if ((millis() - lastInput) > INPUT_INTERVAL) {
-        Log.notice("sound process %s\n", in);
-
+      if (in[0] == 'S' && (millis() - lastInput) > INPUT_INTERVAL) {
         if (arraySize(in) > 2) {
+          token = 0;
           lastInput = millis();
           command.set(in);
-          next();
+          getCommand();
+          Log.notice("######## Sound process input:\"%s\" action[%d] : \"%s\" ########\n", in, token, music);
         } else {
           Log.notice("sound process already typed%s\n", in);
         }
@@ -38,30 +37,35 @@ class Sound {
     }
 
     //input structure char[0,1] -> attack, char[2,3,4] -> music, char[5,6] ex : "+ 123? "
-    void next() {
-      strcpy(music, command.nextCommand(1, 2, 6, 7, 3, 5));
+    boolean next() {
+      token++;
+      if (token < command.nbToken) {
+        getCommand();
+        return true;
+      }
+      return false;
+    }
+
+    void getCommand() {
+      command.getCommand(token, music, 1, 2, 6, 7, 3, 5);
     }
 
     void execute() {
-
       if (strcmp(music, "")) {
-            //Log.notice("Sound music : %s\n", music);
-        
+        //Log.notice("Sound music : %s\n", music);
         if (playing) {
           if (command.doFinish()) {
             Serial3.println('S');
-            Log.notice("stop playing %s\n", music);
+            Log.notice("stop playing sound %s\n", music);
             playing = false;
-            if (command.hasNext()) {
-              next();
-            } else {
+            if (!next()) {
               strcpy(music, "");
             }
           }
         } else {
           if (command.doAttack()) {
             Serial3.println(music);
-            Log.notice("start playing %s\n", music);
+            Log.notice("start playing sound %s\n", music);
             playing = true;
           }
         }

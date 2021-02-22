@@ -82,6 +82,7 @@ class Lights {
 
     Command command;
     char action[3];
+    int token = 0;
 
   public:
 
@@ -149,76 +150,92 @@ class Lights {
       FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
     }
 
-    void next() {
-      strcpy(action, command.nextCommand(1, 2, 6, 7, 3, 5));
+    boolean next() {
+      token++;
+      if (token < command.nbToken) {
+        getCommand();
+        Log.notice("Lights change effect : %d token:%d nbToken:%d\n", choixEffect, token, command.nbToken);
+        return true;
+      }
+      return false;
+    }
+
+    void getCommand() {
+      command.getCommand(token, action, 1, 2, 6, 7, 3, 5);
+      mapping();
     }
 
     void process(char* in)
     {
-      Log.notice("######## Lights process input:\"%s\" action[%d] : \"%s\" ########\n", command.token, in, action);
+      token = 0;
       command.set(in);
-      next();
+      getCommand();
 
-
-      if (action[0] == 'L')
-      {
-        Log.notice("input in light process %s\n", action);
+      if (action[0] == 'L') {
+        Log.notice("######## Lights process input:\"%s\" action[%d] : \"%s\" ########\n", in, token, action);
         bool present = true;
         lightOn = true;
 
-        if (strstr((char*)action, "LE+") != 0) {
-          //Log.notice("input action light process %s\n", action);
-          choixEffect++;
-        } else if (strstr((char*)action, "LE-") != 0) {
-          choixEffect--;
-        } else if (strstr((char*)action, "LS+") != 0) {
-          brightSpan++;
-        } else if (strstr((char*)action, "LS-") != 0) {
-          brightSpan--;
-        } else if (strstr((char*)action, "LT+") != 0) {
-          choixTint++;
-        } else if (strstr((char*)action, "LT-") != 0) {
-          choixTint--;
-        } else if (strstr((char*)action, "LC+") != 0) {
-          nbColors++;
-        } else if (strstr((char*)action, "LC-") != 0) {
-          nbColors--;
-        } else if (strstr((char*)action, "LON") != 0) {
-          lightOn = false;
-        } else
-          present = false;
-
-        if (present)
+        if (mapping())
           Log.notice("effet %d | brightSpan %d | tint %d  | nbColors %d \n", choixEffect, brightSpan, choixTint, nbColors );
       }
+    }
+
+    boolean mapping() {
+      boolean hasElement = true;
+
+      if (strstr((char*)action, "LE+") != 0) {
+        //Log.notice("input action light process %s\n", action);
+        choixEffect++;
+      } else if (strstr((char*)action, "LE-") != 0) {
+        choixEffect--;
+      } else if (strstr((char*)action, "LS+") != 0) {
+        brightSpan++;
+      } else if (strstr((char*)action, "LS-") != 0) {
+        brightSpan--;
+      } else if (strstr((char*)action, "LT+") != 0) {
+        choixTint++;
+      } else if (strstr((char*)action, "LT-") != 0) {
+        choixTint--;
+      } else if (strstr((char*)action, "LC+") != 0) {
+        nbColors++;
+      } else if (strstr((char*)action, "LC-") != 0) {
+        nbColors--;
+      } else if (strstr((char*)action, "LON") != 0) {
+        lightOn = false;
+      } else {
+        hasElement = false;
+      }
+      return hasElement;
     }
 
     void execute()
     {
 
       if (command.doFinish()) {
-        if (command.hasNext()) {
-          next();
-        } else {
+        if (!next()) {
           choixEffect = 7;
         }
       }
       if (command.doAttack()) {
         //Log.notice("Light effect %i\n", choixEffect);
-        switch (choixEffect)
-        {
-          case 1: Effet1(); break;
-          case 2: Effet2(); break;
-          case 3: Effet3(); break;
-          case 4: Effet4(); break;
-          case 5: Effet5(); break;
-          case 6: Effet6(); break;
-          case 7: Effet7(); break;
-          case 8: Effet8(); break;
-            //ajout effet light off
-        }
-        Generate();
+
       }
+
+      switch (choixEffect)
+      {
+        case 1: Effet1(); break;
+        case 2: Effet2(); break;
+        case 3: Effet3(); break;
+        case 4: Effet4(); break;
+        case 5: Effet5(); break;
+        case 6: Effet6(); break;
+        case 7: Effet7(); break;
+        case 8: Effet8(); break;
+          //ajout effet light off
+      }
+
+      Generate();
     }
 
     void Generate()
@@ -751,13 +768,6 @@ class Lights {
       if (ledIndex >= RIGHT_DOWN_START && ledIndex <= RIGHT_DOWN_END)
         return 12;
     }
-
-
-
-
-
-
-
 
     void processOLD()
     {

@@ -51,5 +51,5 @@ char* nextToken(char* str);
 long extractTime(char* input, int seconds, int minutes);
 
 //char** getInputList(char* str);
-char* extractChar(char*str, int s, int e);
+void extractChar(char* receiver, char* str, int s, int e);
 byte arraySize(char array[]);

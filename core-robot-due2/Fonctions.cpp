@@ -284,22 +284,26 @@ long extractTime(char* input, int s, int m) {
   int seconds = input[s] - 32;
   int minutes = input[m] - 32;
   long total = (minutes * 60 + seconds) * 1000;
-  Log.notice("extract time from %s:[%i, %i] %i seconds %i minutes total:%i * 1000 %l\n", input, s, m, seconds, minutes, total);
+  //Log.notice("extract time from %s:[%i, %i] %i seconds %i minutes total:%i * 1000 %l\n", input, s, m, seconds, minutes, total);
   return total;
 }
 
-// str input string, s start index, e end index return char*
-char* extractChar(char* str, int s, int e) {
+void extractChar(char* receiver, char* str, int s, int e) {
 
-  char result[e - s];
+  //char result[e - s + 1];
 
   int i = 0;
   for (int x = s; x <= e; x++) {
-    result[i] = str[x];
+    char strChar = str[x];
+    if (strChar == '\0') {
+      receiver[i] = ' ';
+    } else {
+      receiver[i] = str[x];
+    }
     i++;
   }
-  Log.notice("extractChar input:\"%s\" int s:%i int e:%i result:\"%s\"\n", str, s, e, result);
-  return result;
+  //result[i] = '\0';
+  //Log.notice("extractChar input:\"%s\" int s:%d int e:%d result:\"%s\"\n", str, s, e, receiver);
 }
 
 

@@ -14,12 +14,12 @@
 
 struct Commands
 {
-  char* wheel = {};
-  char* lights = {};
-  char* neck = {};
-  char* mouth = {};
-  char* eyes = {};
-  char* heart = {};
+  char wheel[20] = {};
+  char lights[20] = {};
+  char neck[20] = {};
+  char mouth[20] = {};
+  char eyes[20] = {};
+  char heart[20] = {};
   char sound[20] = {};
 
   float leftSpeed;
@@ -44,7 +44,7 @@ class Command {
 
     */
     void set(char* command) {
-
+      Log.notice("Commands set \"%s\" sizeof: %d\n", command, arraySize(command));
       if (arraySize(command) >= 5) {
         getInputList(command);
       } else {
@@ -52,7 +52,6 @@ class Command {
         nbToken = 1;
         strcpy(commands[0], command);
       }
-
     }
 
     boolean hasNext() {
@@ -80,21 +79,35 @@ class Command {
       }*/
 
     //extract attack time a1, a2 finish time f1, f2 command c1,c2
-    char* nextCommand(byte a1, byte a2, byte f1, byte f2, byte c1, byte c2) {
+   void nextCommand(char* action, byte a1, byte a2, byte f1, byte f2, byte c1, byte c2) {
+      Log.notice("nextCommand:%s token:%d nbToken:%d attack start:%d attack end:%d release start:%d release end:%d command begin :%d command end:%d\n", commands[token], token, nbToken, a1, a2, f1, f2, c1, c2);
+      if ((token < nbToken)) {
+        char command[10];
+        strcpy(command, commands[token]);
+        attack = millis() + extractTime(command, a1, a2);
+        finish = millis() + extractTime(command, f1, f2);
+        //char action[c2 - c1];
+        extractChar(action, command, c1, c2);
+        Log.notice("nextCommand[%d]:%s, millis %d attack %d finish %d action %s\n", token, command, millis(), attack, finish, action);
+        token++;
+      }
+    }
+
+    //extract attack time a1, a2 finish time f1, f2 command c1,c2
+    /*String* nextCommand2(byte a1, byte a2, byte f1, byte f2, byte c1, byte c2) {
       Log.notice("nextCommand:%s token:%d nbToken:%d attack start:%d attack end:%d release start:%d release end:%d command begin :%d command end:%d\n", commands[token], token, nbToken, a1, a2, f1, f2, c1, c2);
       if ((token < nbToken)) {
         char command[token];
         strcpy(command, commands[token]);
         attack = millis() + extractTime(command, a1, a2);
         finish = millis() + extractTime(command, f1, f2);
-        char action[c2 - c1];
-        strcpy(action, extractChar(command, c1, c2));
+        String action =  command.substring(C1, C2);
         Log.notice("nextCommand[%d]:%s, millis %d attack %d finish %d action %s\n", token, command, millis(), attack, finish, action);
         token++;
         return action;
       }
       return 0;
-    }
+      }*/
 
     bool doAttack() {
       return millis() >= attack;
@@ -106,9 +119,7 @@ class Command {
 
     void getInputList(char* str)
     {
-      //char* results[10];
       nbToken = 0;
-      token = 0;
       char delim = '|'; //124
       int i = 0;
       int s = 0;
@@ -117,17 +128,17 @@ class Command {
 
       Log.notice("getInputList in : %s\n", str);
       while (str[i] != 0) {
-        if (str[i] == 124) {
+        if (str[i] == 124) { // | delim
           hasDelim = true;
           e = i - 1;
-          strcpy( commands[nbToken], extractChar(str, s, e));
+          extractChar(commands[nbToken], str, s, e);
           Log.notice("getInputList token %i : %s\n", nbToken,  commands[nbToken]);
           nbToken++;
           s = i + 1;
         }
         i++;
       }
-      strcpy( commands[nbToken], extractChar(str, s, arraySize(str)));
+      extractChar(commands[nbToken], str, s, arraySize(str));
       nbToken++;
       Log.notice("getInputList token %i : %s\n", token,  commands[token]);
       //return results;
