@@ -4,9 +4,9 @@
 //#define LOG_LEVEL LOG_LEVEL_ERROR
 #define LOG_LEVEL LOG_LEVEL_VERBOSE
 
-#include "Move.cpp"
+#include "Wheel.cpp"
 #include "Lights.cpp"
-#include "Head.cpp"
+#include "Neck.cpp"
 #include "Mapping.cpp"
 #include "Commands.h"
 #include "Sound.cpp"
@@ -43,13 +43,13 @@ char radio  [4];
 bool newData = false;
 byte inputCount = 0;
 
-Move wheel;
+Wheel wheel;
 long lastMove = 0;
 bool stopped = true;
-#define moveTime 50
+#define moveTime 200
 
 Lights lights;
-Head head;
+Neck neck;
 Sound sound;
 Face face;
 
@@ -61,7 +61,7 @@ void setup()
 {
 
   Serial.begin(115200);
-  Serial2.begin(9600);
+  Serial2.begin(115200);
   Log.begin   (LOG_LEVEL, &Serial);
 
   face.loadSequence(0);
@@ -135,23 +135,19 @@ void loop()
 {
 
   //debug
+
+  //Log.notice("loop\n");
+
   if (Serial.available()) {
     recvWithStartEndMarkers();
-
+    Log.notice("input from keyboard %s\n", radio);
     newData = true;
   }
 
   if (Serial2.available()) {
-
     recvWithStartEndMarkers2();
     newData = true;
-    //Log.notice("message from modem : %s\n", radio);
-
-    //Serial.println(Serial2.read());
-    //String input = Serial2.readStringUntil('>');
-    //input.toCharArray(loraInput, 4);
-    //Serial.print("Serial input : "); Serial.println(loraInput);
-
+    Log.notice("message from modem : %s\n", radio);
   }
 
   if (newData) {
@@ -161,11 +157,12 @@ void loop()
 
     Commands commands = mapping.getCommands(radio);
 
-    //sound.process(commands.sound);
+    sound.process(commands.sound);
     wheel.process(commands);
     //Log.notice("commands.wheels : \n", commands.wheel);
-    //head.process(commands.neck);
-    //lights.process(commands.lights);
+    neck.process(commands.neck);
+    lights.process(commands.lights);
+    face.process(commands.face);
 
     lastMove = millis();
     stopped = false;
@@ -173,15 +170,15 @@ void loop()
 
   wheel.execute();
   lights.execute();
-  //head.execute();
   //sound.execute();
-  //face.execute();
+  //neck.execute();
+  face.execute();
 
-/*
+
   if ((millis() - lastMove > moveTime) && !stopped) {
     wheel.stop();
     stopped = true;
   }
-*/
+
 
 }

@@ -3,9 +3,9 @@
 #include "Commands.h"
 
 
-#define SPEED_MAX  100
+#define SPEED_MAX  50
 #define SPEED_RATIO  1
-#define SPEED_ACCELERATION  20 //2ms
+#define SPEED_ACCELERATION  10 //2ms
 #define INCREMENT_ACCELERATION  0.05f //2ms
 
 //left

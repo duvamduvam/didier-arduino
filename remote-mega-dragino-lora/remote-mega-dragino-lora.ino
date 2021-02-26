@@ -86,7 +86,7 @@ void setup()
   pinMode(RFM95_RST, OUTPUT);
   digitalWrite(RFM95_RST, HIGH);
   while (!Serial);
-  Serial.begin(9600);
+  Serial.begin(115200);
   delay(100);
 
   Log.begin   (LOG_LEVEL, &Serial);
@@ -218,7 +218,7 @@ void loop()
 
   }
 
-  updateJoystick();
+ // updateJoystick();
 
   u8g.firstPage();
   do {

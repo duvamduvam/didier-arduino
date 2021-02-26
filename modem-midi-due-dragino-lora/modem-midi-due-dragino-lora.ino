@@ -1,33 +1,10 @@
-//local arduino_midi_library-master.zip
-
-
-//#include "MIDIUSB.h"
-#include <SPI.h>
-//local RadioHead-master.zip
-//used pin 9 2 maybe used 13 12 11 10 8 7 6
-#include <RH_RF95.h>
 #include "ArduinoLog.h"
+#include "MIDIUSB.h"
+#include <RH_RF95.h>
 //#define LOG_LEVEL LOG_LEVEL_SILENT
 //#define LOG_LEVEL LOG_LEVEL_ERROR
 #define LOG_LEVEL LOG_LEVEL_VERBOSE
 
-/*PINMAP
-  0 COM
-  1 COM
-  2 RFM95_INT
-  3
-  4
-  5
-  6
-  7
-  8
-  9 RFM95_RST
-  10 RFM95_CS
-  11
-  12
-  13 LED
-
-*/
 #define RFM95_INT 2
 #define RFM95_RST 9
 #define RFM95_CS 10
@@ -54,15 +31,13 @@ void setup()
   while (!Serial);
   // eratics problem with lora radio when changing baud rate
   Serial.begin(115200);
+  Serial2.begin(115200);
+
   Log.begin   (LOG_LEVEL, &Serial);
   //midi debug
-  Serial1.begin(115200);
 
   delay(100);
 
-  //// init radio
-  //printStringLn(debug, "Arduino LoRa RX Test!");
-  // manual reset
   digitalWrite(RFM95_RST, LOW);
   delay(10);
   digitalWrite(RFM95_RST, HIGH);
@@ -96,62 +71,41 @@ void radioRead() {
   }
 }
 
-/*void sendNote(char mod, int note) {
+void sendNote(char mod, int note) {
+
 
   midiEventPacket_t noteOn = {0x09, 0x90 | 0, note, 64};
-  //MidiUSB.sendMIDI(noteOn);
+  MidiUSB.sendMIDI(noteOn);
 
   midiEventPacket_t noteOff = {0x08, 0x80 | 0, note, 64};
-  //MidiUSB.sendMIDI(noteOff);
+  MidiUSB.sendMIDI(noteOff);
 
-  Serial1.println("send");
-  debugMidiEventPacket(noteOn);
-
-}*/
-
-/*void debugMidiEventPacket(midiEventPacket_t in) {
-  if (in.header != 0 && in.byte1 != 0 && in.byte2 != 0 && in.byte3 != 0) {
-    Serial1.print("Received: ");
-    Serial1.print(in.header, HEX);
-    Serial1.print("-");
-    Serial1.print(in.byte1, HEX);
-    Serial1.print("-");
-    Serial1.print(in.byte2, HEX);
-    Serial1.print("-");
-    Serial1.println(in.byte3, HEX);
-  }
-}*/
+  Log.notice("send note %i\n", note);
+}
 
 void loop()
 {
-/*  midiEventPacket_t rx;
-  do {
-    rx = MidiUSB.read();
-    debugMidiEventPacket(rx);
-  } while (rx.header != 0);
-*/
   radioRead();
 
-  // char* input = mapping.getValue((char*)radioMsg);
-  char* input = (char*)radioMsg;
-  // test monitor
-  if (Serial.available()) {
-    String in = Serial.readStringUntil('\n');
-    //Log.notice("You typed: %s \n", in );
-  }
+  if (strcmp((char*)radioMsg, "")) {
+    Serial2.print((char*)radioMsg);
 
-  if (strcmp((char*)radioMsg, "") != 0) {
-    Log.notice("radio: %s \n", radioMsg );
-    Log.notice("input: %s \n", input );
+
+
+    //TODO extract prefix and postfix from here
+
     char note[2];
-    note[0] = input[2];
-    note[1] = input[3];
+    note[0] = radioMsg[2];
+    note[1] = radioMsg[3];
     //sendNote(input[1], atoi(note));
-    //arduino mega reboot after sending note without delay
-    delay(30);
+    sendNote(radioMsg[1], atoi(note));
 
   }
 
+  /*if (Serial.available() > 0) {
+    String s0 = Serial.readStringUntil('\0');
+    Serial.print("serial zero received:"); Serial.println(s0);
+    }*/
 
   memset(radioMsg, 0, sizeof(radioMsg));
 }
