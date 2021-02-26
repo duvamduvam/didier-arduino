@@ -1,33 +1,41 @@
 package fr.duvam.arduino;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.Enumeration;
+import java.util.LinkedList;
+import java.util.List;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 
-import fr.duvam.OSValidator;
-import fr.duvam.video.CommandListener;
+import fr.duvam.listener.CommandListener;
+import fr.duvam.utils.OSValidator;
+import fr.duvam.utils.PropertiesUtil;
+import fr.duvam.utils.ShellCommands;
 import gnu.io.CommPortIdentifier;
 import gnu.io.SerialPort;
 import gnu.io.SerialPortEvent;
 import gnu.io.SerialPortEventListener;
 
 public class ArduinoComm implements SerialPortEventListener {
-	SerialPort serialPort;
-	/** The port we're normally going to use. */
 
+	final String lockPath = "/var/lock";
+	final String lockPrefix = "LCK..";
+
+	SerialPort serialPort;
 	CommandListener commandListener;
-	
+	PropertiesUtil properties;
+
 	private static final Logger LOGGER = Logger.getLogger(ArduinoComm.class);
 
-	private static final String PORT_NAMES[] = { "/dev/tty.usbserial-A9007UX1", // Mac OS X
-			"/dev/ttyACM0", "/dev/ttyACM1", "/dev/ttyACM2", // Raspberry Pi
-			"/dev/ttyAMA0", "/dev/ttyUSB0", // Linux
-			"COM6", "COM11", "COM18", "COM19", "COM24",// Windows
-	};
+	/*
+	 * private static final String PORT_NAMES[] = { "/dev/ttyACM0", "/dev/ttyACM1",
+	 * "/dev/ttyACM2", // Raspberry Pi "/dev/ttyAMA0", "/dev/ttyUSB0", // Linux
+	 * "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM11", "COM18", "COM19",
+	 * "COM24",// Windows };
+	 */
 	/**
 	 * A BufferedReader which will be fed by a InputStreamReader converting the
 	 * bytes into characters making the displayed results codepage independent
@@ -40,10 +48,10 @@ public class ArduinoComm implements SerialPortEventListener {
 	/** Default bits per second for COM port. */
 	private static final int DATA_RATE = 115200;
 
-	public ArduinoComm(CommandListener commandListener) {
+	public ArduinoComm(CommandListener commandListener, PropertiesUtil properties) {
 		this.commandListener = commandListener;
+		this.properties = properties;
 		initialize();
-		LOGGER.info("Arduino link Started");
 	}
 
 	public void initialize() {
@@ -52,18 +60,47 @@ public class ArduinoComm implements SerialPortEventListener {
 		// https://www.raspberrypi.org/phpBB3/viewtopic.php?f=81&t=32186
 
 		String os = OSValidator.getFullOS();
-		// raspian
-		if (os.contains("arm")) {
-			LOGGER.info("arm set \"/dev/ttyAMA0\"");
-			System.setProperty("gnu.io.rxtx.SerialPorts", "/dev/ttyAMA0");
-		}
-		// debian
-		else if (os.contains("linux")) {
-			LOGGER.info("uni set \"/dev/ttyACM0\"");
-			System.setProperty("gnu.io.rxtx.SerialPorts", "/dev/ttyACM0");
+
+		List<String> ports = new LinkedList<String>();
+		if (os.contains("Linux")) {
+			ports = properties.getList("port.linux");
+			LOGGER.info("linux port " + ports);
+		} else if (os.contains("raspberry")) {
+			ports = properties.getList("port.pi");
+			LOGGER.info("raspian port " + ports);
 		} else if (os.contains("win")) {
-			LOGGER.info("win set COM24");
-			System.setProperty("gnu.io.rxtx.SerialPorts", "COM24");
+			ports = properties.getList("port.win");
+			LOGGER.info("windows port " + ports);
+		}
+
+		boolean arduinoConnected = false;
+		for (String port : ports) {
+			System.setProperty("gnu.io.rxtx.SerialPorts", port);
+			arduinoConnected = connectPort(port);
+			if (arduinoConnected) {
+				break;
+			}
+		}
+
+		if (!arduinoConnected) {
+			LOGGER.error("no arduino found");
+		}
+
+	}
+
+	private boolean connectPort(String port) {
+
+		// delete lock
+		String lockName = lockPrefix + port.substring(5);
+		File lock = new File(lockPath + "/" + lockName);
+		LOGGER.trace("lock : "+lockPath + "/" + lockName);
+		if (lock.exists()) {
+			ShellCommands commands = new ShellCommands();
+			List<String> deleteLock = new LinkedList<String>();
+			deleteLock.add("rm");
+			deleteLock.add(lockName);
+			commands.run(lockPath, deleteLock);
+			LOGGER.error("remove : " + lockName);
 		}
 
 		CommPortIdentifier portId = null;
@@ -72,38 +109,33 @@ public class ArduinoComm implements SerialPortEventListener {
 		// First, Find an instance of serial port as set in PORT_NAMES.
 		while (portEnum.hasMoreElements()) {
 			CommPortIdentifier currPortId = (CommPortIdentifier) portEnum.nextElement();
-			for (String portName : PORT_NAMES) {
-				LOGGER.info(portName);
-				if (currPortId.getName().equals(portName)) {
-					portId = currPortId;
-					break;
+
+			if (currPortId.getName().equals(port)) {
+				portId = currPortId;
+				LOGGER.info("open arduino on port : " + port);
+
+				try {
+					serialPort = (SerialPort) portId.open(this.getClass().getName(), TIME_OUT);
+
+					// set port parameters
+					serialPort.setSerialPortParams(DATA_RATE, SerialPort.DATABITS_8, SerialPort.STOPBITS_1,
+							SerialPort.PARITY_NONE);
+
+					// open the streams
+					input = new BufferedReader(new InputStreamReader(serialPort.getInputStream()));
+					output = serialPort.getOutputStream();
+
+					// add event listeners
+					// create access violation error
+					serialPort.addEventListener(this);
+					serialPort.notifyOnDataAvailable(true);
+					return true;
+				} catch (Exception e) {
+					LOGGER.error("can't reach arduino on port : " + port);
 				}
 			}
 		}
-
-		try {
-
-			if (portId == null) {
-				LOGGER.info("Could not find COM port");
-			}
-
-			serialPort = (SerialPort) portId.open(this.getClass().getName(), TIME_OUT);
-
-			// set port parameters
-			serialPort.setSerialPortParams(DATA_RATE, SerialPort.DATABITS_8, SerialPort.STOPBITS_1,
-					SerialPort.PARITY_NONE);
-
-			// open the streams
-			input = new BufferedReader(new InputStreamReader(serialPort.getInputStream()));
-			output = serialPort.getOutputStream();
-
-			// add event listeners
-			// create access violation error
-			serialPort.addEventListener(this);
-			serialPort.notifyOnDataAvailable(true);
-		} catch (Exception e) {
-			LOGGER.error("can't reach arduino");
-		}
+		return false;
 	}
 
 	/**
@@ -124,8 +156,9 @@ public class ArduinoComm implements SerialPortEventListener {
 		if (oEvent.getEventType() == SerialPortEvent.DATA_AVAILABLE) {
 			try {
 				String inputLine = input.readLine();
-				// serialPort.disableReceiveTimeout();
-				// serialPort.enableReceiveThreshold(1);
+				serialPort.disableReceiveTimeout();
+				serialPort.enableReceiveThreshold(1);
+				// TODO
 				commandListener.addKey(inputLine);
 				LOGGER.info(" received from arduino : " + inputLine);
 			} catch (Exception e) {
@@ -146,7 +179,8 @@ public class ArduinoComm implements SerialPortEventListener {
 	}
 
 	public static void main(String[] args) throws Exception {
-		ArduinoComm main = new ArduinoComm(null);
+		PropertiesUtil properties = new PropertiesUtil();
+		ArduinoComm main = new ArduinoComm(null, properties);
 		// SerialTest main = new SerialTest();
 		main.sendString("truc");
 

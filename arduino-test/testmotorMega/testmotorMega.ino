@@ -1,10 +1,20 @@
 //define pin name
-#define dir_1 26
+/*#define dir_1 26
 #define pwm_1 27
 //#define switch_1 13
 //#define switch_2 12
 #define dir_2 28
-#define pwm_2 29
+#define pwm_2 29*/
+
+//left
+#define pwm_1 4
+#define dir_1 5
+
+//right
+#define pwm_2 3
+#define dir_2 2
+
+
 //#define pot 1 //potentiometer
 
 int speed = 1000;

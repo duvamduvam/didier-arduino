@@ -1,8 +1,10 @@
+
 // RH_ASK.h
 //
 // Copyright (C) 2014 Mike McCauley
 // $Id: RH_ASK.h,v 1.16 2016/07/07 00:02:53 mikem Exp mikem $
 
+#define RH_ASK_ARDUINO_USE_TIMER2
 #ifndef RH_ASK_h
 #define RH_ASK_h
 

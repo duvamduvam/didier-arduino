@@ -1,62 +1,95 @@
-// LoRa 9x_TX8
-// -*- mode: C++ -*-
-// Example sketch showing how to create a simple messaging client (transmitter)
-// with the RH_RF95 class. RH_RF95 class does not provide for addressing or
-// reliability, so you should only use RH_RF95 if you do not need the higher
-// level messaging abilities.
-// It is designed to work with the other example LoRa9x_RX
+#include "ArduinoLog.h"
+
+//#define LOG_LEVEL LOG_LEVEL_SILENT
+//#define LOG_LEVEL LOG_LEVEL_ERROR
+#define LOG_LEVEL LOG_LEVEL_VERBOSE
 
 #include <SPI.h>
 #include <RH_RF95.h>
-#include <Keypad.h>
 
 #define RFM95_CS 10
 #define RFM95_RST 9
 #define RFM95_INT 2
 
+#include <Button.h>
+
+
+#define KEYBOARD_DELAY  100
+
+
 // Change to 434.0 or other frequency, must match RX's freq!
 #define RF95_FREQ 868.0
 
-#include <SD.h>
-#include <FTOLED.h>
-
-//screen
-const byte pin_cs = 7;
-const byte pin_dc = 2;
-const byte pin2_reset = 3;
-
-OLED oled(pin_cs, pin_dc, pin_reset);
+//oled
+#include "U8glib.h"
+//SDA 4 SCL 5
+U8GLIB_SSD1306_128X64 u8g(U8G_I2C_OPT_NONE | U8G_I2C_OPT_DEV_0);  // I2C / TWI
 
 // Singleton instance of the radio driver
 RH_RF95 rf95(RFM95_CS, RFM95_INT);
 
-// keypad
-const byte rows = 4; //nombre de lignes
-const byte cols = 4; //nombre de colonnes
-char keys[rows][cols] = {
-  {'1', '2', '3', 'A'},
-  {'4', '5', '6', 'B'},
-  {'7', '8', '9', 'C'},
-  {'*', '0', '#', 'D'}
-};
-byte rowPins[rows] = {41, 43, 45, 47}; //entrées numériques où sont branchées les lignes
-byte colPins[cols] = {33, 35, 37, 39}; //entrées numériques où sont branchées les colonnes
+/// JOYSTICK ///
+const int JOY_X = A0; // analog pin connected to X output
+const int JOY_Y = A1; // analog pin connected to Y output
+char joystick[3];
+const byte Joy_margin = 10;
 
-long lastModPressed = 0;
-char lastPressed;
-char mod = 'A';
+char charVoltage[20];
+char msg[5];
+char* mod = "A";
 
+Button button22 = Button(22, PULLUP);
+Button button23 = Button(23, PULLUP);
+Button button24 = Button(24, PULLUP);
+Button button25 = Button(25, PULLUP);
+Button button26 = Button(26, PULLUP);
+Button button27 = Button(27, PULLUP);
+Button button28 = Button(28, PULLUP);
+Button button29 = Button(29, PULLUP);
+Button button30 = Button(30, PULLUP);
+Button button31 = Button(31, PULLUP);
+Button button32 = Button(32, PULLUP);
+Button button33 = Button(33, PULLUP);
+Button button34 = Button(34, PULLUP);
+Button button35 = Button(35, PULLUP);
+Button button36 = Button(36, PULLUP);
+Button button37 = Button(37, PULLUP);
+Button button38 = Button(38, PULLUP);
+Button button39 = Button(39, PULLUP);
+Button button40 = Button(40, PULLUP);
+Button button41 = Button(41, PULLUP);
+Button button42 = Button(42, PULLUP);
+Button button43 = Button(43, PULLUP);
+Button button44 = Button(44, PULLUP);
+Button button45 = Button(45, PULLUP);
+Button button46 = Button(46, PULLUP);
+Button button47 = Button(47, PULLUP);
+Button button48 = Button(48, PULLUP);
+Button button49 = Button(49, PULLUP);
+Button button50 = Button(50, PULLUP);
+Button button51 = Button(51, PULLUP);
+Button button52 = Button(52, PULLUP);
+Button button53 = Button(53, PULLUP);
+Button button54 = Button(54, PULLUP);
+#define buttonSize 30
 
-Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, rows, cols );
-
+Button buttons[] = {button22, button23, button24, button25, button26, button27, button28, button29,
+                    button30, button31, button32, button33, button34, button35, button36, button37, button38, button39,
+                    button40, button41, button42, button43, button44, button45, button46, button47, button48, button49,
+                    button51, button53,
+                   };
 
 void setup()
 {
+  draw();
+
   pinMode(RFM95_RST, OUTPUT);
   digitalWrite(RFM95_RST, HIGH);
   while (!Serial);
   Serial.begin(9600);
   delay(100);
+
+  Log.begin   (LOG_LEVEL, &Serial);
 
   Serial.println("Arduino LoRa Remote");
 
@@ -82,49 +115,127 @@ void setup()
 
 int16_t packetnum = 0;  // packet counter, we increment per xmission
 
-void sendMsg(char msg[]) {
-  //itoa(packetnum++, msg + 13, 10);
+void sendJoystick(int x, int y) {
+
+  msg[0] = '<';
+  msg[1] = 'J';
+  msg[2] = (char)x;
+  msg[3] = (char)y;
+  msg[4] = '>';
+  rf95.send((uint8_t *)msg, 5);
   Serial.print("Sending "); Serial.println(msg);
-  //msg[19] = 0;
-  Serial.println("Sending..."); delay(10);
-  rf95.send((uint8_t *)msg, 2);
 }
+
+void sendMsg(int msg) {
+
+  char charNumber[10] = "";
+  itoa ( msg, charNumber, 10);
+  Serial.print("int to char "); Serial.println(charNumber);
+  sendMsg(charNumber);
+}
+
+void sendMsg(char input[]) {
+
+  msg[0] = '<';
+  msg[1] = mod[0];
+  msg[2] = input[0];
+  msg[3] = input[1];
+  msg[4] = '>';
+
+  rf95.send((uint8_t *)msg, 5);
+  Serial.print("Sending "); Serial.println(msg);
+}
+
+
+
+void updateJoystick() {
+
+  byte inx = analogRead(JOY_X) / 4;
+  byte iny = analogRead(JOY_Y) / 4;
+
+  byte x = map(inx, 35, 232, 0, 255);
+  byte y = map(iny, 10, 201, 0, 255);
+
+  char m = Joy_margin;
+
+  if (x > 128 + m || x < 128 - m || y > 128 + m || y < 128 - m) {
+    sendJoystick(x, y);
+    Log.notice("Joystick x:%d y:%d\n", x, y);
+  }
+
+}
+
+void draw(void)
+{
+  delay(10);
+
+  u8g.setColorIndex(1);
+  u8g.setFont(u8g_font_gdr30r);
+  u8g.drawStr(3, 50, mod);
+
+  u8g.setFont(u8g_font_gdr14r);
+  u8g.drawStr(60, 20, msg);
+
+  int sensorValue = analogRead(A0); //read the A0 pin value
+  float voltage = sensorValue * (5.00 / 1023.00) * 2; //convert the value to a true voltage.
+
+  //max 8.4V min 6V
+  int voltagePourcentage = (((voltage - 6) / 2.4) * 100);
+
+  sprintf(charVoltage, "%d", voltagePourcentage); // %f au lieu de %d
+  charVoltage[2] = '%';
+  //Serial.print(voltagePourcentage); Serial.print(" "); Serial.println(charVoltage);
+  u8g.drawStr(60, 55, charVoltage);
+}
+
+int checkButton() {
+  for (int i = 0; i < buttonSize; i++) {
+    //Serial.print("test "); Serial.println(buttons[i].getPin());
+    //    if (buttons[i].uniquePress())
+    if (buttons[i].isPressed())
+    {
+      Serial.print(buttons[i].getPin()); Serial.println(" pressed");
+      return buttons[i].getPin();
+    }
+  }
+  return 0;
+}
+
+long lastKeyboardTc;
+int buttonPressed;
 
 void loop()
 {
-
-
-  // test monitor
-  char debugInput[32];
-  int availableBytes = Serial.available();
-  for (int i = 0; i < availableBytes; i++)
+  if (millis() - lastKeyboardTc > KEYBOARD_DELAY)
   {
-    debugInput[i] = Serial.read();
-  }
-  if (availableBytes > 0) {
-    Serial.print("monitor input : ");Serial.println(debugInput);
-    sendMsg(debugInput);
-  }
-  // end test monitor
+    lastKeyboardTc = millis();
 
-  char key = keypad.getKey();
-
-  if (key != NO_KEY) {
-    Serial.println(key);
-    char in[2];
-    in[0] = mod;
-    in[1] = key;
-    //for (int i = 2; i < 10; i++) {
-    //  in[i] = ' ';
-    //}
-    sendMsg(in);
-  }
-
-
-  if (key == 'A' || key == 'B' || key == 'C' || key == 'D') {
-    if (millis() - lastModPressed < 500) {
-      mod = key;
+    buttonPressed = checkButton();
+    if (buttonPressed != 0)
+    {
+      sendMsg(buttonPressed);
     }
-    lastModPressed = millis();
+
   }
+
+  updateJoystick();
+
+  u8g.firstPage();
+  do {
+    draw();
+    u8g.setColorIndex(1);
+  } while ( u8g.nextPage() );
+
+
+
+  if (buttonPressed == 48)
+    mod = "A";
+  else if (buttonPressed == 42)
+    mod = "B";
+  else if (buttonPressed == 49)
+    mod = "C";
+  else if (buttonPressed == 43)
+    mod = "D";
+
+  delay(30);
 }

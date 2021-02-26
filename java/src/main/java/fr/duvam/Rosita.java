@@ -1,30 +1,28 @@
 package fr.duvam;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-
 import javax.swing.SwingUtilities;
 
 import org.apache.log4j.Logger;
 
-import fr.duvam.arduino.ArduinoComm;
 import fr.duvam.lights.Lights;
-import fr.duvam.midi.MidiHandler;
-import fr.duvam.video.CommandListener;
-import fr.duvam.video.MediaListener;
-import fr.duvam.video.MediaManager;
-import fr.duvam.video.PlayerManager;
+import fr.duvam.listener.CheckLastModified;
+import fr.duvam.listener.CommandListener;
+import fr.duvam.listener.MediaListener;
+import fr.duvam.media.PlayerManager;
+import fr.duvam.utils.OSValidator;
+import fr.duvam.utils.PropertiesUtil;
 
 public class Rosita {
 
-	private static Logger LOGGER = Logger.getLogger(Rosita.class);
-	
-	private CommandListener listener;
+	private static Logger LOGGER;
+
+	private CommandListener commands;
 	private PlayerManager playerManager;
 	private Lights lights;
+	PropertiesUtil properties;
 
 	public static void main(String[] args) {
-	
+
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
@@ -35,64 +33,67 @@ public class Rosita {
 
 	public Rosita() {
 
+		properties = new PropertiesUtil();
+
 		initLog();
-		
-		
-		MediaManager mediaManager = new MediaManager();
-		listener = new CommandListener(playerManager, mediaManager);
-		//ArduinoComm arduino = new ArduinoComm(listener);
-		MidiHandler midi = new MidiHandler(listener);
-		playerManager = new PlayerManager(mediaManager, listener, midi);
-		//lights = new Lights(arduino);
-		listener.setPlayerManager(playerManager);
+
+		commands = new CommandListener();
+		// ArduinoComm arduino = new ArduinoComm(commands, properties);
+		// midi listener and player !!!! leave the lister before the player therwise the
+		// player don't work
+		// TODO could be moved inside playerManager
+		// new MidiListener(commands, properties);
+		// MidiPlayer midiPlayer = new MidiPlayer(properties);
+
+		playerManager = new PlayerManager(commands);
+		commands.setPlayerManager(playerManager);
+		// lights = new Lights(arduino);
 
 	}
 
-	
-	void initLog(){
-		//init log4j property logging
-		try {
-			String logPrefix = OSValidator.getFullOS()+"-"+InetAddress.getLocalHost().getHostName();			
-			System.setProperty("hostName", logPrefix);
-			Logger LOGGER = Logger.getLogger(Rosita.class);
-			LOGGER.info("<<<<<<<<<<<<<<<<<<<<<<<<<<< START >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-		} catch (UnknownHostException e) {
-			LOGGER.error(e);
-		} 
+	void initLog() {
+		// init log4j property logging
+		String logsPath = properties.getLogPath();
+		System.setProperty("logsPath", logsPath);
+		String os = OSValidator.getFullOS();
+
+		System.setProperty("hostName", os);
+
+		LOGGER = Logger.getLogger(Rosita.class);
+		LOGGER.info("current os : " + os);
 	}
-	
+
 	protected void start() {
 
-		playerManager.playDefaultVideo();
-		initListeners(listener, lights);
+		playerManager.videoPlayer.playDefault();
+		initListeners();
+
 	}
 
-	private void initListeners(CommandListener keyListener, Lights lights) {
+	private void initListeners() {
 
 		// key listener
-		Thread keyListenerThread = new Thread(keyListener);
+		Thread keyListenerThread = new Thread(commands);
 		keyListenerThread.setDaemon(true);
 		keyListenerThread.start();
 
-
-
 		// video listener
-		MediaListener mediaListener = new MediaListener(playerManager, keyListener, lights);
+		MediaListener mediaListener = new MediaListener(playerManager);
 		Thread mediaListenerThread = new Thread(mediaListener);
 		mediaListenerThread.setDaemon(true);
-		mediaListenerThread.start();		
+		mediaListenerThread.start();
 
+		// arduino listener
+		CheckLastModified fileListener = new CheckLastModified(playerManager, commands);
+		Thread fileListenerThread = new Thread(fileListener);
+		fileListenerThread.setDaemon(true);
+		fileListenerThread.start();
+		
 		// light listener
-		Thread lightsListenerThread = new Thread(lights);
-		lightsListenerThread.setDaemon(true);
-		lightsListenerThread.start();	
-		
-		// test key listener
-		/*TestKeyProvider testKeyListener = new TestKeyProvider(listener);
-		Thread testKeyListenerThread = new Thread(testKeyListener);
-		testKeyListenerThread.setDaemon(true);
-		testKeyListenerThread.start();	*/	
-		
+		// Thread lightsListenerThread = new Thread(lights);
+		// lightsListenerThread.setDaemon(true);
+		// lightsListenerThread.start();
+
 	}
 
 }

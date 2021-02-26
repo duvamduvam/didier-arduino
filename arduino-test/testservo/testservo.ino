@@ -1,13 +1,13 @@
-#include <Wire.h>
+
 #include <Adafruit_PWMServoDriver.h>
 #include "ArduinoLog.h"
 #define LOG_LEVEL LOG_LEVEL_VERBOSE
 
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
-#define SERVOMIN  125 // this is the 'minimum' pulse length count (out of 4096)
-#define SERVOMAX  575 // this is the 'maximum' pulse length count (out of 4096)
+#define SERVOMIN  80 // this is the 'minimum' pulse length count (out of 4096)
+#define SERVOMAX  640 // this is the 'maximum' pulse length count (out of 4096)
 
-int SERVOCURRENT = 125; // this is the 'minimum' pulse length count (out of 4096)
+int SERVOCURRENT = 400; // this is the 'minimum' pulse length count (out of 4096)
 char input;
 
 void setup() {
