@@ -22,7 +22,7 @@ class Neck {
       if (SERVOMIN >= currentPos <= SERVOMAX)
       {
         Log.notice ("position %d next step %d\n", currentPos, step);
-        currentPos = currentPos + step;
+        currentPos += step;
         pwm.setPWM(0, 0, currentPos);
       }
     }
@@ -35,16 +35,21 @@ class Neck {
       pwm = Adafruit_PWMServoDriver();
       pwm.begin();
       pwm.setPWMFreq(60);  // Analog servos run at ~60 Hz updates
-      pwm.setPWM(0, 0, 220);
+      //pwm.setPWM(0, 0, 220);
       delay(100);
       pwm.setPWM(0, 0, currentPos);
     }
 
     void process(char* in) {
       if (in[0] == 'N') {
-        token = 0;
-        command.set(in);
-        getCommand();
+
+        strcpy(action, in);
+
+        /*
+                   token = 0;
+          command.set(in);
+          getCommand();
+        */
         updateTargetPos();
         Log.notice("######## Neck process input:\"%s\" action[%d]:\"%s\" currentPos:%d targetPos:%d ########\n", in, token, action, currentPos, targetPos);
       }
@@ -62,9 +67,11 @@ class Neck {
     }
 
     void updateTargetPos() {
-      if (strcmp(action, "H+")) {
+      if (strcmp(action, "N+")) {
         targetPos += 10;
-      } else if (strcmp(action, "H-")) {
+        Log.notice("Neck +10\n");
+      } else if (strcmp(action, "N-")) {
+        Log.notice("Neck -10\n");
         targetPos -= 10;
       } else {
         targetPos = ((action[0] - 32) * 100) + (action[1] - 32);
@@ -79,14 +86,14 @@ class Neck {
 
     void execute() {
 
-      if (command.doFinish()) {
-        if (!next()) {
-          //TODO come back to the middle
-        }
-      }
-      if (command.doAttack()) {
-        moveHead();
-      }
+      //if (command.doFinish()) {
+      //  if (!next()) {
+      //TODO come back to the middle
+      //  }
+      //}
+      //if (command.doAttack()) {
+      moveHead();
+      //}
 
 
     }

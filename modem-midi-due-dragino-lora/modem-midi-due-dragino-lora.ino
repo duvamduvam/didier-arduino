@@ -10,6 +10,7 @@
 #define RFM95_CS 10
 #define LED 13
 
+#define RESET 7
 
 /// start radio def /////
 
@@ -24,6 +25,8 @@ uint8_t len = sizeof(radioMsg);
 
 void setup()
 {
+  delay(1000);
+  
   pinMode(LED, OUTPUT);
   pinMode(RFM95_RST, OUTPUT);
   digitalWrite(RFM95_RST, HIGH);
@@ -39,9 +42,9 @@ void setup()
   delay(100);
 
   digitalWrite(RFM95_RST, LOW);
-  delay(10);
+  delay(100);
   digitalWrite(RFM95_RST, HIGH);
-  delay(10);
+  delay(100);
   while (!rf95.init()) {
     Log.error("LoRa radio init failed");
     while (1);
@@ -55,7 +58,7 @@ void setup()
   rf95.setTxPower(23, false);
 }
 
-void radioRead() {
+void radioReadOld() {
   if (rf95.available())
   {
     if (rf95.recv(radioMsg, &len))
@@ -70,6 +73,25 @@ void radioRead() {
     }
   }
 }
+
+void radioRead() {
+  if (rf95.available())
+  {
+    uint8_t len = sizeof(radioMsg);
+    if (rf95.recv(radioMsg, &len))
+    {
+      digitalWrite(LED, HIGH);
+      Log.notice("radio received %s\n", radioMsg);
+      digitalWrite(LED, LOW);
+
+    }
+    else
+    {
+      Log.error("Receive failed");
+    }
+  }
+}
+
 
 void sendNote(char mod, int note) {
 
@@ -90,15 +112,14 @@ void loop()
   if (strcmp((char*)radioMsg, "")) {
     Serial2.print((char*)radioMsg);
 
-
-
     //TODO extract prefix and postfix from here
-
+/*
     char note[2];
     note[0] = radioMsg[2];
     note[1] = radioMsg[3];
+    */
     //sendNote(input[1], atoi(note));
-    sendNote(radioMsg[1], atoi(note));
+    //sendNote(radioMsg[1], atoi(note));
 
   }
 
@@ -107,5 +128,5 @@ void loop()
     Serial.print("serial zero received:"); Serial.println(s0);
     }*/
 
-  memset(radioMsg, 0, sizeof(radioMsg));
+    memset(radioMsg, 0, sizeof(radioMsg));
 }

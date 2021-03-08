@@ -1,4 +1,5 @@
 #include "ArduinoLog.h"
+#include "Fonctions.h"
 
 //#define LOG_LEVEL LOG_LEVEL_SILENT
 //#define LOG_LEVEL LOG_LEVEL_ERROR
@@ -28,14 +29,35 @@ U8GLIB_SSD1306_128X64 u8g(U8G_I2C_OPT_NONE | U8G_I2C_OPT_DEV_0);  // I2C / TWI
 // Singleton instance of the radio driver
 RH_RF95 rf95(RFM95_CS, RFM95_INT);
 
+
+
+
+#define JOY_CALIB_DATA_RANGE 100
+#define JOY_SEND_MARGIN 10
+
+//Manche radiocommande
+#define JOY_CALIB_X_MIN 145
+#define JOY_CALIB_X_MAX 927
+#define JOY_CALIB_Y_MIN 140
+#define JOY_CALIB_Y_MAX 910
+
+/*
+//Joy Playstation
+#define JOY_CALIB_X_MIN 0
+#define JOY_CALIB_X_MAX 1023
+#define JOY_CALIB_Y_MIN 1023
+#define JOY_CALIB_Y_MAX 0
+*/
+
+
 /// JOYSTICK ///
 const int JOY_X = A0; // analog pin connected to X output
 const int JOY_Y = A1; // analog pin connected to Y output
 char joystick[3];
-const byte Joy_margin = 10;
+
 
 char charVoltage[20];
-char msg[5];
+char msg[20];
 char* mod = "A";
 
 Button button22 = Button(22, PULLUP);
@@ -117,14 +139,48 @@ int16_t packetnum = 0;  // packet counter, we increment per xmission
 
 void sendJoystick(int x, int y) {
 
+  //Hearder
   msg[0] = '<';
   msg[1] = 'J';
-  msg[2] = (char)x;
-  msg[3] = (char)y;
-  msg[4] = '>';
-  rf95.send((uint8_t *)msg, 5);
-  Serial.print("Sending "); Serial.println(msg);
+  msg[2] = 0;
+
+  char* packet = Concat16(msg, IntToAsciiInt(x));
+  packet = Concat16(packet,",");
+  packet = Concat16(packet, IntToAsciiInt(y));
+  packet = Concat16(packet, ">");
+
+  Serial.println(packet);
+  int len = CharArrayLength(packet,16);
+  Serial.println(len);
+  rf95.send((uint8_t *)packet, len+5);
+
+//  Serial.print("Sending "); Serial.println(msg);
+
 }
+
+//Commande directe des moteurs (-100 à 100)
+void sendWheels(int l, int r) 
+{
+
+  //Hearder
+  msg[0] = '<';
+  msg[1] = 'W';
+  msg[2] = 0;
+
+  char* packet = Concat16(msg, IntToAsciiInt(l));
+  packet = Concat16(packet,",");
+  packet = Concat16(packet, IntToAsciiInt(r));
+  packet = Concat16(packet, ">");
+
+  Serial.println(packet);
+  int len = CharArrayLength(packet,16);
+  Serial.println(len);
+  rf95.send((uint8_t *)packet, len+5);
+
+//  Serial.print("Sending "); Serial.println(msg);
+
+}
+
 
 void sendMsg(int msg) {
 
@@ -150,17 +206,29 @@ void sendMsg(char input[]) {
 
 void updateJoystick() {
 
-  byte inx = analogRead(JOY_X) / 4;
-  byte iny = analogRead(JOY_Y) / 4;
+  int inx = analogRead(JOY_X);
+  int iny = analogRead(JOY_Y);
 
-  byte x = map(inx, 35, 232, 0, 255);
-  byte y = map(iny, 10, 201, 0, 255);
+  //Manche radiocommande
+  int x = map(inx, JOY_CALIB_X_MIN, JOY_CALIB_X_MAX, -JOY_CALIB_DATA_RANGE, JOY_CALIB_DATA_RANGE);
+  int y = map(iny, JOY_CALIB_Y_MIN, JOY_CALIB_Y_MAX, -JOY_CALIB_DATA_RANGE, JOY_CALIB_DATA_RANGE);
 
-  char m = Joy_margin;
+  x = BoundInt(x, -JOY_CALIB_DATA_RANGE, JOY_CALIB_DATA_RANGE);
+  y = BoundInt(y, -JOY_CALIB_DATA_RANGE, JOY_CALIB_DATA_RANGE);
 
-  if (x > 125 + m || x < 125 - m || y > 92 + m || y < 92 - m) {
-    sendJoystick(x, y);
-    Log.notice("Joystick x:%d y:%d\n", x, y);
+
+  if (x > JOY_SEND_MARGIN || x <  -JOY_SEND_MARGIN || y > JOY_SEND_MARGIN || y < -JOY_SEND_MARGIN) 
+  {
+    SpeedVector robot = ToRobot(x, y);
+    int l = robot.left * 100;
+    int r = robot.right* 100;
+    sendWheels(l, r); 
+    Log.notice("Wheels  l:%d r:%d\n", l, r);
+
+    
+    //sendJoystick(x, y);
+    //Log.notice("Joystick x:%d y:%d\n", inx, iny);
+//    Log.notice("Joystick x:%d y:%d\n", x, y);
   }
 
 }
@@ -218,7 +286,7 @@ void loop()
 
   }
 
- // updateJoystick();
+  //updateJoystick();
 
   u8g.firstPage();
   do {

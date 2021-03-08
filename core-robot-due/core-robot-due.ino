@@ -4,6 +4,8 @@
 //#define LOG_LEVEL LOG_LEVEL_ERROR
 #define LOG_LEVEL LOG_LEVEL_VERBOSE
 
+#define LOG_NOTICE_CORE
+
 #include "Wheel.cpp"
 #include "Lights.cpp"
 #include "Neck.cpp"
@@ -37,9 +39,8 @@
 unsigned int recv_size = 0;
 unsigned long prev, interval = 5000;
 
-
-const int inputSize = 4;
-char radio  [4];
+#define INPUT_SIZE 20
+char radio  [INPUT_SIZE];
 bool newData = false;
 byte inputCount = 0;
 
@@ -64,28 +65,54 @@ void setup()
   Serial2.begin(115200);
   Log.begin   (LOG_LEVEL, &Serial);
 
-  face.loadSequence(0);
+  neck.init();
 
   delay(100);
 
 }
 
+boolean serialAvailable(byte nb) {
 
-void recvWithStartEndMarkers() {
+  switch (nb) {
+    case 0:
+      return Serial.available();
+    case 1:
+      return Serial1.available();
+    case 2:
+      return Serial2.available();
+  }
+
+}
+
+char serialRead(byte nb) {
+
+  switch (nb) {
+    case 0:
+      return Serial.read();
+    case 1:
+      return Serial1.read();
+    case 2:
+      return Serial2.read();
+  }
+
+}
+
+
+void recvWithStartEndMarkers(byte serial) {
   static boolean recvInProgress = false;
   static byte ndx = 0;
   char startMarker = '<';
   char endMarker = '>';
   char rc;
 
-  while (Serial.available() > 0 && newData == false) {
-    rc = Serial.read();
+  while (serialAvailable(serial) > 0 && newData == false) {
+    rc = serialRead(serial);
     if (recvInProgress == true) {
       if (rc != endMarker) {
         radio[ndx] = rc;
         ndx++;
-        if (ndx >= inputSize) {
-          ndx = inputSize - 1;
+        if (ndx >= INPUT_SIZE) {
+          ndx = INPUT_SIZE - 1;
         }
       }
       else {
@@ -101,35 +128,6 @@ void recvWithStartEndMarkers() {
   }
 }
 
-void recvWithStartEndMarkers2() {
-  static boolean recvInProgress = false;
-  static byte ndx = 0;
-  char startMarker = '<';
-  char endMarker = '>';
-  char rc;
-
-  while (Serial2.available() > 0 && newData == false) {
-    rc = Serial2.read();
-    if (recvInProgress == true) {
-      if (rc != endMarker) {
-        radio[ndx] = rc;
-        ndx++;
-        if (ndx >= inputSize) {
-          ndx = inputSize - 1;
-        }
-      }
-      else {
-        radio[ndx] = '\0'; // terminate the string
-        recvInProgress = false;
-        ndx = 0;
-        newData = true;
-      }
-    }
-    else if (rc == startMarker) {
-      recvInProgress = true;
-    }
-  }
-}
 
 void loop()
 {
@@ -138,17 +136,22 @@ void loop()
 
   //Log.notice("loop\n");
 
-  if (Serial.available()) {
-    recvWithStartEndMarkers();
-    Log.notice("input from keyboard %s\n", radio);
-    newData = true;
+  //input from keyboard
+  recvWithStartEndMarkers(0);
+
+  //input form modem
+  recvWithStartEndMarkers(2);
+
+  if (newData)
+  {
+
+#ifdef LOG_NOTICE_CORE
+    Log.notice("message from modem : %s\n", radio);
+#endif
+
   }
 
-  if (Serial2.available()) {
-    recvWithStartEndMarkers2();
-    newData = true;
-    Log.notice("message from modem : %s\n", radio);
-  }
+  // }
 
   if (newData) {
     newData = false;
@@ -171,7 +174,7 @@ void loop()
   wheel.execute();
   lights.execute();
   //sound.execute();
-  //neck.execute();
+  neck.execute();
   face.execute();
 
 

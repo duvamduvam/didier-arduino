@@ -1,80 +1,8 @@
 #pragma once
 #include <Wire.h>
-#include <DS3231.h>
+//#include <DS3231.h>
 #include "ArduinoLog.h"
 #include "Fonctions.h"
-
-
-
-
-//######### PROTOCOL ##########
-//--------------------------
-
-//Extrait les valeurs numériques d'une chaine composée de 2 valeurs séparées par une virgule
-void ParseVectorString(char* chain, int* adX, int* adY)
-{
-
-  char str[12];
-  strcpy(str,chain);
-
-  const char s[3] = "W,";
-  char *token;
-   
-   token = strtok(str, s);
-   *adX = atoi(token);
-  
-   token = strtok(NULL, s);
-   *adY = atoi(token);
-  
-}
-
-//Extrait les valeurs numériques d'une chaine composée de 2 valeurs séparées par une virgule
-void ParseIntString(char* chain, int* adX)
-{
-
-  char str[12];
-  strcpy(str,chain);
-
-  const char s[3] = "N";
-  char *token;
-   
-   token = strtok(str, s);
-   *adX = atoi(token);
-  
-}
-
-
-char* SubString20(char* chain, int startIndex, int stopIndex)
-{
-  static char result[21];
-
-  int len = stopIndex-startIndex;
-
-  int resultPtr=0;
-  int i;
-  for(i=0;i<len;i++)
-    result[resultPtr++]=chain[startIndex+i];
-    
-  return result;
-  
-}
-
-//On retire le premier caractère
-char* ShiftCharArray20(char* chain)
-{
-  static char result[21];
-  int len = CharArrayLength(chain,20);
-
-  int i;
-  for(i=0;i<len;i++)
-    result[i++]=chain[i+1];
-  
-  result[i++]=0;
-
-  return result;
-}
-
-
 
 //######### BOUND ##########
 //--------------------------
@@ -89,29 +17,6 @@ int BoundInt(int value, int valMin, int valMax)
 
 //######### CHAIN ##########
 //--------------------------
-
-int AsciiIntToInt(char* chain)
-{
-  bool sig= 0;
-  if (chain[0]=='-')
-    sig=1;
-  
-  int len = CharArrayLength(chain,10);
-  int i;
-  int result=0;
-  for(i=0;i<len;i++)
-  {
-    result+=chain[i+sig]-'0';
-    result*=10;
-  }
-  result/=10;
-  
-  if (sig)
-    result *= -1;
-
-  return result;
-}
-
 
 char* IntToAsciiInt(int value)
 {
@@ -128,6 +33,13 @@ char* IntToAsciiInt(int value)
     result[0]='-';
     resultPtr++;
     value*=-1;
+  }
+
+  if (value==0)
+  {
+    result[0]='0';
+    result[1]=0;
+    return result;
   }
 
   int rest = value;
@@ -147,6 +59,8 @@ char* IntToAsciiInt(int value)
   result[resultPtr++]=0; //EOT //fin de chaine
   return result;
 }
+
+
 
 int CharArrayLength(char *s,int sizeMax)
 {
@@ -180,7 +94,6 @@ char* Concat16(char* a, char* b)
 
 
 
-
 //######### HORLOGE RTC ##########
 //--------------------------
 
@@ -204,6 +117,12 @@ float MapFloat(float x, float in_min, float in_max, float out_min, float out_max
     return 0;
   return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
+
+
+
+//######### TO ROBOT ##########
+//--------------------------
+//Transformation depuis une coordonée cartésienne d'un joystick vers des commandes de vitesse pour un robot de type char d'assault
 
 
 

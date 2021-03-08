@@ -2,8 +2,9 @@
 #include "ArduinoLog.h"
 #include "Commands.h"
 
+//#define LOG_NOTICE_WHEEL
 
-#define SPEED_MAX  50
+#define SPEED_MAX  100
 #define SPEED_RATIO  1
 #define SPEED_ACCELERATION  10 //2ms
 #define INCREMENT_ACCELERATION  0.05f //2ms
@@ -15,6 +16,8 @@
 //right
 #define pwm_right 4
 #define dir_right 5
+
+
 
 
 class Wheel
@@ -62,7 +65,9 @@ class Wheel
         command = cmd;
         extractChar(action, cmd.wheel, 0, 1);
 
+#ifdef LOG_NOTICE_WHEEL
         Log.notice("######## Wheel process input:\"%s\" action:\"%s\" ########\n", cmd.wheel, action);
+#endif
 
         updateInstruction();
 
@@ -153,9 +158,10 @@ class Wheel
         if (speedright < 10)
           speedright = 0;
 
-        //Log.notice("JOY - L=%d - R=%d \n", speedleft, speedright);
-
-        //  Log.notice("JOY - CMD L=%d - R=%d | CUR L=%d - R=%d | DIR L=%d - R=%d \n", decCmdL,decCmdR, decL,decR,dL,dR);
+#ifdef LOG_NOTICE_WHEEL
+        Log.notice("JOY - L=%d - R=%d \n", speedleft, speedright);
+        Log.notice("JOY - CMD L=%d - R=%d | CUR L=%d - R=%d | DIR L=%d - R=%d \n", decCmdL, decCmdR, decL, decR, dL, dR);
+#endif LOG_NOTICE_WHEEL
 
         digitalWrite(dir_left, dL);
         digitalWrite(dir_right, dR);

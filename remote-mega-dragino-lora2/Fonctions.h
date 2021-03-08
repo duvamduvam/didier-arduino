@@ -10,24 +10,10 @@
 #define FASTLED_INTERNAL
 #include <FastLED.h>
 
-//######### PROTOCOL ##########
-//--------------------------
-void ParseVectorString(char* chain, int* adX, int* adY);
-void ParseIntString(char* chain, int* adX);
-char* SubString20(char* chain, int startIndex, int stopIndex);
-char* ShiftCharArray20(char* chain);
 
 //######### BOUND ##########
 //--------------------------
 int BoundInt(int value, int valMin, int valMax);
-
-//######### CHAIN ##########
-//--------------------------
-
-int AsciiIntToInt(char* chain);
-char* IntToAsciiInt(int value);
-int CharArrayLength(char *s,int sizeMax);
-char* Concat16(char* a, char* b);
 
 
 

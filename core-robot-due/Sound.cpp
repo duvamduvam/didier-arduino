@@ -51,24 +51,16 @@ class Sound {
     }
 
     void execute() {
-      if (strcmp(music, "")) {
-        //Log.notice("Sound music : %s\n", music);
-        if (playing) {
-          if (command.doFinish()) {
-            Serial3.println('S');
-            Log.notice("stop playing sound %s\n", music);
-            playing = false;
-            if (!next()) {
-              strcpy(music, "");
-            }
-          }
-        } else {
-          if (command.doAttack()) {
-            Serial3.println(music);
-            Log.notice("start playing sound %s\n", music);
-            playing = true;
-          }
+      if (playing) {
+        if (command.doFinish()) {
+          Serial3.println('S');
+          Log.notice("stop playing sound %s\n", music);
+          playing = false;
         }
+      } else if (command.doAttack()) {
+        Serial3.println(music);
+        Log.notice("start playing sound %s\n", music);
+        playing = true;
       }
     }
 };
