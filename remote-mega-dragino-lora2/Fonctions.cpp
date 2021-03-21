@@ -8,11 +8,11 @@
 //--------------------------
 int BoundInt(int value, int valMin, int valMax)
 {
- if (value < valMin)
-  return valMin;
- if (value > valMax)
-  return valMax;
- return value;
+  if (value < valMin)
+    return valMin;
+  if (value > valMax)
+    return valMax;
+  return value;
 }
 
 
@@ -20,14 +20,14 @@ int BoundInt(int value, int valMin, int valMax)
 //--------------------------
 
 /*void ExecuteRtc(){
-  
-}
 
-void StartRtc(){
+  }
+
+  void StartRtc(){
     //REAL TIME
   Wire.begin();
   DS3231_init(DS3231_CONTROL_INTCN);
-}*/
+  }*/
 
 //######### MATHS ##########
 //--------------------------
@@ -56,120 +56,120 @@ float MapFloat(float x, float in_min, float in_max, float out_min, float out_max
 
 SpeedVector ToRobot(int bX, int bY)
 {
-          //Fractionaire (protocol -> maths)
-          float x = MapFloat(bX, -100, 100, -1, 1);
-          float y = MapFloat(bY, -100, 100, -1, 1);
+  //Fractionaire (protocol -> maths)
+  float x = MapFloat(bX, -100, 100, -1, 1);
+  float y = MapFloat(bY, -100, 100, -1, 1);
 
 
-          //Recherche du cadran trigonométrique
-          char cadran = 0;
-          if (x < 0 && y > 0)
-            cadran = 1;
-          else if (x < 0 && y < 0)
-            cadran = 2;
-          else if (x > 0 && y < 0)
-            cadran = 3;
-          
-          //  Log.notice("PARSE JOY - C=%d - M=%d \n",cadran,dm);
+  //Recherche du cadran trigonométrique
+  char cadran = 0;
+  if (x < 0 && y > 0)
+    cadran = 1;
+  else if (x < 0 && y < 0)
+    cadran = 2;
+  else if (x > 0 && y < 0)
+    cadran = 3;
 
-          int dx = (int)(x * 1000);
-          int dy = (int)(y * 1000);
+  //  Log.notice("PARSE JOY - C=%d - M=%d \n",cadran,dm);
 
-             //Log.notice("PARSE JOY - X=%d - Y=%d \n",dx,dy);
+  int dx = (int)(x * 1000);
+  int dy = (int)(y * 1000);
 
-          double angle = atan(y / x);
-          double module = sqrt(x * x + y * y);
-          if (module > 1)
-            module = 1;
+  //Log.notice("PARSE JOY - X=%d - Y=%d \n",dx,dy);
 
-         int sousCadran;
-          //Configuration des moteurs en fonction de l'angle
-          float l, r;
-          switch (cadran)
-          {
-            case 0: //Avance Droite
-              l = 1;
-              r = MapFloat(angle, 0, PI / 2, -1, 1);
-              break;
+  double angle = atan(y / x);
+  double module = sqrt(x * x + y * y);
+  if (module > 1)
+    module = 1;
 
-            case 1: //Avance Gauche
-              l = MapFloat(angle, -PI/2, 0, 1, -1);
-              r = 1;
-              break;
+  int sousCadran;
+  //Configuration des moteurs en fonction de l'angle
+  float l, r;
+  switch (cadran)
+  {
+    case 0: //Avance Droite
+      l = 1;
+      r = MapFloat(angle, 0, PI / 2, -1, 1);
+      break;
 
-            case 2: //Recul Gauche
+    case 1: //Avance Gauche
+      l = MapFloat(angle, -PI / 2, 0, 1, -1);
+      r = 1;
+      break;
 
-              sousCadran=0;
-              if (angle > PI / 6 && angle < PI /3)
-                sousCadran = 1;
-              if (angle > PI / 3)
-                sousCadran = 2;
+    case 2: //Recul Gauche
 
-              switch (sousCadran)
-              {
-                case 0:
-                  l = MapFloat(angle, 0, PI / 6, -1, 0);
-                  r = MapFloat(angle, 0, PI / 6, 1, 0);
-                  break;
-                  
-                case 1:
-                  l = 0;
-                  r = MapFloat(angle, PI / 6, PI / 3, 0, -1);
-                  break;
-                  
-                case 2:
-                  l = MapFloat(angle, PI / 3, PI / 2, 0, -1);
-                  r = -1;
-                  break;
-              }
+      sousCadran = 0;
+      if (angle > PI / 6 && angle < PI / 3)
+        sousCadran = 1;
+      if (angle > PI / 3)
+        sousCadran = 2;
 
-              
-              break;
+      switch (sousCadran)
+      {
+        case 0:
+          l = MapFloat(angle, 0, PI / 6, -1, 0);
+          r = MapFloat(angle, 0, PI / 6, 1, 0);
+          break;
 
-            case 3: //Recul Droite
+        case 1:
+          l = 0;
+          r = MapFloat(angle, PI / 6, PI / 3, 0, -1);
+          break;
 
-              sousCadran=5;
-              if (angle < -PI / 6 && angle > -PI /3)
-                sousCadran = 4;
-              if (angle < -PI / 3)
-                sousCadran = 3;
-
-              switch (sousCadran)
-              {
-                case 3:
-                  l = -1;
-                  r = MapFloat(angle, -PI / 2, -PI / 3, -1, 0);
-                  break;
-                  
-                case 4:
-                  l = MapFloat(angle, -PI / 3, -PI / 6, -1, 0);
-                  r = 0;
-                  break;
-                  
-                case 5:
-                  l = MapFloat(angle, -PI / 6, 0, 0, 1);
-                  r = MapFloat(angle, -PI / 6, 0, 0, -1);
-                  break;
-              }
-              break;
-          }
-
-          int da = (int)(angle * 1000);
-          int dm = (int)(module * 1000);
-
-             //Log.notice("PARSE JOY - A=%d - M=%d | C=%d | SC=%d \n",da,dm,cadran,sousCadran);
-           //  Log.notice("PARSE JOY - X=%d - Y=%d | A=%d - M=%d | C=%d | SC=%d \n",dx,dy,da,dm,cadran,sousCadran);
+        case 2:
+          l = MapFloat(angle, PI / 3, PI / 2, 0, -1);
+          r = -1;
+          break;
+      }
 
 
-          SpeedVector result;
-          result.left = l * module;
-          result.right = r * module;
+      break;
 
-          int dl = (int)(result.left * 1000);
-          int dr = (int)(result.right * 1000);
+    case 3: //Recul Droite
+
+      sousCadran = 5;
+      if (angle < -PI / 6 && angle > -PI / 3)
+        sousCadran = 4;
+      if (angle < -PI / 3)
+        sousCadran = 3;
+
+      switch (sousCadran)
+      {
+        case 3:
+          l = -1;
+          r = MapFloat(angle, -PI / 2, -PI / 3, -1, 0);
+          break;
+
+        case 4:
+          l = MapFloat(angle, -PI / 3, -PI / 6, -1, 0);
+          r = 0;
+          break;
+
+        case 5:
+          l = MapFloat(angle, -PI / 6, 0, 0, 1);
+          r = MapFloat(angle, -PI / 6, 0, 0, -1);
+          break;
+      }
+      break;
+  }
+
+  int da = (int)(angle * 1000);
+  int dm = (int)(module * 1000);
+
+  //Log.notice("PARSE JOY - A=%d - M=%d | C=%d | SC=%d \n",da,dm,cadran,sousCadran);
+  //  Log.notice("PARSE JOY - X=%d - Y=%d | A=%d - M=%d | C=%d | SC=%d \n",dx,dy,da,dm,cadran,sousCadran);
 
 
-         // Log.notice("PARSE JOY - L=%d - R=%d \n", dl, dr);
+  SpeedVector result;
+  result.left = l * module;
+  result.right = r * module;
+
+  int dl = (int)(result.left * 1000);
+  int dr = (int)(result.right * 1000);
+
+
+  // Log.notice("PARSE JOY - L=%d - R=%d \n", dl, dr);
 
 
   return result;
@@ -285,11 +285,11 @@ char* strtrim_safe( char* input ) {
 }
 
 /*void moveServo(Servo servo, int pos)
-{ if (0 >= pos <= 180)
+  { if (0 >= pos <= 180)
   {
     servo.write(pos);
   }
-}*/
+  }*/
 
 char* nextToken(char* str)
 {
@@ -324,6 +324,16 @@ void extractChar(char* receiver, char* str, int s, int e) {
   //Log.notice("extractChar input:\"%s\" int s:%d int e:%d result:\"%s\"\n", str, s, e, receiver);
 }
 
+char* arrayConcat(char* concatArray, int concatArraySize, char* postfix, int postFixSize) {
+  int resultPtr = concatArraySize;
+
+  for (int i = 0; i < postFixSize; i++)
+    concatArray[resultPtr++] = postfix[i];
+
+  concatArray[resultPtr++] = 0;
+
+  return concatArray;
+}
 
 byte arraySize(char array[])
 {

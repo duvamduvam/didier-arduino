@@ -29,18 +29,16 @@ void ParseVectorString(char* chain, int* adX, int* adY)
 }
 
 //Extrait les valeurs numériques d'une chaine composée de 2 valeurs séparées par une virgule
-void ParseIntString(char* chain, int* adX)
+int ParseIntString(char* chain, char* separator)
 {
 
   char str[12];
   strcpy(str,chain);
 
-  const char s[3] = "N";
   char *token;
    
-   token = strtok(str, s);
-   *adX = atoi(token);
-  
+   token = strtok(str, separator);
+   return atoi(token);
 }
 
 

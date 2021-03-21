@@ -69,14 +69,20 @@ class Face {
     BmpTime heartBeat[4] = {{11, 200}, {0, 200}, {11, 200}, {0, 200} } ;
     BmpTime still[1] = {{0, 2000}} ;
     BmpTime speak[7] = {{0, 20}, {1, 30}, {2, 20}, {3, 40}, {2, 20}, {1, 30}, {0, 20}} ;
+    BmpTime speak1[2] = {{0, 20}, {1, 50}} ;
+    BmpTime speak2[2] = {{1, 30}, {2, 50}} ;
+    BmpTime speak3[2] = {{2, 30}, {3, 50}} ;
     BmpTime mouthBlack[1] = {{4, 200}};
     BmpTime eyesBlack[1] = {{0, 200}} ;
 
-    Sequence sequences[5] = {
+    Sequence sequences[7] = {
       {10000, 1, still,  4, eyes, 4, eyes},
       {10000, 7, speak,  4, eyes, 4, eyes},
       {10000, 7, speak, 4, heartBeat, 4, heartBeat},
-      {10000000, 1, mouthBlack, 1, eyesBlack, 1, eyesBlack}
+      {10000000, 1, mouthBlack, 1, eyesBlack, 1, eyesBlack},
+      {50, 7, speak1,  4, eyes, 4, eyes},
+      {50, 7, speak2,  4, eyes, 4, eyes},
+      {50, 7, speak3,  4, eyes, 4, eyes}
       //{3000, mouthTest, heartTest, eyesTest, eyesTest}
     };
 

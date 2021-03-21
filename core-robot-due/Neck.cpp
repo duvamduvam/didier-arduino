@@ -21,7 +21,7 @@ class Neck {
     {
       if (SERVOMIN >= currentPos <= SERVOMAX)
       {
-        Log.notice ("position %d next step %d\n", currentPos, step);
+        //Log.notice ("position %d next step %d\n", currentPos, step);
         currentPos += step;
         pwm.setPWM(0, 0, currentPos);
       }
@@ -67,14 +67,17 @@ class Neck {
     }
 
     void updateTargetPos() {
-      if (strcmp(action, "N+")) {
+      if (!strcmp(action, "N+")) {
         targetPos += 10;
         Log.notice("Neck +10\n");
-      } else if (strcmp(action, "N-")) {
+      } else if (!strcmp(action, "N-")) {
         Log.notice("Neck -10\n");
         targetPos -= 10;
       } else {
-        targetPos = ((action[0] - 32) * 100) + (action[1] - 32);
+        int slider = ParseIntString(action, "N");
+        targetPos = map(slider, -100, 100, SERVOMIN, SERVOMAX);
+        Log.notice("Neck from slider %d:%d\n", slider, targetPos );
+        //targetPos = ((action[0] - 32) * 100) + (action[1] - 32);
       }
       Log.notice("Neck next %s %i\n", action, targetPos);
     }

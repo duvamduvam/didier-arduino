@@ -60,3 +60,4 @@ long extractTime(char* input, int seconds, int minutes);
 //char** getInputList(char* str);
 void extractChar(char* receiver, char* str, int s, int e);
 byte arraySize(char array[]);
+char* arrayConcat(char* concatArray, int concatArraySize, char* postfix, int postFixSize);

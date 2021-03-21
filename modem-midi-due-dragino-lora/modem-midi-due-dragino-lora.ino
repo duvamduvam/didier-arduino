@@ -26,7 +26,7 @@ uint8_t len = sizeof(radioMsg);
 void setup()
 {
   delay(1000);
-  
+
   pinMode(LED, OUTPUT);
   pinMode(RFM95_RST, OUTPUT);
   digitalWrite(RFM95_RST, HIGH);
@@ -113,14 +113,20 @@ void loop()
     Serial2.print((char*)radioMsg);
 
     //TODO extract prefix and postfix from here
-/*
+
     char note[2];
     note[0] = radioMsg[2];
     note[1] = radioMsg[3];
-    */
-    //sendNote(input[1], atoi(note));
-    //sendNote(radioMsg[1], atoi(note));
 
+    //sendNote(input[1], atoi(note));
+    if (radioMsg[1] == 'X') {
+      int atoiNote = atoi(note);
+      if (atoiNote == 0) {
+        sendNote(radioMsg[1], (int)(note[0]));
+      } else {
+        sendNote(radioMsg[1], atoi(note) + 60);
+      }
+    }
   }
 
   /*if (Serial.available() > 0) {
@@ -128,5 +134,5 @@ void loop()
     Serial.print("serial zero received:"); Serial.println(s0);
     }*/
 
-    memset(radioMsg, 0, sizeof(radioMsg));
+  memset(radioMsg, 0, sizeof(radioMsg));
 }

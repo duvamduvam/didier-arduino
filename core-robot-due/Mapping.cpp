@@ -36,7 +36,7 @@ class Mapping {
       mapping[11] = (char*)"XR";
       mapping[12] = (char*)"LE-";
 
-      mapping[13] = (char*)"XS";
+      mapping[13] = (char*)"XN";
       mapping[14] = (char*)"LON";
 
       mapping[15] = (char*)"XA";
@@ -49,8 +49,8 @@ class Mapping {
       mapping[19] = (char*)"XC";
       mapping[20] = (char*)"F02";
 
-      mapping[21] = (char*)"";
-      mapping[22] = (char*)"";
+      mapping[21] = (char*)"XN";
+      mapping[22] = (char*)"F03";
 
       mapping[23] = (char*)"";
       mapping[24] = (char*)"";
@@ -89,13 +89,21 @@ class Mapping {
             strcpy(commands.wheel, copy);
             Log.notice("Wheels - L=%d - R=%d \n", nL, nR);
             break;
-            
-          case 'N':
 
-            int val;
-            ParseIntString(copy, &val);
-            Log.notice("Neck - V=%d \n", val);
+          case 'N':
+           // Log.notice("Neck - V=%d \n", val);
+            strcpy(commands.neck, copy);
             break;
+
+          case 'P':
+            int piezzo;
+            piezzo = ParseIntString(copy, "P");
+            if (piezzo > 50)
+              strcpy(commands.face, "F06");
+            else if (piezzo > 35)
+              strcpy(commands.face, "F05");
+            else
+              strcpy(commands.face, "F04");
 
           default :
             //Recherche dictionnaire (mapping)

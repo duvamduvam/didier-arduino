@@ -10,7 +10,7 @@
 
 //Button button2 = Button(2, PULLUP);
 Button button3 = Button(3, PULLUP);
-Button button4 = Button(4, PULLUP);
+//Button button4 = Button(4, PULLUP);
 Button button5 = Button(5, PULLUP);
 Button button6 = Button(6, PULLUP);
 Button button7 = Button(7, PULLUP);
@@ -21,15 +21,17 @@ Button button11 = Button(11, PULLUP);
 Button button12 = Button(12, PULLUP);
 //Button button13 = Button(13, PULLUP);
 
-#define buttonSize 12
+#define buttonSize 11
 
-Button buttons[] = {button3, button4, button5, button6, button7, button8, button9,
+Button buttons[] = {button3, button5, button6, button7, button8, button9,
                     button10, button11, button12,
                    };
 
+char key[2];
+
 void setup()
 {
-  Serial.begin(115200);
+  Serial.begin(9600);
   Log.begin   (LOG_LEVEL, &Serial);
 }
 
@@ -48,9 +50,11 @@ int checkButton() {
 
 void loop()
 {
-  int key = checkButton();
-  if (key != 0) {
+  int input = checkButton();
+  if (input != 0) {
+    itoa(input, key, 10);
     Serial.print(key);
   }
+  delay(20);
 
 }

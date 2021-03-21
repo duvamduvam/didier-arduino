@@ -95,6 +95,7 @@
   /     DIGITAL    /
   /---------------*/
 #define PIEZZO      4
+#define PIEZZO_GATE 40
 
 #define FADER_ON    22
 #define BP_CALIB    24
@@ -137,7 +138,7 @@ byte colPins[COLS] = {49, 47, 45, 43, 41, 39, 37, 35};
                   \___)  \___)  \___)
 ********************************************************************/
 
-  /*-------------+
+/*-------------+
   |   KEYBOARD   |
   +-------------*/
 
@@ -150,38 +151,44 @@ char keys[ROWS][COLS] =
 
 char mod = 'X';
 char key = 0;
+char glove1 = 0;
 
-  /*-------------+
+/*-------------+
   |     RADIO    |
   +-------------*/
 char msg[20];
 
 
 
-  /*-------------+
+/*-------------+
   |     LOGIC    |
   +-------------*/
 char ConfA, ConfB;
 
 
 
-  /*-------------+
+/*-------------+
   |   INCLINO    |
   +-------------*/
 int angleX, angleY, angleZ;
 int angleCalibX, angleCalibY, angleCalibZ;
 
-  /*-------------+
+/*-------------+
   |    PIEZZO    |
   +-------------*/
 int piezzo;
 
+/*-------------+
+  |    NECK    |
+  +-------------*/
+int neck;
 
-  /*-------------+
+
+/*-------------+
   |     ANALOG    |
   +-------------*/
 int faderL, faderR;
-int joyX,joyY;
+int joyX, joyY;
 
 /********************************************************************
                        INSTALL CLASS
@@ -257,6 +264,7 @@ void setup()
 
   while (!Serial);
   Serial.begin(115200);
+  Serial2.begin(9600);
   delay(100);
   Log.begin   (LOG_LEVEL, &Serial);
 
@@ -336,7 +344,7 @@ void sendDecMsg(char m, int value) {
   sendCharMsg(m, charNumber);
 }
 
-void sendVectorMsg(char m, int valueX,int valueY) {
+void sendVectorMsg(char m, int valueX, int valueY) {
 
   char sX[7], sY[7];
   char prefixe[2] = " ";
@@ -377,8 +385,12 @@ void sendIntMsg(char m, int value) {
 
 
 //Abstractions
-void sendWheels(int l, int r){sendVectorMsg('W',l,r); } 
-void sendHead(int head){sendIntMsg('N',head);}
+void sendWheels(int l, int r) {
+  sendVectorMsg('W', l, r);
+}
+void sendHead(int head) {
+  sendIntMsg('N', head);
+}
 
 
 
@@ -404,20 +416,24 @@ void sendHead(int head){sendIntMsg('N',head);}
 
 /*  ____          ____
    |                  |
-   |      HEAD      |
+   |      HEAD        |
    |____          ____|   */
 void processHead()
-{  
- sendHead(faderL);
+{
+  if (faderL > neck + 2 || faderL < neck - 2) {
+    sendHead(neck);
+    neck = faderL;
+  }
 }
-
 
 
 /*  ____          ____
    |                  |
    |      PIEZZO      |
    |____          ____|   */
-void processPiezzo(){  piezzo = analogRead(PIEZZO); }
+void aqqPiezzo() {
+  piezzo = map(analogRead(PIEZZO), 0, 500, 0, 126);
+}
 
 
 /*  ____          ____
@@ -441,14 +457,14 @@ void aqqFaders()
 
 }
 
-   
+
 void processFaders()
 {
   if (digitalRead(FADER_ON) == 0)
-  
-  //Seuil d'envoi
-  if (faderL > JOY_SEND_MARGIN || faderL <  -JOY_SEND_MARGIN || faderR > JOY_SEND_MARGIN || faderR < -JOY_SEND_MARGIN)
-    sendWheels(faderL, faderR);
+
+    //Seuil d'envoi
+    if (faderL > JOY_SEND_MARGIN || faderL <  -JOY_SEND_MARGIN || faderR > JOY_SEND_MARGIN || faderR < -JOY_SEND_MARGIN)
+      sendWheels(faderL, faderR);
 }
 
 
@@ -475,7 +491,7 @@ void aqqJoystick()
 
 void processJoystick()
 {
-   if (mod != 'W')return;
+  if (mod != 'W')return;
 
   //Seuil d'envoi
   if (joyX > JOY_SEND_MARGIN || joyX <  -JOY_SEND_MARGIN || joyY > JOY_SEND_MARGIN || joyY < -JOY_SEND_MARGIN)
@@ -494,12 +510,16 @@ void processJoystick()
    |     KEYBOARD     |
    |____          ____|   */
 //Aquisition uniquement
-void aqqKeyboard()
-{
+void aqqKeyboard() {
   key = keypad.getKey();
 }
 
-
+char aqqGlove() {
+  glove1 = 0;
+  while (Serial2.available()) {
+    glove1 = Serial2.read();
+  }
+}
 
 
 /*  ____          ____
@@ -508,14 +528,23 @@ void aqqKeyboard()
    |____          ____|   */
 void processRemote()
 {
-   
-  if (key != NO_KEY) 
+
+  if (key != NO_KEY)
   {
     if (key == 'U' || key == 'V' || key == 'W' || key == 'X') {
       mod = key;
     }
-    Serial.println(key);
+    //Serial.println(key);
     sendCharMsg(mod, key);
+  }
+
+  if (glove1 != 0) {
+    //Serial.println(glove1);
+    sendCharMsg(mod, glove1);
+  }
+
+  if (piezzo > PIEZZO_GATE) {
+    sendIntMsg('P', piezzo);
   }
 
 }
@@ -529,17 +558,17 @@ void processRemote()
    |                  |
    |     TEST MENU     |
    |____          ____|   */
-   /* Exemple d'utilisation du clavier diférent
-void processMenu()
-{
+/* Exemple d'utilisation du clavier diférent
+  void processMenu()
+  {
   switch(key)
   {
-    case 'A':
-      break:
+  case 'A':
+   break:
   }
-  
 
-}
+
+  }
 */
 
 
@@ -591,7 +620,7 @@ void processInclino()
 {
   int x = map(angleX, -ANGLE_INCLINO, ANGLE_INCLINO, -JOY_CALIB_DATA_RANGE, JOY_CALIB_DATA_RANGE);
   int y = map(angleY, -ANGLE_INCLINO, ANGLE_INCLINO, -JOY_CALIB_DATA_RANGE, JOY_CALIB_DATA_RANGE);
-    
+
   x = BoundInt(x, -JOY_CALIB_DATA_RANGE, JOY_CALIB_DATA_RANGE);
   y = BoundInt(y, -JOY_CALIB_DATA_RANGE, JOY_CALIB_DATA_RANGE);
 
@@ -675,24 +704,29 @@ void LCD_Page1()
 void LCD_TestTete()
 {
   u8g.setColorIndex(1);
-  int x = map(faderL, -100, 100, 0, 126);
+  int x = map(neck, -100, 100, 0, 126);
   u8g.setFont(u8g_font_gdr14r);
   char title[10] = "Tete";
   u8g.drawStr(3, 15, title);
 
-  u8g.drawRBox(1, 20, x+5, 44, 1);
+  u8g.drawRBox(1, 20, x + 5, 44, 1);
 }
 
 
-void LCD_TestPiezzo()
+void LCD_Piezzo()
 {
   u8g.setColorIndex(1);
-  int x = map(piezzo, 0, 500, 0, 126);
   u8g.setFont(u8g_font_gdr14r);
-  char title[10] = "Test Piezzo";
+
+  char  piezzoChar[4];
+  itoa(piezzo, piezzoChar, 10);
+
+  char title[15] = "Piezzo ";
+  arrayConcat(title, 7, piezzoChar, 4);
+  //Log.notice(" piezzo value = %d title %s\n xChar %d", piezzo, title, piezzoChar);
   u8g.drawStr(3, 15, title);
 
-  u8g.drawRBox(1, 20, x+5, 44, 1);
+  u8g.drawRBox(1, 20, piezzo + 5, 44, 1);
 
 }
 
@@ -717,8 +751,8 @@ void draw(void)
   switch (ConfA)
   {
     case PROGRAM_MODE_RELEASE: LCD_Page1(); break;
-    case PROGRAM_MODE_TEST_1: LCD_TestPiezzo(); break;
-    case PROGRAM_MODE_TEST_2: LCD_TestTete();break;
+    case PROGRAM_MODE_TEST_1: LCD_Piezzo(); break;
+    case PROGRAM_MODE_TEST_2: LCD_TestTete(); break;
     case PROGRAM_MODE_TEST_3: LCD_DrawInclinometre(); break;
   }
 
@@ -750,6 +784,8 @@ void processLCD()
 void loopRelease()
 {
   aqqKeyboard(); //Perif qui donne accès
+//  aqqGlove();
+  aqqPiezzo();
   processRemote(); //Fonction qui envoie
 
   aqqJoystick();
@@ -757,17 +793,15 @@ void loopRelease()
 
   aqqFaders();
   processFaders();
-  
-
 }
 
 
 //Test Piezzo
 void loopTest1()
 {
-  processPiezzo();
+  aqqPiezzo();
+  processRemote();
 
-  
 }
 
 //Test Tete
@@ -776,7 +810,7 @@ void loopTest2()
   aqqKeyboard();
   aqqFaders();
   processHead();
-  
+
 }
 
 //Test Inclinomètre
@@ -784,7 +818,7 @@ void loopTest3()
 {
   aqqInclino();
   processInclino();
-  
+
 
 }
 

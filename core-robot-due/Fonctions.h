@@ -13,7 +13,7 @@
 //######### PROTOCOL ##########
 //--------------------------
 void ParseVectorString(char* chain, int* adX, int* adY);
-void ParseIntString(char* chain, int* adX);
+int ParseIntString(char* chain, char* separator);
 char* SubString20(char* chain, int startIndex, int stopIndex);
 char* ShiftCharArray20(char* chain);
 
