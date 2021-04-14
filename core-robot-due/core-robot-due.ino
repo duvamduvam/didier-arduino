@@ -64,7 +64,7 @@ void setup()
   Serial.begin(115200);
   Serial2.begin(115200);
   Log.begin   (LOG_LEVEL, &Serial);
-
+  Log.notice("init core robot due");
   neck.init();
 
   delay(100);

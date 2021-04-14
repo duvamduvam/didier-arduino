@@ -1,110 +1,83 @@
 #include "ArduinoLog.h"
-#include <RH_RF95.h>
-//#define LOG_LEVEL LOG_LEVEL_SILENT
-//#define LOG_LEVEL LOG_LEVEL_ERROR
-#define LOG_LEVEL LOG_LEVEL_VERBOSE
+#include "Radio.h"
 
-#define RFM95_INT 2
-#define RFM95_RST 9
-#define RFM95_CS 10
-#define LED 13
+#define RST_PIN 31
+#define BUILD_IN 13
+#define RST_READ 40
 
-#define RESET 7
+#define RST "<UH>"
+#define PERIOD_TIME 5000
 
-/// start radio def /////
+#define INPUT_SIZE 20
+char msg  [INPUT_SIZE];
+bool newData = false;
+byte inputCount = 0;
 
-#define RF95_FREQ 868.0
-RH_RF95 rf95(RFM95_CS, RFM95_INT);
+int current_time;
 
-#define DIGITAL_RESET 31
-
-uint8_t radioMsg[12];
-uint8_t len = sizeof(radioMsg);
-
-//Mapping mapping;
+Radio radio;
 
 void setup()
 {
 
-  
-  delay(1000);
-
-  pinMode(LED, OUTPUT);
-  pinMode(RFM95_RST, OUTPUT);
-  digitalWrite(RFM95_RST, HIGH);
-
-
-
-  while (!Serial);
-  // eratics problem with lora radio when changing baud rate
   Serial.begin(115200);
-  Serial2.begin(115200);
+  Serial3.begin(115200);
+  Serial.println("init reset board");
+  pinMode(RST_PIN, OUTPUT);
+  pinMode(RST_READ, INPUT);
 
-  Serial.println("start reset modem");
+  current_time = millis();
 
-  Log.begin   (LOG_LEVEL, &Serial);
-  //midi debug
-
-  delay(100);
-
-  pinMode(DIGITAL_RESET, OUTPUT); 
-
-  /*digitalWrite(RFM95_RST, LOW);
-  delay(100);
-  digitalWrite(RFM95_RST, HIGH);
-  delay(100);
-  while (!rf95.init()) {
-    Log.error("LoRa radio init failed");
-    while (1);
-  }
-  Log.notice("LoRa radio init OK!\n");
-  if (!rf95.setFrequency(RF95_FREQ)) {
-    Log.error("setFrequency failed");
-    while (1);
-  }
-  //printString(debug, "Set Freq to: "); printDoubleLn(debug, RF95_FREQ);
-  rf95.setTxPower(23, false);*/
+  radio.init();
 }
 
-void radioRead() {
-  if (rf95.available())
-  {
-    uint8_t len = sizeof(radioMsg);
-    if (rf95.recv(radioMsg, &len))
-    {
-      digitalWrite(LED, HIGH);
-      Log.notice("radio received %s\n", radioMsg);
-      digitalWrite(LED, LOW);
+void recvWithStartEndMarkers() {
+  static boolean recvInProgress = false;
+  static byte ndx = 0;
+  char startMarker = '<';
+  char endMarker = '>';
+  char rc;
 
+  while (Serial3.available() > 0 && newData == false) {
+    rc = Serial3.read();
+    if (recvInProgress == true) {
+      if (rc != endMarker) {
+        msg[ndx] = rc;
+        ndx++;
+        if (ndx >= INPUT_SIZE) {
+          ndx = INPUT_SIZE - 1;
+        }
+      }
+      else {
+        msg[ndx] = '\0'; // terminate the string
+        recvInProgress = false;
+        ndx = 0;
+        newData = true;
+      }
     }
-    else
-    {
-      Log.error("Receive failed");
+    else if (rc == startMarker) {
+      recvInProgress = true;
     }
   }
 }
-
-
-
 
 void loop()
 {
 
-  //delay(5000);
+  radio.read();
 
-  //digitalWrite(DIGITAL_RESET, HIGH);
-  
-  /*radioRead();
+  if (!strcmp((char*)radio.msg, RST)) {
+    Serial.println("send reset");
+    digitalWrite(RST_PIN, HIGH);
+    delay(100);
+    digitalWrite(RST_PIN, LOW);
+  }
 
+  radio.msgset();
 
-
-  if (strcmp((char*)radioMsg, "")) {
-    Serial2.print((char*)radioMsg);
-
-
-  memset(radioMsg, 0, sizeof(radioMsg));
-*/
-
-
-  
+  //check arduin
+  recvWithStartEndMarkers();
+  if(newData){
+    Serial.println(msg);
+  }
 }
