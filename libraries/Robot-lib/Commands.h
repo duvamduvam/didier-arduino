@@ -13,6 +13,7 @@ struct Commands
   char neck[20] = {};
   char face[20] = {};
   char sound[20] = {};
+  char relays[20] = {};
 
   float leftSpeed;
   float rightSpeed;

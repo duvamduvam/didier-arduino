@@ -1,8 +1,9 @@
 #include <Arduino.h>
 #include "ArduinoLog.h"
 #include "Commands.h"
+#include "Fonctions.h"
 
-//#define LOG_NOTICE_WHEEL
+#define LOG_NOTICE_WHEEL
 
 #define SPEED_MAX  100
 #define SPEED_RATIO  1
@@ -16,9 +17,6 @@
 //right
 #define pwm_right 4
 #define dir_right 5
-
-
-
 
 class Wheel
 {
@@ -123,20 +121,22 @@ class Wheel
         int decCmdL = (int)(cmdLeft * 1000);
         int decCmdR = (int)(cmdRight * 1000);
 
-        // Log.notice("JOY - L=%d - R=%d \n", decCmdL,decCmdR);
+        Log.notice("JOY - L=%d - R=%d \n", decCmdL,decCmdR);
 
-        if (abs(deltaL) > 0)
-          if (deltaL > 0)
+        if (abs(deltaL) > 0){
+          if (deltaL > 0){
             spLeft += INCREMENT_ACCELERATION;
-          else
+          } else {
             spLeft -= INCREMENT_ACCELERATION;
-
-        if (abs(deltaR) > 0)
-          if (deltaR > 0)
+          }
+        }
+        if (abs(deltaR) > 0){
+          if (deltaR > 0){
             spRight += INCREMENT_ACCELERATION;
-          else
+          } else {
             spRight -= INCREMENT_ACCELERATION;
-
+          }
+        }
         int dL = 0;
         int dR = 0;
         if (spLeft > 0)
@@ -161,7 +161,7 @@ class Wheel
 #ifdef LOG_NOTICE_WHEEL
         Log.notice("JOY - L=%d - R=%d \n", speedleft, speedright);
         Log.notice("JOY - CMD L=%d - R=%d | CUR L=%d - R=%d | DIR L=%d - R=%d \n", decCmdL, decCmdR, decL, decR, dL, dR);
-#endif LOG_NOTICE_WHEEL
+#endif
 
         digitalWrite(dir_left, dL);
         digitalWrite(dir_right, dR);
@@ -169,18 +169,12 @@ class Wheel
         analogWrite(pwm_left, speedleft);
         analogWrite(pwm_right, speedright);
       }
-
-
+      
       if (millis() - TimeoutTimer > 1000)
       {
         TimeoutTimer = millis();
         stop();
       }
     }
-
-
-
-
-
 
 };

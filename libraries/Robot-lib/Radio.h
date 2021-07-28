@@ -32,6 +32,7 @@ class Radio {
     void sendDecMsg(char m, int value);
     void sendVectorMsg(char m, int valueX, int valueY);
     void sendIntMsg(char m, int value);
+	void sendMsg(char input[], int size);
 
 };
 

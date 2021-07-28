@@ -18,12 +18,12 @@
   ||_______|| /
   |_________*/
 
-
+#include "FonctionsMega.h"
 #include "ArduinoLog.h"
 #include <Keypad.h>
 #include <SPI.h>
-#include <RH_RF95.h>
 #include <Button.h>
+#include <Radio.h>
 
 //oled
 #include "U8glib.h"
@@ -47,9 +47,9 @@
 //#define LOG_LEVEL LOG_LEVEL_ERROR
 #define LOG_LEVEL LOG_LEVEL_VERBOSE
 
-#define KEYBOARD_DELAY  100
-#define RF95_FREQ 868.0  // Change to 434.0 or other frequency, must match RX's freq!
-
+#define KEYBOARD_DELAY  10
+#define REFRESH_RATE 50
+long screenTime;
 
 #define JOY_CALIB_DATA_RANGE 100
 #define JOY_SEND_MARGIN 10
@@ -60,6 +60,8 @@
 #define JOY_CALIB_Y_MIN 140
 #define JOY_CALIB_Y_MAX 910
 
+#define FIRST_CHAR_NB 33
+
 /*
   //Joy Playstation
   #define JOY_CALIB_X_MIN 0
@@ -67,13 +69,6 @@
   #define JOY_CALIB_Y_MIN 1023
   #define JOY_CALIB_Y_MAX 0
 */
-
-
-#define PROGRAM_MODE_RELEASE 1
-#define PROGRAM_MODE_TEST_1 2
-#define PROGRAM_MODE_TEST_2 3
-#define PROGRAM_MODE_TEST_3 4
-
 #define ANGLE_INCLINO 30
 
 /********************************************************************
@@ -84,31 +79,27 @@
 ********************************************************************/
 
 /*---------------/
-  /     RFM95      /
+  /     RADIO    /
   /---------------*/
 
-#define RFM95_CS    10
-#define RFM95_RST   9
-#define RFM95_INT   2
+char lastMsg[10];
 
 /*---------------/
   /     DIGITAL    /
   /---------------*/
-#define PIEZZO      4
 #define PIEZZO_GATE 40
 
-#define FADER_ON    22
-#define BP_CALIB    24
+#define FADER_ON    A13
 
-#define CONF_A_1    26
-#define CONF_A_2    28
-#define CONF_A_3    30
-#define CONF_A_4    32
+#define CONF_A_1    22
+#define CONF_A_2    24
+#define CONF_A_3    26
+#define CONF_A_4    40
 
-#define CONF_B_1    34
-#define CONF_B_2    36
-#define CONF_B_3    38
-#define CONF_B_4    40
+#define CONF_B_1    35
+#define CONF_B_2    41
+#define CONF_B_3    43
+#define CONF_B_4    45
 
 
 /*---------------/
@@ -117,18 +108,19 @@
 
 #define JOY_X   A0
 #define JOY_Y   A1
-#define LIN_L   A2
-#define LIN_R   A3
+#define LIN_L   A11
+#define LIN_R   A10
+#define HEAD  A9
 #define PIEZZO  A4
 
 /*---------------/
   /    KEYBOARD    /
   /---------------*/
 
-#define ROWS 3
-#define COLS 8
-byte rowPins[ROWS] = {33, 31, 29};
-byte colPins[COLS] = {49, 47, 45, 43, 41, 39, 37, 35};
+#define ROWS 4
+#define COLS 4
+byte rowPins[ROWS] = {29, 27, 25, 23};
+byte colPins[COLS] = {39, 37, 33, 31};
 
 
 
@@ -144,34 +136,22 @@ byte colPins[COLS] = {49, 47, 45, 43, 41, 39, 37, 35};
 
 char keys[ROWS][COLS] =
 {
-  {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'},
-  {'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P'},
-  {'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X'},
+  {'1', '2', '3', 'A'},
+  {'4', '5', '6', 'B'},
+  {'7', '8', '9', 'C'},
+  {'*', '0', '#', 'D'},
 };
 
-char mod = 'X';
+char mod = 'A';
 char key = 0;
-char glove1 = 0;
-
-/*-------------+
-  |     RADIO    |
-  +-------------*/
-char msg[20];
-
-
+#define GLOVE_SIZE
+char glove1[3] = {0};
+char glove2[3] = {0};
 
 /*-------------+
   |     LOGIC    |
   +-------------*/
 char ConfA, ConfB;
-
-
-
-/*-------------+
-  |   INCLINO    |
-  +-------------*/
-int angleX, angleY, angleZ;
-int angleCalibX, angleCalibY, angleCalibZ;
 
 /*-------------+
   |    PIEZZO    |
@@ -187,7 +167,7 @@ int neck;
 /*-------------+
   |     ANALOG    |
   +-------------*/
-int faderL, faderR;
+int faderL, faderR, head;
 int joyX, joyY;
 
 /********************************************************************
@@ -204,13 +184,11 @@ int joyX, joyY;
 //SDA 4 SCL 5
 U8GLIB_SSD1306_128X64 u8g(U8G_I2C_OPT_NONE | U8G_I2C_OPT_DEV_0);  // I2C / TWI
 
-// Singleton instance of the radio driver
-RH_RF95 rf95(RFM95_CS, RFM95_INT);
-
 Inclino inclino;
 Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
 
-
+Radio radio;
+bool newData = false;
 
 
 /**********************************************************************************************************************
@@ -239,10 +217,6 @@ void setup()
     /    PIN INIT    /
     /---------------*/
 
-  //RFM95
-  pinMode(RFM95_RST, OUTPUT);
-  digitalWrite(RFM95_RST, HIGH);
-
   //BP
   pinMode(FADER_ON, INPUT_PULLUP);
   pinMode(BP_CALIB, INPUT_PULLUP);
@@ -264,37 +238,13 @@ void setup()
 
   while (!Serial);
   Serial.begin(115200);
-  Serial2.begin(9600);
+  Serial1.begin(115200);
+  Serial3.begin(115200);
   delay(100);
   Log.begin   (LOG_LEVEL, &Serial);
+  Serial.println("start modem");
 
-
-
-  /*---------------/
-    /     RFM95      /
-    /---------------*/
-
-  // manual reset
-  digitalWrite(RFM95_RST, LOW);
-  delay(10);
-  digitalWrite(RFM95_RST, HIGH);
-  delay(10);
-
-  while (!rf95.init()) {
-    Serial.println("LoRa radio init failed");
-    while (1);
-  }
-  Serial.println("LoRa radio init OK!");
-
-  // Defaults after init are 434.0MHz, modulation GFSK_Rb250Fd250, +13dbM
-  if (!rf95.setFrequency(RF95_FREQ)) {
-    Serial.println("setFrequency failed");
-    while (1);
-  }
-  rf95.setTxPower(23, false);
-
-
-
+  radio.init();
 }
 
 
@@ -306,90 +256,15 @@ void setup()
                .-(_|||_)-.
                "         "
 ********************************************************************/
-void RfOut()
-{
-  //Output
-  int len = strlen(msg);
-  rf95.send((uint8_t *)msg, len);
-  Serial.print("Sending "); Serial.println(msg);
-}
 
-void sendCharMsg(char m, char input) {
-
-  msg[0] = '<';
-  msg[1] = m;
-  msg[2] = input;
-  msg[3] = '>';
-  msg[4] = 0;
-
-  RfOut();
-}
-
-void sendArrayMsg(char m, char input[]) {
-
-  msg[0] = '<';
-  msg[1] = m;
-  msg[2] = input[0];
-  msg[3] = input[1];
-  msg[4] = '>';
-  msg[5] = 0;
-
-  RfOut();
-}
-
-void sendDecMsg(char m, int value) {
-
-  char charNumber[10] = "";
-  itoa ( value, charNumber, 10);
-  sendCharMsg(m, charNumber);
-}
-
-void sendVectorMsg(char m, int valueX, int valueY) {
-
-  char sX[7], sY[7];
-  char prefixe[2] = " ";
-  prefixe[0] = m;
-  char header[2] = "<";
-
-  msg[0] = 0;
-  strcpy(msg, header);
-  strcat(msg, prefixe);
-  itoa (valueX, sX, 10);
-  strcat(msg, sX);
-  strcat(msg, ",");
-  itoa (valueY, sY, 10);
-  strcat(msg, sY);
-  strcat(msg, ">");
-
-  RfOut();
-}
-
-
-
-void sendIntMsg(char m, int value) {
-
-  char sX[7];
-  char prefixe[2] = " ";
-  prefixe[0] = m;
-  char header[2] = "<";
-
-  msg[0] = 0;
-  strcpy(msg, header);
-  strcat(msg, prefixe);
-  itoa (value, sX, 10);
-  strcat(msg, sX);
-  strcat(msg, ">");
-
-  RfOut();
-}
 
 
 //Abstractions
 void sendWheels(int l, int r) {
-  sendVectorMsg('W', l, r);
+  radio.sendVectorMsg('W', l, r);
 }
 void sendHead(int head) {
-  sendIntMsg('N', head);
+  radio.sendIntMsg('N', head);
 }
 
 
@@ -418,11 +293,12 @@ void sendHead(int head) {
    |                  |
    |      HEAD        |
    |____          ____|   */
+
 void processHead()
 {
-  if (faderL > neck + 2 || faderL < neck - 2) {
+  if (head > neck + 2 || head < neck - 2) {
     sendHead(neck);
-    neck = faderL;
+    neck = head;
   }
 }
 
@@ -446,15 +322,21 @@ void aqqFaders()
 
   int inl = analogRead(LIN_L);
   int inr = analogRead(LIN_R);
+  int inh = analogRead(HEAD);
+
+  //Log.notice("fader l %d fader r %d head %d\n", inl, inr, inh);
 
   //Calibrage Potentiomètres linéaires
-  faderL = map(inl, 0, 1024, -JOY_CALIB_DATA_RANGE, JOY_CALIB_DATA_RANGE);
-  faderR = map(inr, 0, 1024, -JOY_CALIB_DATA_RANGE, JOY_CALIB_DATA_RANGE);
+  faderL = map(inl, 1024, 0, FIRST_CHAR_NB, 126);
+  faderR = map(inr, 1024, 0, FIRST_CHAR_NB, 126);
+  head = map(inh, 1024, 0, FIRST_CHAR_NB, 126);
+  //Log.notice("fader head : %i -> mapping -> %i\n", inh, head);
+  
 
   //Limites en cas de décalibrage
-  faderL = BoundInt(faderL, -JOY_CALIB_DATA_RANGE, JOY_CALIB_DATA_RANGE);
-  faderR = BoundInt(faderR, -JOY_CALIB_DATA_RANGE, JOY_CALIB_DATA_RANGE);
-
+  /*faderL = BoundInt(faderL, -JOY_CALIB_DATA_RANGE, JOY_CALIB_DATA_RANGE);
+    faderR = BoundInt(faderR, -JOY_CALIB_DATA_RANGE, JOY_CALIB_DATA_RANGE);
+    head = BoundInt(head, 0, 270);*/
 }
 
 
@@ -464,10 +346,9 @@ void processFaders()
 
     //Seuil d'envoi
     if (faderL > JOY_SEND_MARGIN || faderL <  -JOY_SEND_MARGIN || faderR > JOY_SEND_MARGIN || faderR < -JOY_SEND_MARGIN)
-      sendWheels(faderL, faderR);
+      sendWheels(-faderL, faderR);
+  sendHead(head);
 }
-
-
 
 /*  ____          ____
    |                  |
@@ -515,127 +396,71 @@ void aqqKeyboard() {
 }
 
 char aqqGlove() {
-  glove1 = 0;
-  while (Serial2.available()) {
-    glove1 = Serial2.read();
-  }
+  bool newData1 = recvWithStartEndMarkersMega(glove1, false,  3, 1);
+  bool newData2 = recvWithStartEndMarkersMega(glove2, false,  3, 3);
+  /*if (newData1) {
+    Log.notice("glove 1 : %s", glove1);
+    } else if (newData2) {
+    Log.notice("glove 2 : %s", glove2);
+    }*/
 }
-
 
 /*  ____          ____
    |                  |
    |     REMOTE     |
    |____          ____|   */
-void processRemote()
-{
+void processRemote() {
+  char radioMsg[10] = {};
+
+  if (digitalRead(FADER_ON) == 0) {
+    Log.notice("faderL : %d | faderR : %d | head : %d\n", faderL, faderR, head);
+    radioMsg[0] = faderL;
+    radioMsg[1] = faderR;
+    radioMsg[2] = head;
+    newData = true;
+  } else {
+    radioMsg[0] = ' ';
+    radioMsg[1] = ' ';
+    radioMsg[2] = ' ';
+  }
+  radioMsg[3] = ' ';
+  radioMsg[4] = ' ';
+  radioMsg[5] = '\0';
 
   if (key != NO_KEY)
   {
-    if (key == 'U' || key == 'V' || key == 'W' || key == 'X') {
+    newData = true;
+    if (key == 'A' || key == 'B' || key == 'C' || key == 'D') {
       mod = key;
     }
+    radioMsg[3] = mod;
+    radioMsg[4] = key;
     //Serial.println(key);
-    sendCharMsg(mod, key);
+    //radio.sendCharMsg(mod, key);
   }
 
-  if (glove1 != 0) {
-    //Serial.println(glove1);
-    sendCharMsg(mod, glove1);
+  if (glove1[0] != 0) {
+    newData = true;
+    radioMsg[3] = glove1[0];
+    glove1[0] = 0;
+
   }
 
-  if (piezzo > PIEZZO_GATE) {
-    sendIntMsg('P', piezzo);
+  if (glove2[0] != 0) {
+    newData = true;
+    radioMsg[4] = glove2[0];
+    glove2[0] = 0;
+  }
+
+  if (newData) {
+    strcpy(lastMsg, radioMsg);
+    radio.sendMsg(radioMsg, 5);
+    //Log.notice("radioMsg : %s\n", radioMsg);
+    radio.msgset();
+    newData = false;
   }
 
 }
-
-
-
-
-
-
-/*  ____          ____
-   |                  |
-   |     TEST MENU     |
-   |____          ____|   */
-/* Exemple d'utilisation du clavier diférent
-  void processMenu()
-  {
-  switch(key)
-  {
-  case 'A':
-   break:
-  }
-
-
-  }
-*/
-
-
-/*  ____          ____
-   |                  |
-   |   INCLINOMETRE   |
-   |____          ____|   */
-
-
-
-void aqqInclino()
-{
-  inclino.read();
-  if (inclino.newData)
-  {
-    int aX = map(JY901.stcAngle.Angle[0], -32767, 32768, -180, 180);
-    int aY = map(JY901.stcAngle.Angle[1], -32767, 32768, -180, 180);
-    int aZ = map(JY901.stcAngle.Angle[2], -32767, 32768, -180, 180);
-
-    angleX = aX - angleCalibX;
-    angleY = aY - angleCalibY;
-    angleZ = aZ - angleCalibZ;
-
-    if (angleX < -180)
-      angleX += 360;
-    if (angleY < -180)
-      angleY += 360;
-    if (angleZ < -180)
-      angleZ += 360;
-
-    if (digitalRead(BP_CALIB) == 0)
-    {
-      angleCalibX = aX;
-      angleCalibY = aY;
-      angleCalibZ = aZ;
-    }
-
-    Serial.print("X="); Serial.print(angleX); Serial.print("  ");
-    Serial.print("Y="); Serial.print(angleY); Serial.print("  ");
-    Serial.print("Z="); Serial.print(angleZ); Serial.println("  ");
-
-    inclino.newData = false;
-  }
-
-
-}
-
-void processInclino()
-{
-  int x = map(angleX, -ANGLE_INCLINO, ANGLE_INCLINO, -JOY_CALIB_DATA_RANGE, JOY_CALIB_DATA_RANGE);
-  int y = map(angleY, -ANGLE_INCLINO, ANGLE_INCLINO, -JOY_CALIB_DATA_RANGE, JOY_CALIB_DATA_RANGE);
-
-  x = BoundInt(x, -JOY_CALIB_DATA_RANGE, JOY_CALIB_DATA_RANGE);
-  y = BoundInt(y, -JOY_CALIB_DATA_RANGE, JOY_CALIB_DATA_RANGE);
-
-  //Seuil d'envoi
-  if (x > JOY_SEND_MARGIN || x <  -JOY_SEND_MARGIN || y > JOY_SEND_MARGIN || y < -JOY_SEND_MARGIN)
-  {
-    //Transformée géométrique
-    SpeedVector robot = ToRobot(x, y);
-    int l = robot.left * 100;
-    int r = robot.right * 100;
-    sendWheels(l, r);
-    //   Log.notice("Wheels  l:%d r:%d\n", l, r);
-  }
-}
-
 
 
 /*  ____          ____
@@ -646,29 +471,34 @@ void processInclino()
 
 void ProcessCommut()
 {
+  int A, B;
   if (digitalRead(CONF_A_1) == 0)
-    ConfA = 1;
+    A = 1;
   if (digitalRead(CONF_A_2) == 0)
-    ConfA = 2;
+    A = 2;
   if (digitalRead(CONF_A_3) == 0)
-    ConfA = 3;
+    A = 3;
   if (digitalRead(CONF_A_4) == 0)
-    ConfA = 4;
+    A = 4;
 
   if (digitalRead(CONF_B_1) == 0)
-    ConfB = 1;
+    B = 1;
   if (digitalRead(CONF_B_2) == 0)
-    ConfB = 2;
+    B = 2;
   if (digitalRead(CONF_B_3) == 0)
-    ConfB = 3;
+    B = 3;
   if (digitalRead(CONF_B_4) == 0)
-    ConfB = 4;
+    B = 4;
+
+  if (A != ConfA || B != ConfB) {
+    ConfA = A; ConfB = B;
+    //Log.notice("A1 : %d A2 : %d A3 : %d A4 : %d B1 : %d B2 : %d B3 : %d B4 : %d\n", digitalRead(CONF_A_1), digitalRead(CONF_A_2),
+    //           digitalRead(CONF_A_3), digitalRead(CONF_A_4), digitalRead(CONF_B_1), digitalRead(CONF_B_2), digitalRead(CONF_B_3),
+    //           digitalRead(CONF_B_4));
+    Log.notice("CONF A : %d B : %d\n", ConfA, ConfB);
+  }
 
 }
-
-
-
-
 
 /*  ____          ____
    |                  |
@@ -695,7 +525,9 @@ void LCD_Page1()
 
   //Message
   u8g.setFont(u8g_font_gdr14r);
-  u8g.drawStr(3, 60, msg);
+  u8g.drawStr(3, 60, lastMsg);
+
+  //Log.notice("LCD radio.msg : %s\n",radio.msg);
 
   //u8g.drawLine(7+a, 10, 40, 55);
 }
@@ -731,8 +563,8 @@ void LCD_Piezzo()
 }
 
 
-void LCD_DrawInclinometre()
-{
+/*void LCD_DrawInclinometre()
+  {
   u8g.setColorIndex(1);
 
 
@@ -743,17 +575,17 @@ void LCD_DrawInclinometre()
   //Mode
   u8g.setFont(u8g_font_gdr20r);
   u8g.drawStr(mX - 8, mY + 10, "o");
-}
+  }*/
 
 
 void draw(void)
 {
   switch (ConfA)
   {
-    case PROGRAM_MODE_RELEASE: LCD_Page1(); break;
-    case PROGRAM_MODE_TEST_1: LCD_Piezzo(); break;
-    case PROGRAM_MODE_TEST_2: LCD_TestTete(); break;
-    case PROGRAM_MODE_TEST_3: LCD_DrawInclinometre(); break;
+    case 1: LCD_Page1(); break;
+    case 2: LCD_Piezzo(); break;
+    case 3: LCD_TestTete(); break;
+      //case 4: LCD_DrawInclinometre(); break;
   }
 
 }
@@ -767,7 +599,6 @@ void processLCD()
     u8g.setColorIndex(1);
   } while ( u8g.nextPage() );
 
-  // delay(30);
 }
 
 /********************************************************************
@@ -784,24 +615,29 @@ void processLCD()
 void loopRelease()
 {
   aqqKeyboard(); //Perif qui donne accès
-//  aqqGlove();
-  aqqPiezzo();
-  processRemote(); //Fonction qui envoie
+  aqqGlove();
+  //aqqPiezzo();
+  //Fonction qui envoie
 
-  aqqJoystick();
-  processJoystick();
+  //aqqJoystick();
+  //processJoystick();
 
   aqqFaders();
-  processFaders();
+  //processFaders();
+  //processHead();
+  processRemote();
 }
 
 
 //Test Piezzo
 void loopTest1()
 {
-  aqqPiezzo();
-  processRemote();
+  //aqqPiezzo();
+  aqqGlove();
+  aqqFaders();
 
+  //processHead();
+  processRemote();
 }
 
 //Test Tete
@@ -809,15 +645,15 @@ void loopTest2()
 {
   aqqKeyboard();
   aqqFaders();
-  processHead();
+  //processHead();
 
 }
 
 //Test Inclinomètre
 void loopTest3()
 {
-  aqqInclino();
-  processInclino();
+  //aqqInclino();
+  //processInclino();
 
 
 }
@@ -828,12 +664,17 @@ void loop()
   ProcessCommut();
   switch (ConfA)
   {
-    case PROGRAM_MODE_RELEASE: loopRelease(); break;
-    case PROGRAM_MODE_TEST_1: loopTest1(); break;
-    case PROGRAM_MODE_TEST_2: loopTest2(); break;
-    case PROGRAM_MODE_TEST_3: loopTest3(); break;
+    case 1: loopRelease(); break;
+    case 2: loopTest1(); break;
+    case 3: loopTest3(); break;
+    case 4: loopTest3(); break;
   }
-  processLCD();
+  //screen stop working in few seconds without this
+  if ((screenTime + REFRESH_RATE) < millis()) {
+    processLCD();
+    screenTime = REFRESH_RATE + millis();
+  }
+
 }
 
 

@@ -12,7 +12,7 @@ class Sound {
     bool playing = false;
 
     long lastInput = 0;
-    const int INPUT_INTERVAL = 300;
+    unsigned const int INPUT_INTERVAL = 300;
 
   public :
 

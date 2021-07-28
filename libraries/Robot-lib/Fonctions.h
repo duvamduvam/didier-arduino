@@ -1,4 +1,4 @@
-#ifndef FONCTIONS_H
+	#ifndef FONCTIONS_H
 #define FONCTIONS_H
 
 //#include <Arduino.h>
@@ -74,6 +74,8 @@ long extractTime(char* input, int seconds, int minutes);
 
 //char** getInputList(char* str);
 void extractChar(char* receiver, char* str, int s, int e);
+void extractRadioChar(char* receiver, char* str);
 byte arraySize(char array[]);
+bool recvWithStartEndMarkers(char* input, bool newData, byte inputSize);
 
 #endif

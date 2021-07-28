@@ -18,9 +18,9 @@
 #include <SD.h>
 
 // define the pins used
-//#define CLK 13       // SPI Clock, shared with SD card
-//#define MISO 12      // Input data, from VS1053/SD card
-//#define MOSI 11      // Output data, to VS1053/SD card
+#define CLK 13       // SPI Clock, shared with SD card
+#define MISO 12      // Input data, from VS1053/SD card
+#define MOSI 11      // Output data, to VS1053/SD card
 // Connect CLK, MISO and MOSI to hardware SPI pins.
 // See http://arduino.cc/en/Reference/SPI "Connections"
 
@@ -30,7 +30,7 @@
 #define BREAKOUT_DCS    8      // VS1053 Data/command select pin (output)
 // These are the pins used for the music maker shield
 #define SHIELD_RESET  -1      // VS1053 reset pin (unused!)
-#define SHIELD_CS     7      // VS1053 chip select pin (output)
+#define SHIELD_CS     7       // VS1053 chip select pin (output)
 #define SHIELD_DCS    6      // VS1053 Data/command select pin (output)
 
 // These are common pins between breakout and shield
@@ -44,13 +44,17 @@ Adafruit_VS1053_FilePlayer musicPlayer =
   // create shield-example object!
   Adafruit_VS1053_FilePlayer(SHIELD_RESET, SHIELD_CS, SHIELD_DCS, DREQ, CARDCS);
 
+#include <SoftwareSerial.h>
 
-char music[20] = {};
+SoftwareSerial serial2(14, 15); // RX, TX
+
+char music[15] = "/track001.mp3";
 char charInput[3] = {};
 
 void setup() {
+  serial2.begin(115200);
   Serial.begin(115200);
-  Serial.println("Adafruit VS1053 Simple Test");
+  Serial.println("Start music player");
 
   if (! musicPlayer.begin()) { // initialise the music player
     Serial.println(F("Couldn't find VS1053, do you have the right pins defined?"));
@@ -95,30 +99,41 @@ void loop() {
 
     delay(5000);*/
 
-  if (Serial.available()) {
+  if (serial2.available()|| Serial.available()) {
 
-    String input = Serial.readStringUntil('\n');
-
-    if (input.equals("S")) {
+    String input;
+    if(serial2.available()){
+      input = serial2.readStringUntil('\n');
+    }else{
+      input = Serial.readStringUntil('\n');
+    }
+    
+    Serial.print("input command : "); Serial.println(input);
+    if (input.startsWith("stop")) {
       musicPlayer.stopPlaying();
       Serial.print("stop file : "); Serial.println(music);
     } else {
-      input = "/track" + input + ".mp3";
-      input.toCharArray(music, input.length() + 1);
+      //input = "/track" + input + ".mp3";
+      //input.toCharArray(music, 15);
+      
+      //music[7] = input.charAt(0);
+      music[8] = input.charAt(0);
       Serial.print("start file : "); Serial.println(music);
+      //String track = "/track" + input + ".mp3";
+      musicPlayer.stopPlaying();
       musicPlayer.startPlayingFile(music);
     }
   }
   /*
 
-      char c = Serial.read();
+      char c = serial2.read();
 
-      // if we get an 's' on the serial console, stop!
+      // if we get an 's' on the serial2 console, stop!
       if (c == 's') {
         musicPlayer.stopPlaying();
       }
 
-      // if we get an 'p' on the serial console, pause/unpause!
+      // if we get an 'p' on the serial2 console, pause/unpause!
       if (c == 'p') {
         if (! musicPlayer.paused()) {
           Serial.println("Paused");

@@ -1,4 +1,6 @@
+
 #include "Fonctions.h"
+#include "FonctionsMega.h"
 #include "ArduinoLog.h"
 //#define LOG_LEVEL LOG_LEVEL_SILENT
 //#define LOG_LEVEL LOG_LEVEL_ERROR
@@ -7,13 +9,12 @@
 #define LOG_NOTICE_CORE
 
 #include "Wheel.cpp"
-#include "Lights.cpp"
-#include "Neck.cpp"
-#include "Mapping.cpp"
+#include "Mapping.h"
 #include "Commands.h"
 #include "Sound.cpp"
+//#include "Lights.cpp"
 #include "Face.h"
-
+#include "Relays.cpp"
 
 /*PINMAP
   0 COM
@@ -39,7 +40,7 @@
 unsigned int recv_size = 0;
 unsigned long prev, interval = 5000;
 
-#define INPUT_SIZE 20
+#define INPUT_SIZE 1
 char radio  [INPUT_SIZE];
 bool newData = false;
 byte inputCount = 0;
@@ -49,10 +50,10 @@ long lastMove = 0;
 bool stopped = true;
 #define moveTime 200
 
-Lights lights;
-Neck neck;
 Sound sound;
 Face face;
+//Lights lights;
+Relays relays;
 
 bool testInputRead = false;
 
@@ -60,87 +61,24 @@ Mapping mapping;
 
 void setup()
 {
-
   Serial.begin(115200);
+  Serial1.begin(115200);
   Serial2.begin(115200);
+  Serial3.begin(115200);
+
+  Serial.println("start due core");
   Log.begin   (LOG_LEVEL, &Serial);
-  Log.notice("init core robot due");
-  neck.init();
-
+  //neck.init();
   delay(100);
-
 }
-
-boolean serialAvailable(byte nb) {
-
-  switch (nb) {
-    case 0:
-      return Serial.available();
-    case 1:
-      return Serial1.available();
-    case 2:
-      return Serial2.available();
-  }
-
-}
-
-char serialRead(byte nb) {
-
-  switch (nb) {
-    case 0:
-      return Serial.read();
-    case 1:
-      return Serial1.read();
-    case 2:
-      return Serial2.read();
-  }
-
-}
-
-
-void recvWithStartEndMarkers(byte serial) {
-  static boolean recvInProgress = false;
-  static byte ndx = 0;
-  char startMarker = '<';
-  char endMarker = '>';
-  char rc;
-
-  while (serialAvailable(serial) > 0 && newData == false) {
-    rc = serialRead(serial);
-    if (recvInProgress == true) {
-      if (rc != endMarker) {
-        radio[ndx] = rc;
-        ndx++;
-        if (ndx >= INPUT_SIZE) {
-          ndx = INPUT_SIZE - 1;
-        }
-      }
-      else {
-        radio[ndx] = '\0'; // terminate the string
-        recvInProgress = false;
-        ndx = 0;
-        newData = true;
-      }
-    }
-    else if (rc == startMarker) {
-      recvInProgress = true;
-    }
-  }
-}
-
 
 void loop()
 {
-
-  //debug
-
-  //Log.notice("loop\n");
-
   //input from keyboard
-  recvWithStartEndMarkers(0);
+  // recvWithStartEndMarkersMega(radio, newData, 20, 0);
 
   //input form modem
-  recvWithStartEndMarkers(2);
+  newData = recvWithStartEndMarkersMega(radio, newData, 20, 1);
 
   if (newData)
   {
@@ -163,19 +101,34 @@ void loop()
     sound.process(commands.sound);
     wheel.process(commands);
     //Log.notice("commands.wheels : \n", commands.wheel);
-    neck.process(commands.neck);
-    lights.process(commands.lights);
+    //neck.process(commands.neck);
     face.process(commands.face);
+    //lights.process(commands.lights);
+    relays.process(commands.relays);
+
+    if (commands.neck[0] == 'N') {
+      //char neck[20];
+      //strcpy(neck, commands.neck);
+      commands.neck[0] = '<';
+      Serial3.print(commands.neck); Serial3.println(">");
+      Log.notice("send %s> to serial3\n", commands.neck);
+    }
+
+    if (commands.face[0]=='F') {
+      relays.process("R2");
+      Serial3.print("<VE>");
+      Log.notice("send voice effect\n");
+    }
 
     lastMove = millis();
     stopped = false;
   }
 
   wheel.execute();
-  lights.execute();
   //sound.execute();
-  neck.execute();
+  //neck.execute();
   face.execute();
+  //lights.execute();
 
 
   if ((millis() - lastMove > moveTime) && !stopped) {
@@ -183,5 +136,6 @@ void loop()
     stopped = true;
   }
 
+  Serial2.println("<alive>");
 
 }

@@ -10,9 +10,9 @@ class Face {
 
     const int BRIGHTNESS = 5;
 
-    const byte MOUTH_PIN = 13;
-    const byte L_EYE_PIN = 11;
-    const byte R_EYE_PIN = 12;
+    const byte MOUTH_PIN = 12;
+    const byte L_EYE_PIN = 10;
+    const byte R_EYE_PIN = 11;
 
     const byte MOUTH = 1;
     const byte L_EYE = 2;
@@ -24,7 +24,7 @@ class Face {
     };
 
     struct Sequence {
-      long seq_time;
+      word seq_time;
       byte mouth_size;
       BmpTime* mouth;
       byte r_eye_size;
@@ -64,25 +64,66 @@ class Face {
     byte l_eye_p;
 
     Sequence current_seq;
+    //Eyes
+    BmpTime eyes[4] = {{YMIDDLE, 500}, {YRIGHT, 100}, {YMIDDLE, 200}, {YLEFT, 200} } ;
+    BmpTime heartBeat[4] = {{YLOVE, 200}, {YBLACK, 200}, {YLOVE, 200}, {YBLACK, 200} } ;
+    BmpTime heartBeat2[4] = {{YLOVE2, 200}, {YBLACK, 200}, {YLOVE2, 200}, {YBLACK, 200} } ;
+    BmpTime mouthBlack[1] = {{MBLACK, 200}};
+    BmpTime eyesBlack[1] = {{YBLACK, 200}};
+    BmpTime eyesAngryL[1] = {{YANGRYL, 200}};
+    BmpTime eyesAngryR[1] = {{YANGRYR, 200}};
+    BmpTime eyesSurprise[1] = {{YSURPRISE, 200}};
+    BmpTime eyesSurpriseR[1] = {{YANGRYR, 200}};
+    BmpTime eyesSurpriseL[1] = {{YANGRYR, 200}};
+    BmpTime eyesNeutral[1] = {{YNEUTRAL, 200}};
+    BmpTime eyesCross[1] = {{YCROSS, 200}};
+    BmpTime eyesSmiley[1] = {{YSMILEY, 200}};
+    BmpTime eyesLine1[1] = {{YLINES, 200}};
+    BmpTime eyesLine2[1] = {{YLINES2, 200}};
+    BmpTime eyesLine3[1] = {{YLINES3, 200}};
+    BmpTime eyesLine4[1] = {{YLINES4, 200}};
+    BmpTime eyesBlue[1] = {{YBLUE, 200}};
 
-    BmpTime eyes[4] = {{1, 500}, {2, 100}, {1, 200}, {3, 200} } ;
-    BmpTime heartBeat[4] = {{11, 200}, {0, 200}, {11, 200}, {0, 200} } ;
-    BmpTime still[1] = {{0, 2000}} ;
-    BmpTime speak[7] = {{0, 20}, {1, 30}, {2, 20}, {3, 40}, {2, 20}, {1, 30}, {0, 20}} ;
-    BmpTime speak1[2] = {{0, 20}, {1, 50}} ;
-    BmpTime speak2[2] = {{1, 30}, {2, 50}} ;
-    BmpTime speak3[2] = {{2, 30}, {3, 50}} ;
-    BmpTime mouthBlack[1] = {{4, 200}};
-    BmpTime eyesBlack[1] = {{0, 200}} ;
 
-    Sequence sequences[7] = {
+    //Mouth
+    BmpTime still[1] = {{MCLOSE, 2000}} ;
+    BmpTime speak[7] = {{MCLOSE, 20}, {MOPEN1, 10}, {MOPEN2, 20}, {MOPEN3, 10}, {MOPEN2, 20}, {MOPEN1, 10}, {MCLOSE, 20}} ;
+    BmpTime speak1[2] = {{MCLOSE, 20}, {MOPEN1, 50}} ;
+    BmpTime speak2[2] = {{MOPEN1, 30}, {MOPEN2, 50}} ;
+    BmpTime speak3[2] = {{MOPEN2, 30}, {MOPEN3, 50}} ;
+    BmpTime mouthAngry[1] = {{MANGRY, 200}} ;
+    BmpTime mouthFunny[1] = {{MFUNNY, 200}} ;
+    BmpTime mouthNeutral[1] = {{MNEUTRAL, 200}} ;
+    BmpTime mouthHoo[1] = {{MHOO, 200}} ;
+    BmpTime mouthHaa[1] = {{MHAA, 200}} ;
+    BmpTime mouthD[1] = {{MD, 200}} ;
+    BmpTime mouthEh[1] = {{MEH, 200}} ;
+    BmpTime mouthL[1] = {{ML, 200}} ;
+    BmpTime mouthM[1] = {{MM, 200}} ;
+    BmpTime mouthHo[1] = {{MHO, 200}} ;
+    BmpTime mouthR[1] = {{MR, 200}} ;
+    BmpTime mouthS[1] = {{MS, 200}} ;
+    BmpTime mouthUh[1] = {{MUH, 200}} ;
+    BmpTime mouthWoo[1] = {{MWOO, 200}} ;
+    BmpTime speak4[10] = {{20,MHOO},{30,MEH}, {20,MEH},{40,ML},{30, MM},{30,MHO},{40, MR},{20,MS},{30,MUH},{50,MWOO}};
+
+
+
+#define nbSeq 13
+    Sequence sequences[nbSeq] = {
       {10000, 1, still,  4, eyes, 4, eyes},
-      {10000, 7, speak,  4, eyes, 4, eyes},
-      {10000, 7, speak, 4, heartBeat, 4, heartBeat},
-      {10000000, 1, mouthBlack, 1, eyesBlack, 1, eyesBlack},
+      {50, 7, speak,  4, eyes, 4, eyes}, // speak
+      {50, 7, speak, 4, heartBeat, 4, heartBeat}, //love
+      {10000000, 1, mouthBlack, 1, eyesBlack, 1, eyesBlack}, //shutdown
       {50, 7, speak1,  4, eyes, 4, eyes},
       {50, 7, speak2,  4, eyes, 4, eyes},
-      {50, 7, speak3,  4, eyes, 4, eyes}
+      {50, 7, speak3,  4, eyes, 4, eyes},
+      {100, 1, mouthFunny,  1, eyesSurpriseL, 1, eyesSurpriseR},
+      {100, 1, mouthAngry,  1, eyesAngryL, 1, eyesAngryR},
+      {1000, 1, mouthNeutral,  1, eyesNeutral, 1, eyesNeutral},
+      {3000, 10, speak3,  1, eyes, 1, eyes},
+      {3000, 1, speak3,  1, eyesSmiley, 1, eyesSmiley},
+      {3000, 10, speak4,  1, eyesLine2, 1, eyesLine2},
       //{3000, mouthTest, heartTest, eyesTest, eyesTest}
     };
 
@@ -104,22 +145,24 @@ class Face {
 
     void process(char* in) {
       if (in[0] == 'F') {
-        char numChar[2];
+        char numChar[3] = {};
+        //numChar[0] = in[1];
+        //numChar[1] = in[2];
         extractChar(numChar, in, 1, 2) ;
         current_seq_nb = 0;
         int new_seq = atoi(numChar);
 
-        current_seq_nb = new_seq;
-        loadSequence(current_seq_nb);
-        Log.notice("######## Face process input:\"%s\" sequence:%d current_seq_nb:%d ########\n", in, new_seq, current_seq_nb );
-        /*if (current_seq_nb != new_seq) {
+        if (new_seq < nbSeq) {
           current_seq_nb = new_seq;
           loadSequence(current_seq_nb);
-          }*/
+          Log.notice("######## Face process input:\"%s\" sequence:%d current_seq_nb:%d ########\n", in, new_seq, current_seq_nb );
+        } else {
+          Log.notice("######## Face process input:\"%s\" sequence:%d not in range, numChar : %s ########\n", in, new_seq, numChar);
+        }
       }
     }
 
-    long loadPart(Adafruit_NeoMatrix * part, uint16_t bitmap[] , long part_time, int w, int h) {
+    long loadPart(Adafruit_NeoMatrix * part, const uint16_t bitmap[] , long part_time, int w, int h) {
       //cur_time = millis() + part_time;
       part->drawRGBBitmap(0, 0, bitmap, w, h);
       part->show();

@@ -1,6 +1,6 @@
 #include "Commands.h"
 
-#define TABLE_SIZE 33
+#define TABLE_SIZE 104
 
 #define LOG_NOTICE_MAPPING
 

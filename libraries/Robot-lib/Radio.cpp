@@ -119,6 +119,22 @@ void Radio::sendArrayMsg(char m, char* input) {
   RfOut();
 }
 
+
+void Radio::sendMsg(char* input, int size) {
+	
+  msg[0] = '<';
+  //Serial.print(" sendMsg : ");Serial.print(input);Serial.print(" size ");Serial.println(size);
+  for(int i=1;i <= size;i++){
+	  msg[i] = input[i-1];
+	  //Serial.print("input ");Serial.print(i);Serial.print(" size ");Serial.print(size);Serial.print(" ");Serial.println(input[i-1]);
+	  if(i==size){
+		msg[i+1] = '>';
+		msg[i+2] = 0;
+	  }
+  }
+  RfOut();
+}
+
 void Radio::sendDecMsg(char m, int value) {
 
   char charNumber[2] = "";
