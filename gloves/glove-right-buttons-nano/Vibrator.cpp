@@ -2,7 +2,7 @@
 
 #define VIBRATOR_PIN 3
 
-#define PRESS_TIME 100
+#define PRESS_TIME 300
 
 class Vibrator {
 
@@ -24,13 +24,16 @@ class Vibrator {
     }
 
     void press() {
+      //Serial.println("vibration press set");
       vibrationTime  = millis() +  PRESS_TIME;
     }
 
     void execute() {
       if (vibrationTime > millis()) {
-        analogWrite(VIBRATOR_PIN, HIGH);
+        //Serial.println("vibration on");
+        analogWrite(VIBRATOR_PIN, 255);
       } else {
+        //Serial.println("vibration off");
         analogWrite(VIBRATOR_PIN, LOW);
       }
 

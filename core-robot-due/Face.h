@@ -8,7 +8,7 @@ class Face {
 
   private :
 
-    const int BRIGHTNESS = 5;
+    const int BRIGHTNESS = 255;
 
     const byte MOUTH_PIN = 12;
     const byte L_EYE_PIN = 10;
@@ -105,7 +105,7 @@ class Face {
     BmpTime mouthS[1] = {{MS, 200}} ;
     BmpTime mouthUh[1] = {{MUH, 200}} ;
     BmpTime mouthWoo[1] = {{MWOO, 200}} ;
-    BmpTime speak4[10] = {{20,MHOO},{30,MEH}, {20,MEH},{40,ML},{30, MM},{30,MHO},{40, MR},{20,MS},{30,MUH},{50,MWOO}};
+    BmpTime speak4[10] = {{20, MHOO}, {30, MEH}, {20, MEH}, {40, ML}, {30, MM}, {30, MHO}, {40, MR}, {20, MS}, {30, MUH}, {50, MWOO}};
 
 
 
@@ -144,21 +144,27 @@ class Face {
     }
 
     void process(char* in) {
-      if (in[0] == 'F') {
-        char numChar[3] = {};
+      /*char numChar[3] = {};
         //numChar[0] = in[1];
         //numChar[1] = in[2];
         extractChar(numChar, in, 1, 2) ;
-        current_seq_nb = 0;
-        int new_seq = atoi(numChar);
+        current_seq_nb = 0;*/
 
-        if (new_seq < nbSeq) {
-          current_seq_nb = new_seq;
-          loadSequence(current_seq_nb);
-          Log.notice("######## Face process input:\"%s\" sequence:%d current_seq_nb:%d ########\n", in, new_seq, current_seq_nb );
-        } else {
-          Log.notice("######## Face process input:\"%s\" sequence:%d not in range, numChar : %s ########\n", in, new_seq, numChar);
-        }
+      if (!strcmp(in, "")) {
+        return;
+      }
+
+
+      extractChar(in, in, 1, 2);
+      in[2] = 0;
+      int new_seq = atoi(in);
+
+      if (new_seq < nbSeq) {
+        current_seq_nb = new_seq;
+        loadSequence(current_seq_nb);
+        Log.notice("######## Face process input:\"%s\" sequence:%d current_seq_nb:%d ########\n", in, new_seq, current_seq_nb );
+      } else {
+        Log.notice("######## Face process input:\"%s\" sequence:%d not in range\n", in, new_seq);
       }
     }
 

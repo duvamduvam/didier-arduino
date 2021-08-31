@@ -81,7 +81,7 @@ class Lights {
     bool lightOn = true;
 
     Command command;
-    char action[3];
+    int action;
     int token = 0;
 
   public:
@@ -150,7 +150,7 @@ class Lights {
       FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
     }
 
-    boolean next() {
+    /*boolean next() {
       token++;
       if (token < command.nbToken) {
         getCommand();
@@ -158,35 +158,44 @@ class Lights {
         return true;
       }
       return false;
-    }
+    }*/
 
-    void getCommand() {
-      command.getCommand(token, action, 1, 2, 6, 7, 3, 5);
-      mapping();
-    }
+    //void getCommand() {
+    //      command.getCommand(token, action, 1, 2, 6, 7, 3, 5);
+    //  mapping();
+    //} 
 
     void process(char* in)
     {
-      token = 0;
-      command.set(in);
-      getCommand();
+      //token = 0;
+      //command.set(in);
+      //getCommand();
 
       //TODO fix this
-      strcpy(action, in);
+      //strcpy(action, in);
 
-
-      if (action[0] == 'L') {
-        Log.notice("######## Lights process input:\"%s\" action[%d] : \"%s\" ########\n", in, token, action);
-        bool present = true;
-        lightOn = true;
-
-        if (mapping())
-          Log.notice("effet %d | brightSpan %d | tint %d  | nbColors %d \n", choixEffect, brightSpan, choixTint, nbColors );
+      if (!strcmp(in, "")) {
+        return;
       }
+
+      extractChar(in, in, 1, 2);
+      in[2] = 0;
+      action = atoi(in);
+
+      //if (action[0] == 'L') {
+      Log.notice("######## Lights process input:\"%s\" action[%d] : \"%s\" ########\n", in, token, action);
+      bool present = true;
+      lightOn = true;
+
+      if (mapping())
+        Log.notice("effet %d | brightSpan %d | tint %d  | nbColors %d \n", choixEffect, brightSpan, choixTint, nbColors );
+      //}
     }
 
     boolean mapping() {
       boolean hasElement = true;
+
+      choixEffect = action;
 
       if (strstr((char*)action, "LE+") != 0) {
         choixEffect++;
@@ -266,9 +275,9 @@ class Lights {
       ledIndex = 0;
 
       //Stars
-      if(!lightOn){
+      if (!lightOn) {
         FastLED.clear();
-      }else if (starsEnabled)
+      } else if (starsEnabled)
       {
         leds[starIndex] = starColor;
       } else {
