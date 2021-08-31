@@ -3,10 +3,10 @@
 #include "Commands.h"
 #include "Fonctions.h"
 
-//#define LOG_NOTICE_WHEEL
+#define LOG_NOTICE_WHEEL
 
-#define SPEED_MAX  1
-#define SPEED_RATIO  1
+#define SPEED_MAX  1.5
+//#define SPEED_RATIO  1
 #define SPEED_ACCELERATION  10 //2ms
 #define INCREMENT_ACCELERATION  2 //2ms
 

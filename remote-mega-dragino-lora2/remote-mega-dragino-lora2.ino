@@ -143,7 +143,8 @@ char keys[ROWS][COLS] =
 };
 
 char mod = 'A';
-char key = 0;
+char key, holdKey;
+unsigned long t_hold;
 #define GLOVE_SIZE
 char glove1[3] = {0};
 char glove2[3] = {0};
@@ -331,7 +332,7 @@ void aqqFaders()
   faderR = map(inr, 1024, 0, FIRST_CHAR_NB, 126);
   head = map(inh, 1024, 0, FIRST_CHAR_NB, 126);
   //Log.notice("fader head : %i -> mapping -> %i\n", inh, head);
-  
+
 
   //Limites en cas de décalibrage
   /*faderL = BoundInt(faderL, -JOY_CALIB_DATA_RANGE, JOY_CALIB_DATA_RANGE);
@@ -393,6 +394,10 @@ void processJoystick()
 //Aquisition uniquement
 void aqqKeyboard() {
   key = keypad.getKey();
+
+
+
+
 }
 
 char aqqGlove() {
@@ -427,17 +432,35 @@ void processRemote() {
   radioMsg[4] = ' ';
   radioMsg[5] = '\0';
 
-  if (key != NO_KEY)
+  if (key != NO_KEY) {
+    holdKey = key;
+  }
+
+  if ((key != NO_KEY) || (keypad.getState() == HOLD))
   {
     newData = true;
+
     if (key == 'A' || key == 'B' || key == 'C' || key == 'D') {
       mod = key;
     }
     radioMsg[3] = mod;
-    radioMsg[4] = key;
+    radioMsg[4] = holdKey;
     //Serial.println(key);
     //radio.sendCharMsg(mod, key);
   }
+
+  /*if (key != NO_KEY) {
+    Serial.print("<"); Serial.print(key); Serial.println(">");
+    holdKey = key;
+    }
+
+    if (keypad.getState() == HOLD) {
+    if ((millis() - t_hold) > 100 ) {
+      Serial.print("<"); Serial.print(holdKey); Serial.println(">");
+      t_hold = millis();
+    }
+    }*/
+
 
   if (glove1[0] != 0) {
     newData = true;

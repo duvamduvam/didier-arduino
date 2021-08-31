@@ -51,7 +51,8 @@ Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, rows, cols );
 
 //dead 9 / 6 / 3 / A3 / A6 / A7
 
-char key;
+char key, holdKey;
+unsigned long t_hold;
 char msg[5];
 
 
@@ -73,8 +74,15 @@ void loop()
   char key = keypad.getKey();
 
   if (key != NO_KEY) {
-    vibrator.press();
     Serial.print("<"); Serial.print(key); Serial.println(">");
+    holdKey = key;
+  }
+
+  if (keypad.getState() == HOLD) {
+    if ((millis() - t_hold) > 100 ) {
+      Serial.print("<"); Serial.print(holdKey); Serial.println(">");
+      t_hold = millis();
+    }
   }
 
   vibrator.execute();

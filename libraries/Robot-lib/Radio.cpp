@@ -93,7 +93,7 @@ void Radio::RfOut(){
   //Output
   int len = strlen(msg);
   rf95.send((uint8_t *)msg, len);
-  Serial.print("Sending (");Serial.print(len); Serial.print(") : ");Serial.println(msg);
+  //Serial.print("Sending (");Serial.print(len); Serial.print(") : ");Serial.println(msg);
 }
 
 void Radio::sendCharMsg(char m, char input) {
@@ -123,7 +123,7 @@ void Radio::sendArrayMsg(char m, char* input) {
 void Radio::sendMsg(char* input, int size) {
 	
   msg[0] = '<';
-  //Serial.print(" sendMsg : ");Serial.print(input);Serial.print(" size ");Serial.println(size);
+  Serial.print(" sendMsg : ");Serial.print(input);Serial.print(" size ");Serial.println(size);
   for(int i=1;i <= size;i++){
 	  msg[i] = input[i-1];
 	  //Serial.print("input ");Serial.print(i);Serial.print(" size ");Serial.print(size);Serial.print(" ");Serial.println(input[i-1]);
