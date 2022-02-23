@@ -99,15 +99,15 @@ void loop() {
 
     delay(5000);*/
 
-  if (serial2.available()|| Serial.available()) {
+  if (serial2.available() || Serial.available()) {
 
     String input;
-    if(serial2.available()){
+    if (serial2.available()) {
       input = serial2.readStringUntil('\n');
-    }else{
+    } else {
       input = Serial.readStringUntil('\n');
     }
-    
+
     Serial.print("input command : "); Serial.println(input);
     if (input.startsWith("stop")) {
       musicPlayer.stopPlaying();
@@ -115,9 +115,10 @@ void loop() {
     } else {
       //input = "/track" + input + ".mp3";
       //input.toCharArray(music, 15);
-      
-      //music[7] = input.charAt(0);
-      music[8] = input.charAt(0);
+
+      music[7] = input.charAt(0);
+      music[8] = input.charAt(1);
+
       Serial.print("start file : "); Serial.println(music);
       //String track = "/track" + input + ".mp3";
       musicPlayer.stopPlaying();

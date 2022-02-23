@@ -8,7 +8,7 @@ class Face {
 
   private :
 
-    const int BRIGHTNESS = 255;
+    const int BRIGHTNESS = 50;
 
     const byte MOUTH_PIN = 12;
     const byte L_EYE_PIN = 10;
@@ -77,6 +77,7 @@ class Face {
     BmpTime eyesSurpriseL[1] = {{YANGRYR, 200}};
     BmpTime eyesNeutral[1] = {{YNEUTRAL, 200}};
     BmpTime eyesCross[1] = {{YCROSS, 200}};
+    //BmpTime eyes[1] = {{YSMILEY, 200}};
     BmpTime eyesSmiley[1] = {{YSMILEY, 200}};
     BmpTime eyesLine1[1] = {{YLINES, 200}};
     BmpTime eyesLine2[1] = {{YLINES2, 200}};
@@ -109,21 +110,23 @@ class Face {
 
 
 
-#define nbSeq 13
+#define nbSeq 15
     Sequence sequences[nbSeq] = {
       {10000, 1, still,  4, eyes, 4, eyes},
       {50, 7, speak,  4, eyes, 4, eyes}, // speak
       {50, 7, speak, 4, heartBeat, 4, heartBeat}, //love
       {10000000, 1, mouthBlack, 1, eyesBlack, 1, eyesBlack}, //shutdown
-      {50, 7, speak1,  4, eyes, 4, eyes},
-      {50, 7, speak2,  4, eyes, 4, eyes},
-      {50, 7, speak3,  4, eyes, 4, eyes},
+      {250, 7, speak,  4, eyes, 4, eyes}, // speak 2.5s
+      {1000, 7, speak,  4, eyes, 4, eyes}, //speak 10s
+      {2000, 7, speak,  4, eyes, 4, eyes},
       {100, 1, mouthFunny,  1, eyesSurpriseL, 1, eyesSurpriseR},
       {100, 1, mouthAngry,  1, eyesAngryL, 1, eyesAngryR},
       {1000, 1, mouthNeutral,  1, eyesNeutral, 1, eyesNeutral},
       {3000, 10, speak3,  1, eyes, 1, eyes},
-      {3000, 1, speak3,  1, eyesSmiley, 1, eyesSmiley},
-      {3000, 10, speak4,  1, eyesLine2, 1, eyesLine2},
+      //{3000, 1, speak3,  1, eyesSmiley, 1, eyesSmiley},
+      {500, 10, speak4,  1, eyesLine2, 1, eyesLine2},
+      {500, 7, speak,  4, eyes, 4, eyes}, // speak 1s
+      {1500, 7, speak,  4, eyes, 4, eyes}, // speak 1s
       //{3000, mouthTest, heartTest, eyesTest, eyesTest}
     };
 

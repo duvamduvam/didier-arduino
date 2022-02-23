@@ -1539,6 +1539,7 @@ void Adafruit_GFX::getTextBounds(const __FlashStringHelper *str, int16_t x,
 /**************************************************************************/
 void Adafruit_GFX::invertDisplay(bool i) {
   // Do nothing, must be subclassed if supported by hardware
+  (void)i; // disable -Wunused-parameter warning
 }
 
 /***************************************************************************/
@@ -1660,6 +1661,8 @@ void Adafruit_GFX_Button::initButtonUL(Adafruit_GFX *gfx, int16_t x1,
   _textsize_y = textsize_y;
   _gfx = gfx;
   strncpy(_label, label, 9);
+  _label[9] = 0; // strncpy does not place a null at the end.
+                 // When 'label' is >9 characters, _label is not terminated.
 }
 
 /**************************************************************************/

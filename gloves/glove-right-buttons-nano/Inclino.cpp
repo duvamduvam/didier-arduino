@@ -25,7 +25,7 @@ class Inclino {
 
       while (Serial.available())
       {
-        JY901.CopeSerialData(Serial.read()); //Call JY901 data cope function
+        //JY901.CopeSerialData(Serial.read()); //Call JY901 data cope function
         newData = true;
       }
 
@@ -44,9 +44,9 @@ class Inclino {
       read();
       if (newData)
       {
-        int aX = map(JY901.stcAngle.Angle[0], -32767, 32768, -180, 180);
-        int aY = map(JY901.stcAngle.Angle[1], -32767, 32768, -180, 180);
-        int aZ = map(JY901.stcAngle.Angle[2], -32767, 32768, -180, 180);
+        int aX = 0;//map(JY901.stcAngle.Angle[0], -32767, 32768, -180, 180);
+        int aY = 0;//map(JY901.stcAngle.Angle[1], -32767, 32768, -180, 180);
+        int aZ = 0;//map(JY901.stcAngle.Angle[2], -32767, 32768, -180, 180);
 
         angleX = aX - angleCalibX;
         angleY = aY - angleCalibY;
