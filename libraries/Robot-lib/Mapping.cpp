@@ -155,11 +155,11 @@
       mapping[96] = (char*)"L07";
 
       mapping[97] = (char*)"a ";
-      mapping[98] = (char*)"S10F04";
+      mapping[98] = (char*)"S10";
       //mapping[18] = (char*)"L! LE+% |L! LE-% |L! LE-% ";
 
       mapping[99] = (char*)"b ";
-      mapping[100] = (char*)"S12F12";
+      mapping[100] = (char*)"S12F04";
 
       mapping[101] = (char*)"c ";
       mapping[102] = (char*)"S29F13";
