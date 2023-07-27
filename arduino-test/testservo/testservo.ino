@@ -7,15 +7,18 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 #define SERVOMIN  80 // this is the 'minimum' pulse length count (out of 4096)
 #define SERVOMAX  640 // this is the 'maximum' pulse length count (out of 4096)
 
+#define SERVONUM  0
+
 int SERVOCURRENT = 400; // this is the 'minimum' pulse length count (out of 4096)
 char input;
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
   delay(2000);
   Log.begin   (LOG_LEVEL, &Serial);
   pwm.begin();
   pwm.setPWMFreq(60);  // Analog servos run at ~60 Hz updates
+  pwm.setPWM(SERVONUM, 0, 350 );
 }
 
 void loop() {
@@ -28,14 +31,14 @@ void loop() {
 
     if (SERVOCURRENT - 10 >= SERVOMIN) {
       SERVOCURRENT = SERVOCURRENT - 10;
-      pwm.setPWM(0, 0, SERVOCURRENT );
+      pwm.setPWM(SERVONUM, 0, SERVOCURRENT );
       Log.notice("move to %d\n", SERVOCURRENT);
     }
 
   } else if (input == 'z') {
     if (SERVOCURRENT + 10 <= SERVOMAX) {
       SERVOCURRENT = SERVOCURRENT + 10;
-      pwm.setPWM(0, 0, SERVOCURRENT );
+      pwm.setPWM(SERVONUM, 0, SERVOCURRENT );
       Log.notice("move to %d\n", SERVOCURRENT);
     }
   }

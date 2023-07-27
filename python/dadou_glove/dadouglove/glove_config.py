@@ -1,0 +1,85 @@
+import os
+
+import board
+from dadou_utils.utils_static import AUDIOS_DIRECTORY, BASE_PATH, MSG_SIZE, NAME, SERIAL_ID, TYPE, NONE, I2C_ENABLED, \
+    DEVICES, \
+    STOP_ANIMATION_KEYS, \
+    I2C_ENABLED, DEVICES_LIST, JSON_VISUALS, JSON_RELAYS, JSON_MAPPINGS, JSON_LIGHTS_SEQUENCE, \
+    JSON_LIGHTS, JSON_FACE_SEQUENCE, JSON_EXPRESSIONS, JSON_COLORS, JSON_AUDIO_SEQUENCE, JSON_AUDIOS, JSON_CONFIG, \
+    LOOP_DURATION, LEFT_ARM, REYE, LEYE, MOUTHS, RANDOM_ANIMATION_HIGH, RANDOM_ANIMATION_LOW, RANDOM_ANIMATION, \
+    EYE_VISUALS_PATH, MOUTH_VISUALS_PATH, MAIN_LOOP_SLEEP, STOP_KEY, RIGHT_ARM_NB, LEFT_ARM_NB, WHEEL_RIGHT_DIR, \
+    WHEEL_LEFT_DIR, WHEEL_RIGHT_PWM, WHEEL_LEFT_PWM, HEAD_PWM_NB, LORA_MISO_PIN, LORA_MOSI_PIN, LORA_SCK_PIN, \
+    LORA_RESET_PIN, LORA_CS_PIN, STATUS_LED_PIN, RESTART_PIN, SHUTDOWN_PIN, CMD_RIGHT, CMD_LEFT, CMD_BACKWARD, \
+    CMD_FORWARD, DIGITAL_CHANNELS_ENABLED, PWM_CHANNELS_ENABLED, LIGHTS_PIN, LIGHTS_LED_COUNT, LIGHTS_START_LED, \
+    LIGHTS_END_LED, JSON_DIRECTORY, SEQUENCES_DIRECTORY, LOGGING_CONFIG_FILE, LOGGING_CONFIG_TEST_FILE, RANDOM, \
+    PROFILER, CALIBRATION, LOGGING, PROCESS, LOGGING_FILE_NAME, LEFT_EYE_NB, RIGHT_EYE_NB, LOGGING_TEST_FILE_NAME, \
+    SINGLE_THREAD, BATTERY_PINS, BUZZER_PIN, VIBRATOR_PIN, ROW_GLOVE_PINS, COLUMN_GLOVE_PINS, BRIGHTNESS, WS_CLIENTS, \
+    FONTS_DIRECTORY
+
+DUAL_GLOVE_9DOF_LEFT, DUAL_GLOVE_9DOF_RIGHT, DUAL_GLOVE_LEFT, DUAL_GLOVE_RIGHT, SINGLE_GLOVE_9DOF, SINGLE_GLOVE, DUAL_GLOVE, CONFIG = 1, 2, 3, 4, 5, 6, 7, 8
+IH, IM, IB, MH, MM, MB, AH, AM, AB, OH, OM, OB = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12
+
+config = {}
+
+config[WS_CLIENTS] = {'robot': 'didier.local', 'sceno': 'sceno.local', 'harddrive': 'disk.local'}
+
+config[I2C_ENABLED] = False
+config[PWM_CHANNELS_ENABLED] = True
+config[DIGITAL_CHANNELS_ENABLED] = True
+config[SINGLE_THREAD] = False
+
+config[RANDOM] = False
+config[PROFILER] = False
+
+config[CMD_FORWARD] = "g"
+config[CMD_BACKWARD] = "h"
+config[CMD_LEFT] = "e"
+config[CMD_RIGHT] = "d"
+
+config[CALIBRATION] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 252, 255, 251, 255, 1, 0, 232, 3, 0, 0]
+
+########## RPI PINS #########
+
+config[SHUTDOWN_PIN] = board.D16
+config[RESTART_PIN] = board.D20
+config[STATUS_LED_PIN] = board.D12
+config[BATTERY_PINS] = []
+
+config[ROW_GLOVE_PINS] = (board.D16, board.D20, board.D21)
+config[COLUMN_GLOVE_PINS] = (board.D6, board.D13, board.D19, board.D26)
+
+config[BUZZER_PIN] = board.D22
+config[VIBRATOR_PIN] = board.D21
+
+config[LIGHTS_PIN] = board.D18
+config[BRIGHTNESS] = 5
+config[LIGHTS_LED_COUNT] = 782
+config[LIGHTS_START_LED] = 513
+config[LIGHTS_END_LED] = 782
+
+config[LORA_CS_PIN] = 0
+config[LORA_RESET_PIN] = 0
+config[LORA_SCK_PIN] = board.SCK
+config[LORA_MOSI_PIN] = board.MOSI
+config[LORA_MISO_PIN] = board.MISO
+
+########## I2C SERVO NUMBER #########
+
+config[STOP_KEY] = "Db C&"
+config[MAIN_LOOP_SLEEP] = 0.001
+
+config[BASE_PATH] = os.getcwd()
+config[BASE_PATH] = config[BASE_PATH].replace('/tests', '')
+config[LOGGING_CONFIG_TEST_FILE] = config[BASE_PATH] + '/conf/logging-test.conf'
+config[LOGGING_CONFIG_FILE] = config[BASE_PATH] + '/conf/logging.conf'
+config[LOGGING_TEST_FILE_NAME] = '../../logs/robot-test.log'
+config[LOGGING_FILE_NAME] = 'logs/robot.log'
+config[LOGGING_TEST_FILE_NAME] = '../../logs/robot-test.log'
+config[JSON_DIRECTORY] = '/json/'
+config[FONTS_DIRECTORY] = '/fonts/'
+
+############### JSON FILES ###############
+
+config[JSON_COLORS] = 'colors.json'
+config[JSON_LIGHTS] = 'lights_glove.json'
+config[JSON_LIGHTS_SEQUENCE] = 'lights_sequence.json'

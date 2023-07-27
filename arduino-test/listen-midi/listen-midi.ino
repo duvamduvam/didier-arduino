@@ -96,18 +96,18 @@ void radioRead() {
   }
 }
 
-/*void sendNote(char mod, int note) {
+void sendNote(char mod, int note) {
 
   midiEventPacket_t noteOn = {0x09, 0x90 | 0, note, 64};
-  //MidiUSB.sendMIDI(noteOn);
+  MidiUSB.sendMIDI(noteOn);
 
   midiEventPacket_t noteOff = {0x08, 0x80 | 0, note, 64};
-  //MidiUSB.sendMIDI(noteOff);
+  MidiUSB.sendMIDI(noteOff);
 
   Serial1.println("send");
   debugMidiEventPacket(noteOn);
 
-}*/
+}
 
 /*void debugMidiEventPacket(midiEventPacket_t in) {
   if (in.header != 0 && in.byte1 != 0 && in.byte2 != 0 && in.byte3 != 0) {

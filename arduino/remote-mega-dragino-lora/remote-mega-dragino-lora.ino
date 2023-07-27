@@ -1,241 +1,382 @@
+#include "FonctionsMega.h"
 #include "ArduinoLog.h"
+
+#include <SPI.h>
+#include <Button.h>
+#include <Radio.h>
+
+#include "Inclino.cpp"
+#include "Oled.cpp"
+#include "Move.cpp"
+#include "Keyboard.cpp"
 
 //#define LOG_LEVEL LOG_LEVEL_SILENT
 //#define LOG_LEVEL LOG_LEVEL_ERROR
 #define LOG_LEVEL LOG_LEVEL_VERBOSE
 
-#include <SPI.h>
-#include <RH_RF95.h>
+#define KEYBOARD_DELAY  10
+#define REFRESH_RATE 50
+long screenTime;
 
-#define RFM95_CS 10
-#define RFM95_RST 9
-#define RFM95_INT 2
+/*
+  //Joy Playstation
+  #define JOY_CALIB_X_MIN 0
+  #define JOY_CALIB_X_MAX 1023
+  #define JOY_CALIB_Y_MIN 1023
+  #define JOY_CALIB_Y_MAX 0
+*/
+#define ANGLE_INCLINO 30
 
-#include <Button.h>
+/********************************************************************
+                  PIN MAP
+                     _ _ /--\
+            \/_ _ _/(_(_(_o o)
+             (_(_(_(/      ^
+********************************************************************/
+
+/*---------------/
+  /     RADIO    /
+  /---------------*/
+
+char lastMsg[6];
 
 
-#define KEYBOARD_DELAY  100
+/*---------------/
+  /     BATTERY    /
+  /---------------*/
+
+//TODO a changer
+#define battery 22
+
+/*---------------/
+  /     LEDS    /
+  /---------------*/
+
+#define redLed 13
+#define yellowLed 12
+
+/*---------------/
+  /     DIGITAL    /
+  /---------------*/
+#define PIEZZO_GATE 40
+
+#define CONF_A_1    21
+#define CONF_A_2    23
+#define CONF_A_3    25
+#define CONF_A_4    27
+
+#define CONF_B_1    29
+#define CONF_B_2    31
+#define CONF_B_3    33
+#define CONF_B_4    35
 
 
-// Change to 434.0 or other frequency, must match RX's freq!
-#define RF95_FREQ 868.0
+/*---------------/
+  /     ANALOG     /
+  /---------------*/
 
-//oled
-#include "U8glib.h"
-//SDA 4 SCL 5
+
+#define PIEZZO  A4
+
 U8GLIB_SSD1306_128X64 u8g(U8G_I2C_OPT_NONE | U8G_I2C_OPT_DEV_0);  // I2C / TWI
 
-// Singleton instance of the radio driver
-RH_RF95 rf95(RFM95_CS, RFM95_INT);
 
-/// JOYSTICK ///
-const int JOY_X = A0; // analog pin connected to X output
-const int JOY_Y = A1; // analog pin connected to Y output
-char joystick[3];
-const byte Joy_margin = 10;
+/********************************************************************
+                      GLOBAL VAR
+                  __(.)< __(.)> __(.)=
+                  \___)  \___)  \___)
+********************************************************************/
 
-char charVoltage[20];
-char msg[5];
-char* mod = "A";
+/*-------------+
+  |   KEYBOARD   |
+  +-------------*/
 
-Button button22 = Button(22, PULLUP);
-Button button23 = Button(23, PULLUP);
-Button button24 = Button(24, PULLUP);
-Button button25 = Button(25, PULLUP);
-Button button26 = Button(26, PULLUP);
-Button button27 = Button(27, PULLUP);
-Button button28 = Button(28, PULLUP);
-Button button29 = Button(29, PULLUP);
-Button button30 = Button(30, PULLUP);
-Button button31 = Button(31, PULLUP);
-Button button32 = Button(32, PULLUP);
-Button button33 = Button(33, PULLUP);
-Button button34 = Button(34, PULLUP);
-Button button35 = Button(35, PULLUP);
-Button button36 = Button(36, PULLUP);
-Button button37 = Button(37, PULLUP);
-Button button38 = Button(38, PULLUP);
-Button button39 = Button(39, PULLUP);
-Button button40 = Button(40, PULLUP);
-Button button41 = Button(41, PULLUP);
-Button button42 = Button(42, PULLUP);
-Button button43 = Button(43, PULLUP);
-Button button44 = Button(44, PULLUP);
-Button button45 = Button(45, PULLUP);
-Button button46 = Button(46, PULLUP);
-Button button47 = Button(47, PULLUP);
-Button button48 = Button(48, PULLUP);
-Button button49 = Button(49, PULLUP);
-Button button50 = Button(50, PULLUP);
-Button button51 = Button(51, PULLUP);
-Button button52 = Button(52, PULLUP);
-Button button53 = Button(53, PULLUP);
-Button button54 = Button(54, PULLUP);
-#define buttonSize 30
 
-Button buttons[] = {button22, button23, button24, button25, button26, button27, button28, button29,
-                    button30, button31, button32, button33, button34, button35, button36, button37, button38, button39,
-                    button40, button41, button42, button43, button44, button45, button46, button47, button48, button49,
-                    button51, button53,
-                   };
+
+char mod = 'A';
+
+unsigned long t_hold;
+#define GLOVE_SIZE
+char glove1[3] = {0};
+char glove2[3] = {0};
+
+/*-------------+
+  |     LOGIC    |
+  +-------------*/
+char ConfA, ConfB;
+
+/*-------------+
+  |    PIEZZO    |
+  +-------------*/
+int piezzo;
+
+Inclino inclino;
+Radio radio;
+bool newData = false;
+Move move;
+Matrix matrix;
+Oled oled(u8g);
+
 
 void setup()
 {
-  draw();
+  oled.draw(mod, lastMsg);
 
-  pinMode(RFM95_RST, OUTPUT);
-  digitalWrite(RFM95_RST, HIGH);
+  /*---------------/
+    /    PIN INIT    /
+    /---------------*/
+
+  //BP
+  pinMode(BP_CALIB, INPUT_PULLUP);
+
+  //COMMUT
+  pinMode(CONF_A_1, INPUT_PULLUP);
+  pinMode(CONF_A_2, INPUT_PULLUP);
+  pinMode(CONF_A_3, INPUT_PULLUP);
+  pinMode(CONF_A_4, INPUT_PULLUP);
+
+  pinMode(CONF_B_1, INPUT_PULLUP);
+  pinMode(CONF_B_2, INPUT_PULLUP);
+  pinMode(CONF_B_3, INPUT_PULLUP);
+  pinMode(CONF_B_4, INPUT_PULLUP);
+
+  pinMode(redLed, OUTPUT);
+  pinMode(yellowLed, OUTPUT);
+
+  /*---------------/
+    /     SERIAL     /
+    /---------------*/
+
   while (!Serial);
   Serial.begin(115200);
+  Serial1.begin(115200);
+  Serial2.begin(115200);
   delay(100);
-
   Log.begin   (LOG_LEVEL, &Serial);
+  Serial.println("start modem");
 
-  Serial.println("Arduino LoRa Remote");
+  radio.init();
+}
 
-  // manual reset
-  digitalWrite(RFM95_RST, LOW);
-  delay(10);
-  digitalWrite(RFM95_RST, HIGH);
-  delay(10);
 
-  while (!rf95.init()) {
-    Serial.println("LoRa radio init failed");
-    while (1);
+
+/*  ____          ____
+   |                  |
+   |      PIEZZO      |
+   |____          ____|   */
+void aqqPiezzo() {
+  piezzo = map(analogRead(PIEZZO), 0, 500, 0, 126);
+}
+
+
+/*  ____          ____
+   |                  |
+   |     KEYBOARD     |
+   |____          ____|   */
+
+
+char aqqGlove() {
+  bool newData1 = recvWithStartEndMarkersMega(glove1, false,  3, 1);
+  bool newData2 = recvWithStartEndMarkersMega(glove2, false,  5, 2);
+  if (newData1) {
+    Log.notice("glove 1 : %s\n", glove1);
+  } else if (newData2) {
+    Log.notice("glove 2 : %s\n", glove2);
   }
-  Serial.println("LoRa radio init OK!");
+}
 
-  // Defaults after init are 434.0MHz, modulation GFSK_Rb250Fd250, +13dbM
-  if (!rf95.setFrequency(RF95_FREQ)) {
-    Serial.println("setFrequency failed");
-    while (1);
+/*  ____          ____
+   |                  |
+   |     REMOTE     |
+   |____          ____|   */
+void processRemote() {
+  char radioMsg[6] = {};
+
+  if (digitalRead(FADER_ON) == 0) {
+  //if(move.isJoystickMoving()){
+    strcpy(radioMsg, move.getMsg());
+    //radioMsg[2] = ' ';
+    newData = true;
+  } else {
+    radioMsg[0] = ' ';
+    radioMsg[1] = ' ';
+    radioMsg[2] = ' ';
   }
-  rf95.setTxPower(23, false);
-}
+  radioMsg[3] = ' ';
+  radioMsg[4] = ' ';
+  radioMsg[5] = 0;
 
-int16_t packetnum = 0;  // packet counter, we increment per xmission
+  if (matrix.newKey())
+  {
+    newData = true;
 
-void sendJoystick(int x, int y) {
-
-  msg[0] = '<';
-  msg[1] = 'J';
-  msg[2] = (char)x;
-  msg[3] = (char)y;
-  msg[4] = '>';
-  rf95.send((uint8_t *)msg, 5);
-  Serial.print("Sending "); Serial.println(msg);
-}
-
-void sendMsg(int msg) {
-
-  char charNumber[10] = "";
-  itoa ( msg, charNumber, 10);
-  Serial.print("int to char "); Serial.println(charNumber);
-  sendMsg(charNumber);
-}
-
-void sendMsg(char input[]) {
-
-  msg[0] = '<';
-  msg[1] = mod[0];
-  msg[2] = input[0];
-  msg[3] = input[1];
-  msg[4] = '>';
-
-  rf95.send((uint8_t *)msg, 5);
-  Serial.print("Sending "); Serial.println(msg);
-}
-
-
-
-void updateJoystick() {
-
-  byte inx = analogRead(JOY_X) / 4;
-  byte iny = analogRead(JOY_Y) / 4;
-
-  byte x = map(inx, 35, 232, 0, 255);
-  byte y = map(iny, 10, 201, 0, 255);
-
-  char m = Joy_margin;
-
-  if (x > 125 + m || x < 125 - m || y > 92 + m || y < 92 - m) {
-    sendJoystick(x, y);
-    Log.notice("Joystick x:%d y:%d\n", x, y);
+    radioMsg[3] = matrix.getMod();
+    radioMsg[4] = matrix.getKey();
+    //Serial.println(key);
+    //radio.sendCharMsg(mod, key);
   }
 
-}
-
-void draw(void)
-{
-  delay(10);
-
-  u8g.setColorIndex(1);
-  u8g.setFont(u8g_font_gdr30r);
-  u8g.drawStr(3, 50, mod);
-
-  u8g.setFont(u8g_font_gdr14r);
-  u8g.drawStr(60, 20, msg);
-
-  int sensorValue = analogRead(A0); //read the A0 pin value
-  float voltage = sensorValue * (5.00 / 1023.00) * 2; //convert the value to a true voltage.
-
-  //max 8.4V min 6V
-  int voltagePourcentage = (((voltage - 6) / 2.4) * 100);
-
-  sprintf(charVoltage, "%d", voltagePourcentage); // %f au lieu de %d
-  charVoltage[2] = '%';
-  //Serial.print(voltagePourcentage); Serial.print(" "); Serial.println(charVoltage);
-  u8g.drawStr(60, 55, charVoltage);
-}
-
-int checkButton() {
-  for (int i = 0; i < buttonSize; i++) {
-    //Serial.print("test "); Serial.println(buttons[i].getPin());
-    //    if (buttons[i].uniquePress())
-    if (buttons[i].isPressed())
-    {
-      Serial.print(buttons[i].getPin()); Serial.println(" pressed");
-      return buttons[i].getPin();
+  /*if (key != NO_KEY) {
+    Serial.print("<"); Serial.print(key); Serial.println(">");
+    holdKey = key;
     }
+
+    if (keypad.getState() == HOLD) {
+    if ((millis() - t_hold) > 100 ) {
+      Serial.print("<"); Serial.print(holdKey); Serial.println(">");
+      t_hold = millis();
+    }
+    }*/
+
+
+  if (glove1[0] != 0) {
+    newData = true;
+    radioMsg[3] = glove1[0];
+    glove1[0] = 0;
+
   }
-  return 0;
+
+  if (glove2[0] != 0) {
+    newData = true;
+    radioMsg[4] = glove2[0];
+    glove2[0] = 0;
+  }
+
+  if (newData) {
+    strcpy(lastMsg, radioMsg);
+    radio.sendMsg(radioMsg, 5);
+    //Log.notice("radioMsg : %s\n", radioMsg);
+    radio.msgset();
+    newData = false;
+  }
+
 }
 
-long lastKeyboardTc;
-int buttonPressed;
+
+/*  ____          ____
+   |                  |
+   |      COMMUT      |
+   |____          ____|   */
+
+
+void ProcessCommut()
+{
+  int A, B;
+  if (digitalRead(CONF_A_1) == 0)
+    A = 1;
+  if (digitalRead(CONF_A_2) == 0)
+    A = 2;
+  if (digitalRead(CONF_A_3) == 0)
+    A = 3;
+  if (digitalRead(CONF_A_4) == 0)
+    A = 4;
+
+  if (digitalRead(CONF_B_1) == 0)
+    B = 1;
+  if (digitalRead(CONF_B_2) == 0)
+    B = 2;
+  if (digitalRead(CONF_B_3) == 0)
+    B = 3;
+  if (digitalRead(CONF_B_4) == 0)
+    B = 4;
+
+  if (A != ConfA || B != ConfB) {
+    ConfA = A; ConfB = B;
+    //Log.notice("A1 : %d A2 : %d A3 : %d A4 : %d B1 : %d B2 : %d B3 : %d B4 : %d\n", digitalRead(CONF_A_1), digitalRead(CONF_A_2),
+    //           digitalRead(CONF_A_3), digitalRead(CONF_A_4), digitalRead(CONF_B_1), digitalRead(CONF_B_2), digitalRead(CONF_B_3),
+    //           digitalRead(CONF_B_4));
+    Log.notice("CONF A : %d B : %d\n", ConfA, ConfB);
+  }
+
+}
+
+
+/********************************************************************
+                    EXECUTE
+                    ,~~.
+                   (  9 )-_,
+              (\___ )=='-'
+               \ .   ) )
+                \ `-' /
+                 `~j-'
+********************************************************************/
+
+//Programme normal
+void loopRelease()
+{
+
+
+  matrix.aqqKeyboard(); //Perif qui donne accès
+  aqqGlove();
+  //aqqPiezzo();
+  //Fonction qui envoie
+
+  //move.aqqJoystick();
+  //move.processJoystick();
+
+  move.aqqFaders();
+  //move.processFaders();
+  //move.processHead();
+  processRemote();
+
+  //try to fix random freeze
+  delay(50);
+}
+
+
+//Test Piezzo
+void loopTest1()
+{
+  //aqqPiezzo();
+  aqqGlove();
+  move.aqqFaders();
+
+  //processHead();
+  processRemote();
+}
+
+//Test Tete
+void loopTest2()
+{
+  matrix.aqqKeyboard();
+  move.aqqFaders();
+  //processHead();
+
+}
+
+//Test Inclinomètre
+void loopTest3()
+{
+  //aqqInclino();
+  //processInclino();
+
+}
 
 void loop()
 {
-  if (millis() - lastKeyboardTc > KEYBOARD_DELAY)
+
+  //faderL, faderR, head;
+  /*Serial.print("L : ");
+  Serial.print(analogRead(LIN_L));
+  Serial.print(" R : ");
+  Serial.print(analogRead(LIN_R));
+  Serial.print(" H : ");
+  Serial.println(analogRead(HEAD));*/
+  digitalWrite(redLed, HIGH);
+  digitalWrite(yellowLed, HIGH);
+  
+  ProcessCommut();
+  switch (ConfA)
   {
-    lastKeyboardTc = millis();
-
-    buttonPressed = checkButton();
-    if (buttonPressed != 0)
-    {
-      sendMsg(buttonPressed);
-    }
-
+    case 1: loopRelease(); break;
+    case 2: loopTest1(); break;
+    case 3: loopTest2(); break;
+    case 4: loopTest3(); break;
+  }
+  //screen stop working in few seconds without this
+  if ((screenTime + REFRESH_RATE) < millis()) {
+    oled.processLCD(mod, lastMsg);
+    screenTime = REFRESH_RATE + millis();
   }
 
- // updateJoystick();
-
-  u8g.firstPage();
-  do {
-    draw();
-    u8g.setColorIndex(1);
-  } while ( u8g.nextPage() );
-
-
-
-  if (buttonPressed == 31)
-    mod = "A";
-  else if (buttonPressed == 37)
-    mod = "B";
-  else if (buttonPressed == 30)
-    mod = "C";
-  else if (buttonPressed == 36)
-    mod = "D";
-
-  delay(30);
 }
